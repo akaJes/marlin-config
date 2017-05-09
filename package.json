@@ -1,0 +1,24 @@
+{
+  "name": "marlin-conf",
+  "version": "1.0.3",
+  "description": "configuration tool for Marlin project",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin":{
+    "mct": "bin/mct"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akaJes/marlin-config.git"
+  },
+  "author": "akaJes",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/akaJes/marlin-config/issues"
+  },
+  "homepage": "https://github.com/akaJes/marlin-config#readme",
+  "dependencies": {
+    "simple-git": "^1.72.0"
+  }
+}
