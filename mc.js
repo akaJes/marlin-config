@@ -16,14 +16,22 @@ function build(base){
 module.exports.build=build;
 module.exports.h2json=function(h){
   return new Promise(function(r){
-//    var lines=h.match(/[^\r\n]+/g);
     var lines=h.split(/\r\n?|\n/);
-    var selected=[],all=[];
-    lines.forEach(function(val,i){
+    var section,condition=[];
+    var all=lines.map(function(val,i){
+      var match;
+      if (match=val.match(/^(\s|\/\/)*@section\s+(\w+)/))
+        section=match[2]
+      if (match=val.match(/^(\s)*#if\s+(.*)/))
+        condition.push(match[2])
+      if (match=val.match(/^(\s)*#elif\s+(.*)/))
+        with(condition){ pop(); push(match[2]) }
+      if (match=val.match(/^(\s)*#endif/))
+        condition.pop()
+
       if (/^(\s|\/\/)*#define/.test(val)){
-        var base={ id:i, no:i+1, line:val};
+        var base={ id:i, no:i+1, line:val, section:section,condition:condition.slice() };
         var strip=val;
-        var match,m;
         //uncomment
         if (match=val.match(/(.*#define.+?)(\/\/.*)/)){
           strip=match[1];
@@ -47,13 +55,11 @@ module.exports.h2json=function(h){
           if(match[7].length>1)
             base.valueSp=match[7].length;
         }
+        return base;
         base.back=build(base);
-        all.push(base);
-        if (base.back != base.line)
-        selected.push(base);
       }
-    })
-    r(all);//r(selected);
+    }).filter(a=>a)
+    r(all);
   })
 }
 module.exports.compare=function(a,b){

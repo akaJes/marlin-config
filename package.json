@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "bin":{
+  "bin": {
     "mct": "bin/mct"
   },
   "repository": {
@@ -19,6 +19,10 @@
   },
   "homepage": "https://github.com/akaJes/marlin-config#readme",
   "dependencies": {
+    "opn": "^5.0.0",
     "simple-git": "^1.72.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
   }
 }

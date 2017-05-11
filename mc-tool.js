@@ -131,6 +131,48 @@ module.exports.makeJson=(root,base)=>file=>{
     .then(a=>console.log('done json: ',path.relative(root,file)))
     .catch(a=>console.log('fail json: ',file,a))
 }
+var groups=[
+      ["DELTA", //?
+      "MORGAN_SCARA", //?
+      "MAKERARM_SCARA", //?
+      "COREXY",
+      "COREXZ",
+      "COREYZ",
+      "COREYX",
+      "COREZX",
+      "COREZY"],
+      ["PROBE_MANUALLY",
+      "FIX_MOUNTED_PROBE",
+      ["Z_ENDSTOP_SERVO_NR","Z_SERVO_ANGLES"],
+      "BLTOUCH",
+      "Z_PROBE_ALLEN_KEY", //?
+      "SOLENOID_PROBE",
+      "Z_PROBE_SLED",
+      ],
+      ["AUTO_BED_LEVELING_3POINT",
+      "AUTO_BED_LEVELING_LINEAR",
+      "AUTO_BED_LEVELING_BILINEAR",
+      "AUTO_BED_LEVELING_UBL",
+      "MESH_BED_LEVELING"],
+      ['TODO: //LCDs'],
+]
+var type=i=>i.value==undefined?'BOOL='+!i.disabled:'string'
+var section=i=>i.name+' '+type(i)+(i.condition.length&&(' == '+i.condition.join(' AND '))||'')
+
+module.exports.getJson=(root,base)=>file=>{
+    var p=path.parse(file);
+    var conf = inFile(file).then(mc.h2json);
+    var h=base?Promise.resolve(base):inFile(path.join(root||'','Marlin',p.name+'.h'));
+    return h
+    .then(mc.h2json)
+    .then(addNumber)
+    .then(a=>a.filter(i=>!i.number||i.number !=undefined&&!i.disabled)) //remove commented duplicates
+    .then((a,m)=>(m=unique(a.map(i=>i.section)).filter(a=>a),{sections:m,names:a}))
+    .then((a,m)=>(m={},a.sections.map(s=>(m[s]=a.names.filter(i=>i.section==s).map(section))),{groups:groups,sections:m,names:a.names}))
+    .then(toJson)
+    .then(a=>(console.log('done json: ',path.relative(root,file)),a))
+    .catch(a=>console.log('fail json: ',file,a))
+}
 
 module.exports.makeTxt=(root,base,git)=>file=>{
     var p=path.parse(file);
