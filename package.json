@@ -23,6 +23,8 @@
     "simple-git": "^1.72.0"
   },
   "devDependencies": {
+    "highlight.js": "^9.11.0",
+    "marked": "^0.3.6",
     "nodemon": "^1.11.0"
   }
 }

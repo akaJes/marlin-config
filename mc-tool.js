@@ -156,8 +156,9 @@ var groups=[
       "MESH_BED_LEVELING"],
       ['TODO: //LCDs'],
 ]
-var type=i=>i.value==undefined?'BOOL='+!i.disabled:'string'
-var section=i=>i.name+' '+type(i)+(i.condition.length&&(' == '+i.condition.join(' AND '))||'')
+var type=i=>i.value==undefined?'BOOL':'string'
+var section0=i=>i.name+' '+type(i)+(i.condition.length&&(' == '+i.condition.join(' AND '))||'')
+var section=i=>({name:i.name,type:type(i),condition:i.condition.length&&i.condition||undefined,value:i.value||!i.disabled})
 
 module.exports.getJson=(root,base)=>file=>{
     var p=path.parse(file);
@@ -167,9 +168,16 @@ module.exports.getJson=(root,base)=>file=>{
     .then(mc.h2json)
     .then(addNumber)
     .then(a=>a.filter(i=>!i.number||i.number !=undefined&&!i.disabled)) //remove commented duplicates
-    .then((a,m)=>(m=unique(a.map(i=>i.section)).filter(a=>a),{sections:m,names:a}))
-    .then((a,m)=>(m={},a.sections.map(s=>(m[s]=a.names.filter(i=>i.section==s).map(section))),{groups:groups,sections:m,names:a.names}))
-    .then(toJson)
+//    .then(a=>({sections:unique(a.map(i=>i.section)).filter(a=>a),names:a}))
+    .then(a=>({file:path.parse(file),names:a}))
+    .then(a=>(a.sections=unique(a.names.map(i=>i.section)).filter(i=>i),a))
+//    .then((a,m)=>(m={},a.sections.map(s=>(m[s]=a.names.filter(i=>i.section==s).map(section))),{groups:groups,sections:m,names:a.names}))
+    .then(a=>(a.groups=groups,a))
+    .then(a=>(a.list=a.sections.reduce((p,s)=>(p[s]=a.names.filter(i=>i.section==s).map(section0),p),{}),a))
+    .then(a=>(a.all=a.sections.reduce((p,s)=>(p[s]=a.names.filter(i=>i.section==s).map(section),p),{}),a))
+    .then(a=>(a.names=undefined,a))
+//    .then(a=>(a.groups=groups,a.sections={},a.sections.reduce((ob,s)=>(m[s]=a.names.filter(i=>i.section==s).map(section)),a)))
+//    .then(toJson)
     .then(a=>(console.log('done json: ',path.relative(root,file)),a))
     .catch(a=>console.log('fail json: ',file,a))
 }

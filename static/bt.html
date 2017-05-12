@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Bootstrap 101 Template</title>
+
+    <!-- Bootstrap -->
+    <link href="libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="libs/jquery/dist/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="libs/bootstrap/dist/js/bootstrap.min.js"></script>
+<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+<script>
+$(function(){
+$.get('/json',function(data){
+  data.forEach(function(file){
+  var s=$('template.section')
+  $.each(file.all,function(n,section){
+    s.parent().append(s.prop('content').cloneNode(true))
+    var p=s.parent().children().last()
+    p.find('.panel-title').text(n);
+    var t=p.find('template.define')
+    $.each(section,function(n,define){
+      t.parent().append(t.prop('content').cloneNode(true))
+      var d=t.parent().children().last()
+      d.find('label').text(define.name);
+      if (define.type!='BOOL'){
+        d.find('input').attr('type','text');
+        d.find('input').val(define.value)
+      }else
+        d.find('input').attr('checked',define.value)
+      //var n=$(t.prop('content').cloneNode(true));
+      //t.parent().append(n);
+    })
+    p.find('[type=checkbox]').bootstrapToggle()
+  })
+  })
+})
+})
+</script>
+  </head>
+  <body>
+    <h1>Hello, world!</h1>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-4">
+
+      <template class="section">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">
+          </h3>
+        </div>
+        <div class="panel-body">
+      <div class="form-horizontal" role="form">
+        <template class="define">
+        <div class="form-group">
+          <label class="col-sm-6 control-label"></label>
+          <div class="col-sm-6">
+            <input type="checkbox" data-toggle="toggle" class="form-control">
+          </div>
+        </div>
+        </template>
+      </div>
+
+        </div>
+        <div class="panel-footer">
+        </div>
+      </div>
+      </template>
+    </div>
+    <div class="col-md-4">
+      <div class="form-horizontal" role="form">
+        <div class="form-group">
+          <label class="col-sm-4 control-label">Email</label>
+          <div class="col-sm-8"><input type="text" class="form-control" /></div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-offset-2 col-sm-10">
+             
+            <button type="submit" class="btn btn-default">
+              Sign in
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+
+
+<link rel="stylesheet" title="Default" href="styles/default.css"><h3 id="mixing-extruder">Mixing Extruder</h3>
+<pre><code class="lang-cpp hljs"><span class="hljs-comment">/**
+ * "Mixing Extruder"
+ *   - Adds a new code, M165, to set the current mix factors.
+ *   - Extends the stepping routines to move multiple steppers in proportion to the mix.
+ *   - Optional support for Repetier Host M163, M164, and virtual extruder.
+ *   - This implementation supports only a single extruder.
+ *   - Enable DIRECT_MIXING_IN_G1 for Pia Taubert's reference implementation
+ */</span>
+<span class="hljs-comment">//#define MIXING_EXTRUDER</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">if</span> ENABLED(MIXING_EXTRUDER)</span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> MIXING_STEPPERS 2        <span class="hljs-comment">// Number of steppers in your mixing extruder</span></span>
+  <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> MIXING_VIRTUAL_TOOLS 16  <span class="hljs-comment">// Use the Virtual Tool method with M163 and M164</span></span>
+  <span class="hljs-comment">//#define DIRECT_MIXING_IN_G1    // Allow ABCDHI mix factors in G1 movement commands</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+</code></pre>
+<p>A Mixing Extruder uses two or more stepper motors to drive multiple filaments into a mixing chamber, with the mixed filaments extruded from a single nozzle. This option adds the ability to set a mixture, to save mixtures, and to recall mixtures using the <code>T</code> command. The extruder still uses a single E axis, while the current mixture is used to determine the proportion of each filament to use. An &quot;experimental&quot; <code>G1</code> direct mixing option is included.</p>
+
+    </div>
+  </div>
+</div>
+  </body>
+</html>

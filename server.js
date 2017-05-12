@@ -32,14 +32,23 @@ app.get('/tags', function (req, res) {
     res.send(data);
   });
 });
-app.get('/now', function (req, res) {
-  res.set('Content-Type', 'text/plain');
-  ['Marlin/Configuration'].forEach(f=>{ //'Marlin/Configuration_adv',
+var get_cfg=()=>{//new Promise((res,fail)=>{
+  var list=['Marlin/Configuration'].map(f=>{ //'Marlin/Configuration_adv',
     var base=Promise.all([gitroot,showGit('1.1.0',f)]);
-    base
+    return base
     .then(a=>mctool.getJson(a[0],a[1])(path.join(a[0],f+'.h')))
-    .then(a=>res.send(a))
+//    .then(a=>res(a))
   });
+  return Promise.all(list)
+}
+//application/json
+app.get('/now/', function (req, res) {
+  res.set('Content-Type', 'text/plain');
+  get_cfg().then(a=>res.send(JSON.stringify(a,null,2)))
+});
+app.get('/json/', function (req, res) {
+  res.set('Content-Type', 'application/json');
+  get_cfg().then(a=>res.send(a))
 });
 function main(){
 app.listen(port, function () {
