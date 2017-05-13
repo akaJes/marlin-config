@@ -3,24 +3,12 @@ var path= require('path');
 var opn = require('opn');
 var mctool = require('./mc-tool');
 var app = express();
-var git = require('simple-git')();
+var git = require('./git-tool');
+var getPort = require('get-port');
+var hints = require('./hints');
+var fs = require('fs');
+
 var port= 3000;
-
-var gitRoot=()=>
-new Promise((done,fail)=>git.revparse(['--show-toplevel'],(e,a)=>e?fail(e):done(a.replace(/\r|\n/,''))))
-.then(root=>(console.log('[gitroot]',root),root))
-
-
-var gitTag=()=>
-new Promise((done,fail)=>git.describe(['--tags'],(e,a)=>e?fail(e):done(a.replace(/\r|\n/,''))))
-.then(root=>(console.log('[tag]',root),root))
-
-var showGit=(branch,file)=>
-new Promise((done,fail)=>Promise.resolve(branch).then(b=>git.show([b+':'+file+'.h'],(e,a)=>e?fail(e):done(a))));
-
-
-var gitroot=gitRoot();
-//var gittag=gitTag();
 
 app.use('/static', express.static(path.resolve(__dirname, 'static')));
 
@@ -28,15 +16,17 @@ app.get('/', function (req, res) {
   res.send('Hello World!');
 });
 app.get('/tags', function (req, res) {
-  git.tags(['--sort=-creatordate'],function (err, data) { //,"--format='%(creatordate) %(refname)'"
+  git.git.tags(['--sort=-creatordate'],function (err, data) { //,"--format='%(creatordate) %(refname)'"
     res.send(data);
   });
 });
+//var tag=git.Tag();
+//console.log(tag);
 var get_cfg=()=>{//new Promise((res,fail)=>{
-  var list=['Marlin/Configuration'].map(f=>{ //'Marlin/Configuration_adv',
-    var base=Promise.all([gitroot,showGit('1.1.0',f)]);
+  var base=Promise.all([git.root,git.Tag()]);
+  var list=['Marlin/Configuration.h','Marlin/Configuration_adv.h'].map(f=>{
     return base
-    .then(a=>mctool.getJson(a[0],a[1])(path.join(a[0],f+'.h')))
+      .then(p=>git.Show(p[1],f).then(file=>mctool.getJson(p[0],file,p[1])(path.join(p[0],f))))
 //    .then(a=>res(a))
   });
   return Promise.all(list)
@@ -50,11 +40,37 @@ app.get('/json/', function (req, res) {
   res.set('Content-Type', 'application/json');
   get_cfg().then(a=>res.send(a))
 });
+app.get('/hint/:name', function (req, res) {
+//  res.send('<a href='+hints.url+'>Documentation</a>');
+  res.send(hints.hint(req.params.name));
+  //res.send(req.params)
+})
+app.post('/set/:file/:name/:prop/:value', function (req, res) {
+  git.root
+  .then(root=>{
+    var ob=[{ name:req.params.name}]
+    if (req.params.prop=='disabled')
+      ob[0].disabled=req.params.value=='true';
+    else
+      ob[0][req.params.prop]=req.params.value;
+    mctool.updateH(root,path.join(root,'Marlin',req.params.file+'.h'),ob);
+  })
+  .then(a=>res.send(req.params))
+})
 function main(){
-app.listen(port, function () {
-  console.log('Example app listening on port 3000!');
-});
-opn('http://localhost:'+port+'/now');
+  git.root.then(root=>{
+    fs.stat(path.join(root,'Marlin'),(e,a)=>{
+    if(!a)
+      console.log('this git not look like Marlin repository');
+    else
+      getPort(3000).then(port => {
+        app.listen(port, function () {
+          console.log('Marlin config tooll started on port http://localhost:'+port);
+        });
+        opn('http://localhost:'+port+'/static');
+      });
+    })
+  })
 }
 module.exports.main=main;
 require.main===module && main();

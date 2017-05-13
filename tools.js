@@ -2,10 +2,10 @@ var http = require('https');
 var fs = require('fs');
 var marked = require('marked');
 var hljs=require('highlight.js');
-
+var docFile="views/configuration.md"
 function load(){
 var url="https://github.com/MarlinFirmware/MarlinDocumentation/raw/master/_configuration/configuration.md";
-var file = fs.createWriteStream("static/configuration.md");
+var file = fs.createWriteStream();
 var request = http.get(url, function(response) {
   if (response.statusCode==302)
     http.get(response.headers['location'], function(response) {
@@ -16,7 +16,7 @@ var request = http.get(url, function(response) {
 });
 }
 //load();
-var md=fs.readFileSync("static/configuration.md",'utf8');
+var md=fs.readFileSync(docFile,'utf8');
 marked.setOptions({
   highlight: function (code) {
     return hljs.highlightAuto(code).value;

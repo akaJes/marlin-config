@@ -76,6 +76,30 @@ var setConfig=(target,file,root)=>a=>{
     return res;
   })
 }
+var addChanged=(target)=>a=>{
+  return target.then(t=>{
+    var map=remap(t);
+    var res=a.map(i=>{
+      var o=map[i.name];
+      if (o){
+        var o=o[Math.min(i.number||0,o.length-1)];
+        if (o){
+          var changed = {};
+          if ( o.disabled != i.disabled )
+            changed.disabled = o.disabled;
+          if ( i.value  != undefined || o.value  != undefined )
+            if ( (o.value || '').trim() != (i.value || '').trim() )
+              changed.value = o.value;
+          if ( changed.disabled !=undefined || changed.value !=undefined )
+            i.changed=changed;
+        }
+      }
+      return i;
+    }).filter(i=>i)
+    return res;
+  })
+}
+
 var stripConf=a=>a.map(i=>{
   var obj = { name: i.name };
   if ( i.number != undefined )
@@ -157,30 +181,46 @@ var groups=[
       ['TODO: //LCDs'],
 ]
 var type=i=>i.value==undefined?'BOOL':'string'
+var type1=i=>i.value&&(/\".*\"/.test(i.value)?'string':'numeric')||undefined //"
 var section0=i=>i.name+' '+type(i)+(i.condition.length&&(' == '+i.condition.join(' AND '))||'')
 var section=i=>({name:i.name,type:type(i),condition:i.condition.length&&i.condition||undefined,value:i.value||!i.disabled})
+var section1=(p,i)=>(p[i.name]={changed:i.changed,type:type1(i),condition:i.condition.length&&i.condition||undefined,value:i.value,disabled:i.disabled},p)
 
-module.exports.getJson=(root,base)=>file=>{
+module.exports.getJson=(root,base,tag)=>file=>{
     var p=path.parse(file);
-    var conf = inFile(file).then(mc.h2json);
+    var conf = inFile(file).then(mc.h2json).then(addNumber);
+//console.log(base);
     var h=base?Promise.resolve(base):inFile(path.join(root||'','Marlin',p.name+'.h'));
     return h
     .then(mc.h2json)
     .then(addNumber)
+    .then(addChanged(conf))
     .then(a=>a.filter(i=>!i.number||i.number !=undefined&&!i.disabled)) //remove commented duplicates
-//    .then(a=>({sections:unique(a.map(i=>i.section)).filter(a=>a),names:a}))
-    .then(a=>({file:path.parse(file),names:a}))
+    .then(a=>({file:path.parse(file),names:a,tag:tag}))
     .then(a=>(a.sections=unique(a.names.map(i=>i.section)).filter(i=>i),a))
 //    .then((a,m)=>(m={},a.sections.map(s=>(m[s]=a.names.filter(i=>i.section==s).map(section))),{groups:groups,sections:m,names:a.names}))
     .then(a=>(a.groups=groups,a))
-    .then(a=>(a.list=a.sections.reduce((p,s)=>(p[s]=a.names.filter(i=>i.section==s).map(section0),p),{}),a))
-    .then(a=>(a.all=a.sections.reduce((p,s)=>(p[s]=a.names.filter(i=>i.section==s).map(section),p),{}),a))
+    .then(a=>(a.defs=a.names.reduce(section1,{}),a))
+    .then(a=>(a.list=a.sections.reduce((p,s)=>(p[s]=a.names.filter(i=>i.section==s).map(i=>i.name),p),{}),a))
+//    .then(a=>(a.all=a.sections.reduce((p,s)=>(p[s]=a.names.filter(i=>i.section==s).map(section),p),{}),a))
     .then(a=>(a.names=undefined,a))
-//    .then(a=>(a.groups=groups,a.sections={},a.sections.reduce((ob,s)=>(m[s]=a.names.filter(i=>i.section==s).map(section)),a)))
-//    .then(toJson)
     .then(a=>(console.log('done json: ',path.relative(root,file)),a))
     .catch(a=>console.log('fail json: ',file,a))
 }
+module.exports.updateH=(root,file,json)=>{
+    var h=inFile(file);
+    return h
+    .then(mc.h2json)
+    .then(addNumber)
+    .then(loadConfig(Promise.resolve(json)))
+    .then(onlyChanged)
+    .then(extendFrom(h))
+    .then(array2text)
+    .then(outFile(file))
+    .then(a=>console.log('updated h: ',path.relative(root,file)))
+    .catch(a=>console.log('fail h: ',file,a))
+}
+
 
 module.exports.makeTxt=(root,base,git)=>file=>{
     var p=path.parse(file);
