@@ -11,6 +11,7 @@ var fs = require('fs');
 var port= 3000;
 
 app.use('/static', express.static(path.resolve(__dirname, 'static')));
+app.use('/static/libs', express.static(path.resolve(__dirname, 'node_modules')));
 
 app.get('/', function (req, res) {
   res.send('Hello World!');

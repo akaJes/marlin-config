@@ -1,25 +1,3 @@
 #! /usr/bin/env node
 var cmd=require('../start');
-var path=require('path');
-var server=require('../server');
-var nodemon = require('nodemon');
-function nd(){
-nodemon({
-  script: path.resolve(__dirname, '..','server.js'),
-  watch: path.resolve(__dirname, '..'),
-  ext: 'js json',
-  ignore: ['tools.js'],
-});
-
-nodemon.on('start', function () {
-  console.log('App has started');
-}).on('quit', function () {
-  console.log('App has quit');
-}).on('restart', function (files) {
-  console.log('App restarted due to: ', files);
-});
-}
-if (process.argv.indexOf('www')<0)
-  cmd.main();
-else
-  nd();//server.main();
+cmd.main();
