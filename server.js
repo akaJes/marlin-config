@@ -54,9 +54,10 @@ app.post('/set/:file/:name/:prop/:value', function (req, res) {
       ob[0].disabled=req.params.value=='true';
     else
       ob[0][req.params.prop]=req.params.value;
-    mctool.updateH(root,path.join(root,'Marlin',req.params.file+'.h'),ob);
+    return mctool.updateH(root,path.join(root,'Marlin',req.params.file+'.h'),ob);
   })
   .then(a=>res.send(req.params))
+  .catch(a=>res.status(403).send(a))
 })
 function main(){
   git.root.then(root=>{

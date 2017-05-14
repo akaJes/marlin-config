@@ -217,8 +217,8 @@ module.exports.updateH=(root,file,json)=>{
     .then(extendFrom(h))
     .then(array2text)
     .then(outFile(file))
-    .then(a=>console.log('updated h: ',path.relative(root,file)))
-    .catch(a=>console.log('fail h: ',file,a))
+    .then(a=>(console.log('updated h: ',path.relative(root,file)),a))
+    .catch(a=>{ console.log('fail h: ',file,a); throw a;})
 }
 
 

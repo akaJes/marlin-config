@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Bootstrap 101 Template</title>
+    <title>Marlin configurator</title>
 
     <!-- Bootstrap -->
     <link href="libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -13,19 +13,19 @@
     <script src="libs/jquery/dist/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="libs/bootstrap/dist/js/bootstrap.min.js"></script>
-<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
-<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-<script src="head.min.js"></script>
-<script>
-     head.load("sheetrock.min.js");
-</script>
-<script src="main.js"></script>
+    <script src="head.min.js"></script>
+    <script>
+      head.load("sheetrock.min.js");
+    </script>
+    <script src="main.js"></script>
 <style>
 .vcenter>* {
     display: inline-block;
@@ -43,7 +43,7 @@
       <div class="col-md-2">
             <input type="checkbox" data-toggle="toggle" class="form-control" data-on="Changed" data-off="All">
       </div>
-      <div class="col-md-2"><span></span></div>
+      <div class="col-md-2"><span  class="mct-status"></span></div>
     </h1>
   </div>
   <div class="row">
@@ -61,48 +61,44 @@
           <template class="_file_content">
           <div class="tab-pane" id="panel-ID">
             <p>
-      <template class="_section">
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <h3 class="panel-title">
-              <label class="control-label col-sm-2 text-right" >Section:</label><span></span>
-              <span class="badge pull-right"></span>
-          </h3>
-       </div>
-        <div class="panel-body">
-      <div class="form-horizontal" role="form">
-        <template class="define">
-        <div class="form-group vcenter">
-          <label class="col-sm-5 control-label"></label><!--
-          --><div class="col-sm-6">
-            <input type="checkbox" data-toggle="toggle" class="form-control">
-            <p></p>
-            <input type="text" class="form-control">
-          </div><!--
-          --><div class="col-sm-1">
-            <button type="button" class="btn btn-info btn-sm">?</button>
-          </div>
-        </div>
-        </template>
-      </div>
-
-        </div>
-        <div class="panel-footer">
-        </div>
-      </div>
-      </template>
-
-
+              <template class="_section">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h3 class="panel-title">
+                    <label class="control-label col-sm-2 text-right" >Section:</label><span></span>
+                    <button type="button" class="btn btn btn-xs pull-right">All <span class="badge"></span></button>
+                    <span class="pull-right">&nbsp;</span>
+                    <button type="button" class="btn btn-info btn-xs pull-right">Changed <span class="badge"></span></button>
+                  </h3>
+                </div>
+                <div class="panel-body">
+                  <div class="form-horizontal" role="form">
+                  <template class="define">
+                    <div class="form-group vcenter">
+                      <label class="col-sm-5 control-label"></label><!--
+                    --><div class="col-sm-6">
+                          <input type="checkbox" data-toggle="toggle" class="form-control">
+                          <p></p>
+                          <input type="text" class="form-control">
+                      </div><!--
+                    --><div class="col-sm-1">
+                        <button type="button" class="btn btn-info btn-sm">?</button>
+                      </div>
+                    </div>
+                  </template>
+                  </div>
+                </div>
+                <div class="panel-footer">
+                </div>
+              </div>
+              </template>
             </p>
           </div>
           </template>
         </div>
       </div>
-
-
     </div>
     <div class="col-md-5 mct-hint" style="    position: fixed;overflow-y:auto;    right: 0;height:90vh">
-
     </div>
   </div>
 </div>
