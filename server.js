@@ -28,6 +28,9 @@ var get_cfg=()=>{//new Promise((res,fail)=>{
   var list=['Marlin/Configuration.h','Marlin/Configuration_adv.h'].map(f=>{
     return base
       .then(p=>git.Show(p[1],f).then(file=>mctool.getJson(p[0],file,p[1])(path.join(p[0],f))))
+      .then(o=>(o.names.filter(n=>hints.d2i[n.name],1).map(n=>o.defs[n.name].hint=!0),o))
+//      .then(o=>(o.names.map(n=>o.defs[n]&&(o.defs[n].hint=1)),o))
+      .then(a=>(a.names=undefined,a))
 //    .then(a=>res(a))
   });
   return Promise.all(list)

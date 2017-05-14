@@ -1,6 +1,9 @@
 # marlin-config
 
-This software can help to migrate your own configuration from one release to another - with files 
+run `mct conf` in Marlin git repository and you get a configuration tool in browser
+
+
+This software can help to migrate your own configuration from one release to another - with files
 Configuration.h and Configuration_adv.h
 
   creating file for issue publication `mct git 1.1.0-RC7 txt` (compare 1.1.0-RC7 release with your current files in folder and create readable text file)
@@ -23,8 +26,12 @@ migrate configuration:
 
 # mct help
 ```
+marlin-conf v 2.0.5
 usage: mct help|git|tree
+You need to run it in Marlin git repository
 commands:
+    mct conf
+        open browser for interactive configuration
     mct git <git-tag> json|h|txt
         json: compare [gitroot]/Marlin/Configuration*.h files
               between git-tag files and files in folder then

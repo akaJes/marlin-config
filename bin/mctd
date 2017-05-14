@@ -19,7 +19,7 @@ nodemon.on('start', function () {
   console.log('App restarted due to: ', files);
 });
 }
-if (process.argv.indexOf('www')<0)
-  cmd.main();
-else
+//if (process.argv.indexOf('www')<0)
+//  cmd.main();
+//else
   nd();//server.main();

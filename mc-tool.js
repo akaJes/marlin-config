@@ -185,6 +185,7 @@ var type1=i=>i.value&&(/\".*\"/.test(i.value)?'string':'numeric')||undefined //"
 var section0=i=>i.name+' '+type(i)+(i.condition.length&&(' == '+i.condition.join(' AND '))||'')
 var section=i=>({name:i.name,type:type(i),condition:i.condition.length&&i.condition||undefined,value:i.value||!i.disabled})
 var section1=(p,i)=>(p[i.name]={changed:i.changed,type:type1(i),condition:i.condition.length&&i.condition||undefined,value:i.value,disabled:i.disabled},p)
+var section_txt=(p,i)=>(i.changed&&(p[i.name]={value:i.changed.value||i.value,disabled:i.changed.disabled||i.disabled}),p)
 
 module.exports.getJson=(root,base,tag)=>file=>{
     var p=path.parse(file);
@@ -203,7 +204,8 @@ module.exports.getJson=(root,base,tag)=>file=>{
     .then(a=>(a.defs=a.names.reduce(section1,{}),a))
     .then(a=>(a.list=a.sections.reduce((p,s)=>(p[s]=a.names.filter(i=>i.section==s).map(i=>i.name),p),{}),a))
 //    .then(a=>(a.all=a.sections.reduce((p,s)=>(p[s]=a.names.filter(i=>i.section==s).map(section),p),{}),a))
-    .then(a=>(a.names=undefined,a))
+    .then(a=>(a.txt=a.names.reduce(section_txt,{}),a)) //changed
+//    .then(a=>(a.names=undefined,a))
     .then(a=>(console.log('done json: ',path.relative(root,file)),a))
     .catch(a=>console.log('fail json: ',file,a))
 }

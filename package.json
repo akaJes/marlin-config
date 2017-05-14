@@ -1,13 +1,14 @@
 {
   "name": "marlin-conf",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "configuration tool for Marlin project",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall-": "bower install"
   },
   "bin": {
-    "mct": "bin/mct"
+    "mct": "bin/mct",
+    "mctd": "bin/mctd"
   },
   "repository": {
     "type": "git",
@@ -21,6 +22,7 @@
   "homepage": "https://github.com/akaJes/marlin-config#readme",
   "dependencies": {
     "bootstrap": "^3.3.7",
+    "bootstrap-toggle": "^2.2.2",
     "express": "^4.15.2",
     "get-port": "^3.1.0",
     "highlight.js": "^9.11.0",

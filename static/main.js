@@ -75,6 +75,8 @@ $(function(){
               val.remove(),p.remove();
             if (! def.disabled && def.value != undefined)
               dis.remove(),p.remove();
+            if (def.hint == undefined)
+              d.find('button').remove();
           })
           sec.find('.panel-title span.badge:eq(0)').text(cnt);
           updateChanged(sec);
@@ -86,6 +88,33 @@ $(function(){
         })
       })
       $('.config-files li:eq(0) a').eq(0).trigger('click');
+    })
+    $('.mct-header button').on('click',function(){
+      defs.then(function(data){
+        var text='';
+        data.forEach(function(file){
+          var f='';
+          $.each(file.sections,function(n,section){
+            var lines='';
+            $.each(file.list[section],function(n,define){
+              var def=file.defs[define]
+              if (def.changed){
+                var ch=['disabled','value'].filter(function(i){ return i in def.changed &&def.changed[i]!=def[i]})
+                if (ch.length)
+                  lines+=(( ch.indexOf('disabled')>=0 ? def.changed.disabled : def.disabled)?'//':'')
+                    +'#define '+define+' '
+                    +(( ch.indexOf('value')>=0 ? def.changed.value : def.value)||'')
+                    +'\n';
+              }
+            })
+            if (lines)
+              f+='//section '+section+'\n'+lines
+          })
+          if (f)
+            text+='//file '+file.file.base+'\n'+f;
+        })
+        window.open(encodeURI('https://github.com/MarlinFirmware/Marlin/issues/new?title=&body='+text).replace(/\#/g,'%23'))
+      })
     })
     var state=$('.mct-header input')
     .on('change',function(){
