@@ -7,6 +7,7 @@ var git = require('./git-tool');
 var getPort = require('get-port');
 var hints = require('./hints');
 var fs = require('fs');
+var formidable = require('formidable');
 
 var port= 3000;
 
@@ -28,8 +29,6 @@ app.get('/checkout/:branch', function (req, res) {
   })
   .catch(a=>res.status(403).send(a))
 });
-//var tag=git.Tag();
-//console.log(tag);
 var get_cfg=()=>{//new Promise((res,fail)=>{
   var base=Promise.all([git.root(),git.Tag()]);
   var list=['Marlin/Configuration.h','Marlin/Configuration_adv.h'].map(f=>{
@@ -42,7 +41,6 @@ var get_cfg=()=>{//new Promise((res,fail)=>{
   });
   return Promise.all(list)
 }
-//application/json
 app.get('/now/', function (req, res) {
   res.set('Content-Type', 'text/plain');
   get_cfg().then(a=>res.send(JSON.stringify(a,null,2)))
@@ -52,10 +50,23 @@ app.get('/json/', function (req, res) {
   get_cfg().then(a=>res.send(a))
 });
 app.get('/hint/:name', function (req, res) {
-//  res.send('<a href='+hints.url+'>Documentation</a>');
   res.send(hints.hint(req.params.name));
-  //res.send(req.params)
 })
+app.post('/upload', function(req, res){
+  var form = new formidable.IncomingForm();
+  form.multiples = true;
+  form.uploadDir = path.join(__dirname, '/uploads');
+  form.on('file', function(field, file) {
+    fs.rename(file.path, path.join(form.uploadDir, file.name));
+  });
+  form.on('error', function(err) {
+    console.log('An error has occured: \n' + err);
+  });
+  form.on('end', function() {
+    res.end('success');
+  });
+  form.parse(req);
+});
 app.post('/set/:file/:name/:prop/:value', function (req, res) {
   git.root()
   .then(root=>{

@@ -38,7 +38,87 @@ function getVal(ob,name){
     return ob.changed[name]
   return ob[name]
 }
+// The plugin code https://gist.github.com/meleyal/3794126
+$.fn.draghover = function(options) {
+  return this.each(function() {
+    var collection = $(),
+        self = $(this);
+    self.on('dragenter', function(e) {
+      if (collection.length === 0) {
+        self.trigger('draghoverstart');
+      }
+      collection = collection.add(e.target);
+    });
+    self.on('dragleave drop', function(e) {
+      collection = collection.not(e.target);
+      if (collection.length === 0) {
+        self.trigger('draghoverend');
+      }
+    });
+  });
+};
+function upload_files(files){
+  if (files.length > 0){
+    var formData = new FormData();
+    for (var i = 0; i < files.length; i++) {
+      var file = files[i];
+      formData.append('uploads[]', file, file.name);
+    }
+    $('.mct-progress').show();
+    $.ajax({
+      url: '/upload',
+      type: 'POST',
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: function(data){
+          console.log('upload successful!\n' + data);
+      },
+      xhr: function() {
+        var xhr = new XMLHttpRequest();
+        xhr.upload.addEventListener('progress', function(evt) {
+          if (evt.lengthComputable) {
+            // calculate the percentage of upload completed
+            var percentComplete = evt.loaded / evt.total;
+            percentComplete = parseInt(percentComplete * 100);
+            // update the Bootstrap progress bar with the new percentage
+            $('.mct-progress span').text(percentComplete + '%');
+            $('.mct-progress .progress-bar').width(percentComplete + '%');
+            // once the upload reaches 100%, set the progress bar text to done
+            if (percentComplete === 100)
+              $('.mct-progress').fadeOut(2000);
+          }
+        }, false);
+        return xhr;
+      }
+    });
+  }
+}
 $(function(){
+    //uploader decoration
+    var dropZone=$('#mct-dragzone')
+    $(window).on('beforeunload',function(){ return "Do You want leave page?"})
+    .draghover().on('draghoverstart draghoverend', function(ev) {
+      dropZone.toggle(ev.type=='draghoverstart');
+    });
+    dropZone.on('dragover dragleave', function(ev) {
+        dropZone.toggleClass('drop',ev.type=='dragover');
+        if (ev.type=='dragover')
+            ev.preventDefault();
+    })
+    dropZone.on('drop',function(e) {
+        upload_files(e.originalEvent.dataTransfer.files)
+        e.preventDefault();
+    })
+    $('button.mct-upload').on('click', function(){
+      $('input.mct-upload').trigger('click')
+    });
+    $('input.mct-upload').on('change',function(){
+      var files = $(this).get(0).files;
+      upload_files(files);
+    });
+    //end uploader decoration
+
     var defs=$.get('/json');
     defs.then(function(data){
       data.forEach(function(file){
@@ -112,6 +192,7 @@ $(function(){
         var tag=row.find('td').eq(1).text().split(',');
           $.ajax('/checkout/'+tag[0])
           .then(function(data){
+            $(window).unbind('beforeunload');
             window.location.reload();
           })
           .fail(function(a){

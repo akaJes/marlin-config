@@ -24,6 +24,7 @@
     "bootstrap": "^3.3.7",
     "bootstrap-toggle": "^2.2.2",
     "express": "^4.15.2",
+    "formidable": "^1.1.1",
     "get-port": "^3.1.0",
     "highlight.js": "^9.11.0",
     "jquery": "^3.2.1",

@@ -26,8 +26,7 @@ renderer.code = function (code, lang) {
 
 marked.setOptions({ renderer: renderer });
 
-var md=fs.stat(docFile)&&fs.readFileSync(docFile,'utf8')||'';
-
+var md=fs.statSync(docFile)&&fs.readFileSync(docFile,'utf8')||'';
 var tokens=marked.lexer(md);
 
 var map=type=>t=>t.map((i,n)=>(i.index=n,i)).filter(i=>i.type==type)
