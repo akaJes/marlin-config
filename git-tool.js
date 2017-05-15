@@ -32,9 +32,11 @@ new Promise((done,fail)=>git(root).log(['--tags','--simplify-by-decoration'],(e,
 var gitShow=(branch,file)=>
 new Promise((done,fail)=>git(root).show([branch+':'+file],(e,a)=>e?fail(e):done(a)));
 
+var gitCheckout=(branch)=>
+new Promise((done,fail)=>git(root).checkout(branch,(e,a)=>e?fail(e):done(a)));
 
 
-
+exports.Checkout=gitCheckout;
 exports.Root=gitRoot;
 exports.Tag=gitTag;
 exports.Tags=gitTags;

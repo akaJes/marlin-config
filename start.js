@@ -8,6 +8,7 @@ var pjson = require('./package.json');
 var git = require('./git-tool');
 var server = require('./server');
 var readline = require('readline');
+var hints = require('./hints');
 
 var doJson=(root)=>
 Promise.resolve(root)
@@ -37,7 +38,7 @@ Promise.resolve(root)
 .then(a=>console.log('done rm ALL .json / .not'))
 
 function main(){
-  var is={tree:1,json:1,h:1,git:0,rm:1,help:1,txt:1,conf:1,clone:1}
+  var is={tree:1,json:1,h:1,git:0,rm:1,help:1,txt:1,conf:1,clone:1,hints:1}
   .filter((v,key,o,p,i)=>(p=process.argv,i=p.indexOf(key),!v&&i>=0&&i+1<p.length&&(o[key]=p[i+1]),i>=0));
 //    var tag=git.Tag();
 //    var tags=git.Tags();
@@ -68,6 +69,9 @@ function main(){
   }else
   if ( is.conf ){
     server.main()
+  }else
+  if ( is.hints ){
+    hints.load()
   }else
   if ( is.clone ){
     git.root().then(root=>{

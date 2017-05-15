@@ -36,16 +36,40 @@
   </head>
   <body>
 <div class="container-fluid">
+  <div id="mct-alert" ></div>
   <div class="row mct-header">
-    <h1>
-      <div class="col-md-2 text-right" >Release:</div>
-      <div class="col-md-4"><span></span></div>
-      <div class="col-md-2">
-            <input type="checkbox" data-toggle="toggle" class="form-control" data-on="Changed" data-off="All">
+      <div class="col-md-2 text-right" ><h2>Release:</h2></div>
+      <div class="col-md-4">
+        <h2><button type="button" class="btn btn-info mct-tags">TAGS</button></h2>
+        <div class="modal fade" id="mct-tags-modal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="myModalLabel">Available releases</h4>
+              </div>
+              <div class="modal-body">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Date<th>Version
+                  <tbody>
+                </table>
+              </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Change</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="col-md-2"><span  class="mct-status"></span></div>
-      <div class="col-md-2"><button type="button" class="btn btn">Issue</button></div>
-    </h1>
+      <div class="col-md-2">
+        <h2>    <input type="checkbox" data-toggle="toggle" class="form-control" data-on="Changed" data-off="All"></h2>
+      </div>
+      <div class="col-md-2"><h4><span  class="mct-status"></span></h4></div>
+      <div class="col-md-2"><h2><button type="button" class="btn btn-warning mct-issue">Issue</button></h2></div>
+    </h2>
   </div>
   <div class="row">
     <div class="col-md-7">

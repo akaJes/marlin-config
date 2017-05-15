@@ -17,9 +17,16 @@ app.get('/', function (req, res) {
   res.send('Hello World!');
 });
 app.get('/tags', function (req, res) {
-  git.git.tags(['--sort=-creatordate'],function (err, data) { //,"--format='%(creatordate) %(refname)'"
+  git.Tags().then(data=>{
     res.send(data);
   });
+});
+app.get('/checkout/:branch', function (req, res) {
+  git.Checkout(req.params.branch)
+  .then(data=>{
+    res.send(data);
+  })
+  .catch(a=>res.status(403).send(a))
 });
 //var tag=git.Tag();
 //console.log(tag);

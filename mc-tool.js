@@ -199,10 +199,11 @@ module.exports.getJson=(root,base,tag)=>file=>{
     .then(a=>a.filter(i=>!i.number||i.number !=undefined&&!i.disabled)) //remove commented duplicates
     .then(a=>({file:path.parse(file),names:a,tag:tag}))
     .then(a=>(a.sections=unique(a.names.map(i=>i.section)).filter(i=>i),a))
+    .then(a=>((a.sections=a.sections.length?a.sections:['common']),a))
 //    .then((a,m)=>(m={},a.sections.map(s=>(m[s]=a.names.filter(i=>i.section==s).map(section))),{groups:groups,sections:m,names:a.names}))
     .then(a=>(a.groups=groups,a))
     .then(a=>(a.defs=a.names.reduce(section1,{}),a))
-    .then(a=>(a.list=a.sections.reduce((p,s)=>(p[s]=a.names.filter(i=>i.section==s).map(i=>i.name),p),{}),a))
+    .then(a=>(a.list=a.sections.reduce((p,s)=>(p[s]=a.names.filter(i=>(i.section||'common')==s).map(i=>i.name),p),{}),a))
 //    .then(a=>(a.all=a.sections.reduce((p,s)=>(p[s]=a.names.filter(i=>i.section==s).map(section),p),{}),a))
     .then(a=>(a.txt=a.names.reduce(section_txt,{}),a)) //changed
 //    .then(a=>(a.names=undefined,a))

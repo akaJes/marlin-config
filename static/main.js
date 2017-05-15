@@ -24,11 +24,25 @@ function updateChanged(sec){
   var cnt=sec.find('.form-group.bg-info').length;
   sec.find('.panel-title span.badge:eq(1)').text(cnt);
 }
+var bootstrap_alert = function() {}
+bootstrap_alert.error = function(message) {
+    $('#mct-alert').html(`
+<div class="alert alert-danger alert-dismissible fade in" id="mct-alert" role="alert">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+  <h4>Oh snap! You got an error!</h4><p></p></div>
+    `).find('p').text(message)
+}
+function getVal(ob,name){
+  if( ob.changed != undefined)
+//    if( 'changed' in ob)
+    return ob.changed[name]
+  return ob[name]
+}
 $(function(){
     var defs=$.get('/json');
     defs.then(function(data){
       data.forEach(function(file){
-        $('.mct-header span').eq(0).text(file.tag)
+        $('.mct-tags').eq(0).text(file.tag)
         var href='panel-'+file.file.name;
         _add($('template._file_tab'))
         .find('a').text(file.file.name)
@@ -46,7 +60,7 @@ $(function(){
             if (def.changed)
               d.addClass('bg-info')
             d.find('label').text(define);
-            var dis=d.find('input').eq(0).attr('checked',!(def.changed&&def.changed.disabled||def.disabled));
+            var dis=d.find('input').eq(0).attr('checked',!getVal(def,'disabled'))
             var dv=(def.changed&&def.changed.value||def.value);
             if (def.type=='string')
               dv=dv.slice(1,-1)
@@ -89,7 +103,38 @@ $(function(){
       })
       $('.config-files li:eq(0) a').eq(0).trigger('click');
     })
-    $('.mct-header button').on('click',function(){
+    var m=$('#mct-tags-modal');
+    var a=$('#mct-alert');
+    var t=m.find('table tbody');
+    m.find('button.btn-primary').on('click',function(ev){
+      var row = t.find('.success');
+      if(row.length){
+        var tag=row.find('td').eq(1).text().split(',');
+          $.ajax('/checkout/'+tag[0])
+          .then(function(data){
+            window.location.reload();
+          })
+          .fail(function(a){
+            m.modal('hide')
+            bootstrap_alert.error(a.responseText);
+          })
+      }
+    });
+    m.find('table tbody').on('click',function(ev){
+      $(this).find('tr').removeClass('success');
+      $(ev.target).parents('tr').addClass('success')
+    });
+    $('.mct-tags').on('click',function(){
+      $.ajax('/tags').then(function(data){
+        data=data.sort(function(a,b){ return a.date<b.date?1:a.date>b.date?-1:0;})
+        t.empty();
+        data.map(function(row){
+          t.append($('<tr>').append($('<td>').text(row.date)).append($('<td>').text(row.tag)))
+        })
+        m.modal();
+      })
+    })
+    $('.mct-issue').on('click',function(){
       defs.then(function(data){
         var text='';
         data.forEach(function(file){

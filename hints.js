@@ -7,7 +7,6 @@ var docFile=path.resolve(__dirname,"views/configuration.md")
 var http = require('https');
 var url="https://github.com/MarlinFirmware/MarlinDocumentation/raw/master/_configuration/configuration.md";
 
-var md=fs.readFileSync(docFile,'utf8');
 
 marked.setOptions({
   highlight: function (code) {
@@ -27,6 +26,8 @@ renderer.code = function (code, lang) {
 
 marked.setOptions({ renderer: renderer });
 
+var md=fs.stat(docFile)&&fs.readFileSync(docFile,'utf8')||'';
+
 var tokens=marked.lexer(md);
 
 var map=type=>t=>t.map((i,n)=>(i.index=n,i)).filter(i=>i.type==type)
@@ -36,8 +37,8 @@ var define2index=map('code')(tokens).reduce(function(p,ob){
     p[match[1]]=ob.index;
   return p;
 },{})
-
 var headings=map('heading')(tokens).map(i=>i.index);
+
 function extendTokens(tokens){
   var _alert={
         $$0:{info:'info',error:'danger',warning:'warning'},
@@ -86,8 +87,9 @@ exports.hint=function(name){
   }
 }
 exports.url=url;
+exports.load=load;
 function load(){
-  var file = fs.createWriteStream();
+  var file = fs.createWriteStream(docFile);
   var request = http.get(url, function(response) {
     if (response.statusCode==302)
       http.get(response.headers['location'], function(response) {
