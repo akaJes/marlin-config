@@ -24,7 +24,7 @@ app.get('/tags', function (req, res) {
 //var tag=git.Tag();
 //console.log(tag);
 var get_cfg=()=>{//new Promise((res,fail)=>{
-  var base=Promise.all([git.root,git.Tag()]);
+  var base=Promise.all([git.root(),git.Tag()]);
   var list=['Marlin/Configuration.h','Marlin/Configuration_adv.h'].map(f=>{
     return base
       .then(p=>git.Show(p[1],f).then(file=>mctool.getJson(p[0],file,p[1])(path.join(p[0],f))))
@@ -50,7 +50,7 @@ app.get('/hint/:name', function (req, res) {
   //res.send(req.params)
 })
 app.post('/set/:file/:name/:prop/:value', function (req, res) {
-  git.root
+  git.root()
   .then(root=>{
     var ob=[{ name:req.params.name}]
     if (req.params.prop=='disabled')
@@ -63,7 +63,8 @@ app.post('/set/:file/:name/:prop/:value', function (req, res) {
   .catch(a=>res.status(403).send(a))
 })
 function main(){
-  git.root.then(root=>{
+  git.root()
+  .then(root=>{
     fs.stat(path.join(root,'Marlin'),(e,a)=>{
     if(!a)
       console.log('this git not look like Marlin repository');

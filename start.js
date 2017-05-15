@@ -37,7 +37,7 @@ Promise.resolve(root)
 .then(a=>console.log('done rm ALL .json / .not'))
 
 function main(){
-  var is={tree:1,json:1,h:1,git:0,rm:1,help:1,txt:1,conf:1}
+  var is={tree:1,json:1,h:1,git:0,rm:1,help:1,txt:1,conf:1,clone:1}
   .filter((v,key,o,p,i)=>(p=process.argv,i=p.indexOf(key),!v&&i>=0&&i+1<p.length&&(o[key]=p[i+1]),i>=0));
 //    var tag=git.Tag();
 //    var tags=git.Tags();
@@ -46,7 +46,7 @@ function main(){
   else
   if ( is.git ) {
     ['Marlin/Configuration_adv','Marlin/Configuration'].forEach(f=>{
-      var base=Promise.all([git.root,git.Show(is.git,f)]);
+      var base=Promise.all([git.root(),git.Show(is.git,f)]);
       if ( is.json )
         base
         .then(a=>mctool.makeJson(a[0],a[1])(path.join(a[0],f+'.h')))
@@ -61,37 +61,72 @@ function main(){
     })
   }else
   if ( is.tree ){
-      git.root
+      git.root()
       .then( root=> is.json ? doJson(root) : root )
       .then( root=> is.h ? doH(root) : root )
       .then( is.rm ? rmJson : 0);
   }else
   if ( is.conf ){
     server.main()
+  }else
+  if ( is.clone ){
+    git.root().then(root=>{
+      console.log('there is git');
+    }).catch(err=>{
+      git.clone().then(a=>console.log('over'));
+    })
   }else{
-    git.root.then(root=>{
-      console.log('type: mct help if you need more information');
-      if(root){
-        var rl = readline.createInterface({
+    function getConsole(){
+      return readline.createInterface({
           input: process.stdin,
           output: process.stdout
-        });
-        rl.question('press Enter to run web browser or ^C to exit', (answer) => {
-          server.main()
+      });
+    }
+    function startWeb(){
+      git.root()
+      .then(root=>{
+        console.log('type: mct help if you need more information');
+          if(root){
+          var rl = getConsole();
+          rl.question('press Enter to run web browser or ^C to exit', (answer) => {
+            rl.close();
+            server.main()
+          });
+        }
+      })
+    }
+    function tryRun(){
+      process.chdir('Marlin')
+console.log(process.cwd())
+      git.root('Marlin').then(a=>{
+        server.main();
+      });
+    }
+    git.root()
+    .then(startWeb)
+    .catch(a=>{
+        var rl = getConsole();
+        rl.question('press Enter to clone it from web or ^C to exit', (answer) => {
           rl.close();
+          git.clone()
+          .then(tryRun)
+          .catch(tryRun)
         });
-      }
     })
   }
 
 }
 function help(){
   console.log(`${pjson.name} v ${pjson.version}
-usage: mct help|git|tree
+usage: mct help|git|tree|conf|clone
 You need to run it in Marlin git repository
 commands:
+    mct
+        asks to 'clone' if no repository then run 'conf'
     mct conf
         open browser for interactive configuration
+    mct clone
+        clone current Marlin repository to current working directory
     mct git <git-tag> json|h|txt
         json: compare [gitroot]/Marlin/Configuration*.h files
               between git-tag files and files in folder then
