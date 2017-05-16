@@ -47,6 +47,10 @@ app.get('/now/', function (req, res) {
   res.set('Content-Type', 'text/plain');
   get_cfg().then(a=>res.send(JSON.stringify(a,null,2)))
 });
+app.get('/version', function (req, res) {
+  res.set('Content-Type', 'text/plain');
+  res.send("var version='"+pjson.version+"'")
+});
 app.get('/json/', function (req, res) {
   res.set('Content-Type', 'application/json');
   get_cfg().then(a=>res.send(a))
