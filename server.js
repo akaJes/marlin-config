@@ -8,6 +8,7 @@ var getPort = require('get-port');
 var hints = require('./hints');
 var fs = require('fs');
 var formidable = require('formidable');
+var pjson = require('./package.json');
 
 var port= 3000;
 
@@ -36,9 +37,10 @@ var get_cfg=()=>{//new Promise((res,fail)=>{
       .then(p=>git.Show(p[1],f).then(file=>mctool.getJson(p[0],file,p[1])(path.join(p[0],f))))
       .then(o=>(o.names.filter(n=>hints.d2i[n.name],1).map(n=>o.defs[n.name].hint=!0),o))
 //      .then(o=>(o.names.map(n=>o.defs[n]&&(o.defs[n].hint=1)),o))
-      .then(a=>(a.names=undefined,a))
+      .then(a=>(a.names=undefined,type='file',a))
 //    .then(a=>res(a))
   });
+  list.push({type:'info',pkg:pjson})
   return Promise.all(list)
 }
 app.get('/now/', function (req, res) {
@@ -67,14 +69,14 @@ app.post('/upload', function(req, res){
       if ( err )
         return fail(err);
       files=files[Object.keys(files)[0]];
-      files=Array.isArray(files)&&t||[files]
+      files=Array.isArray(files)&&files||[files]
       done(files);
     })
   })
   .then(files=>{
     files.map(file=>{
       if (['Configuration.h','Configuration_adv.h'].indexOf(file.name)<0)
-        throw 'wrong name';
+        throw 'Wrong file name! Allowed only Configuration.h and Configuration_adv.h';
     })
     return files;
   })
@@ -82,9 +84,11 @@ app.post('/upload', function(req, res){
 //process
   .then(files=>{
     return Promise.all(files.map(file=>git.root().then(root=>{
+try{
         return mctool
           .makeCfg(file.path)
-          .then(mctool.makeHH(root,file.name))
+          .then(mctool.makeHfile(root,file.name))
+}catch(e) { console.log(e); throw e; }
       })
 //        return new Promise((done,fail)=>
 //        fs.rename(file.path, path.join(uploadDir, file.name),(err,ok)=>(err&&fail(err)||done(ok))))

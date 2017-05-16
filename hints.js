@@ -73,6 +73,8 @@ exports.d2i=define2index;
 exports.hint=function(name){
   var find=define2index[name]
   var banner='<link rel="stylesheet" title="Default" href="styles/default.css">';
+  var banner2='<script src="head.min.js"></script><script>head.load("sheetrock.min.js");</script>';
+  var add_banner='';
   if (find){
     var ob=headings.reduce((ob,v)=>{
       if (v>find && ob.max==undefined) ob.max=v;
@@ -81,8 +83,10 @@ exports.hint=function(name){
     },{})
     var cut=tokens.slice(ob.min,ob.max);
     cut=extendTokens(cut);
+    if(cut.filter(i=>/sheetrock\.min/.test(i.text||'')).length)
+      add_banner=banner2;
     cut.links={};
-    return marked.parser(cut);
+    return add_banner+marked.parser(cut);
   }
 }
 exports.url=url;

@@ -39,8 +39,9 @@ var addNumber=a=>{
   })
 }
 
+var killComments=a=>a.map(i=>(i.comment=null,i))
+
 var setConfig=(target,file,root)=>a=>{
-try{
   var map=remap(a);
   return Promise.resolve(target).then(t=>{
     var undef=[];
@@ -58,6 +59,7 @@ try{
         if ( i.value  != undefined || o.value  != undefined )
           if ( changed.value = (o.value || '').trim() != (i.value || '').trim() )
             o.value = i.value;
+        if ( i.comment !== null )
         if ( i.comment != undefined || o.comment != undefined )
           if ( changed.comment = ( o.comment || '' ).trim() != ( i.comment || '' ).trim() )
             o.comment = i.comment;
@@ -76,9 +78,6 @@ try{
     }
     return res;
   })
-}catch(e){
-  console.error(e);
-}
 }
 var addChanged=(target)=>a=>{
   return target.then(t=>{
@@ -87,8 +86,8 @@ var addChanged=(target)=>a=>{
       var oo=map[i.name];
       if (oo){
         var o=oo[Math.min(i.number||0,oo.length-1)];
-        if (oo.length>1&&!i.number)
-          o=oo[oo.length-1]
+        if ( oo.length>1 && !i.number )
+          o=oo.filter(i=>!i.disabled)[oo.length-1]
         if (o){
           var changed = {};
           if ( o.disabled != i.disabled )
@@ -123,7 +122,6 @@ var stripConfA=a=>a.map(i=>{
     obj.number = i.number;
   return obj;
 });
-
 
 
 var remapNum=a=>{
@@ -198,8 +196,10 @@ var type=i=>i.value==undefined?'BOOL':'string'
 var type1=i=>i.value&&(/\".*\"/.test(i.value)?'string':'numeric')||undefined //"
 var section0=i=>i.name+' '+type(i)+(i.condition.length&&(' == '+i.condition.join(' AND '))||'')
 var section=i=>({name:i.name,type:type(i),condition:i.condition.length&&i.condition||undefined,value:i.value||!i.disabled})
-var section1=(p,i)=>(p[i.name]={changed:i.changed,type:type1(i),condition:i.condition.length&&i.condition||undefined,value:i.value,disabled:i.disabled},p)
+var section1=(p,i)=>(p[i.name]={changed:i.changed,type:type1(i),condition:i.condition.length&&i.condition||undefined,value:i.value,disabled:i.disabled,line:i.line},p)
 var section_txt=(p,i)=>(i.changed&&(p[i.name]={value:i.changed.value||i.value,disabled:i.changed.disabled||i.disabled}),p)
+
+/* PROCESSORS */
 
 module.exports.getJson=(root,base,tag)=>file=>{
     var p=path.parse(file);
@@ -224,6 +224,7 @@ module.exports.getJson=(root,base,tag)=>file=>{
     .then(a=>(console.log('done json: ',path.relative(root,file)),a))
     .catch(a=>console.log('fail json: ',file,a))
 }
+
 module.exports.updateH=(root,file,json)=>{
     var h=inFile(file);
     return h
@@ -237,7 +238,6 @@ module.exports.updateH=(root,file,json)=>{
     .then(a=>(console.log('updated h: ',path.relative(root,file)),a))
     .catch(a=>{ console.log('fail h: ',file,a); throw a;})
 }
-
 
 module.exports.makeTxt=(root,base,git)=>file=>{
     var p=path.parse(file);
@@ -258,7 +258,6 @@ module.exports.makeTxt=(root,base,git)=>file=>{
     .catch(a=>console.log('fail txt: ',file,a))
 }
 
-
 module.exports.makeH=(root,base)=>file=>{
     var p=path.parse(file);
     var h=base?Promise.resolve(base):inFile(path.join(root||'','Marlin',p.name+'.h'));
@@ -278,6 +277,7 @@ module.exports.makeCfg=file=>{
     return inFile(file)
     .then(mc.h2json)
     .then(addNumber)
+    .then(killComments)
 //    .then(stripConfA)
 //    .then(uniqueJson)
 //    .then(toJson)
@@ -301,4 +301,19 @@ module.exports.makeHH=(root,name)=>conf=>{
 //    .then(outFile(path.join(p.dir,p.name+'.h')))
     .then(a=>(console.log('done conf h: ',path.relative(root,p)),a))
     .catch(a=>(console.log('fail conf h: ',file,a),a))
+}
+
+module.exports.makeHfile=(root,name)=>conf=>{
+    var p=path.join(root||'','Marlin',name);
+    var h=inFile(p);
+    return h
+    .then(mc.h2json)
+    .then(addNumber)
+    .then(setConfig(conf))
+    .then(onlyChanged)
+    .then(extendFrom(h))
+    .then(array2text)
+    .then(outFile(p))
+    .then(a=>(console.log('done update h file: ',path.relative(root,p)),a))
+    .catch(a=>(console.log('fail update h file: ',file,a),a))
 }

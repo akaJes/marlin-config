@@ -38,6 +38,28 @@ function getVal(ob,name){
     return ob.changed[name]
   return ob[name]
 }
+function cmdReload(cmd,modal){
+    cmd
+    .then(function(data){
+      $(window).unbind('beforeunload');
+      window.location.reload();
+    })
+    .fail(function(a){
+      modal&&modal.modal('hide')
+      bootstrap_alert.error(a.responseText);
+    })
+}
+function progress(val){
+    var dom = $('.mct-progress');
+    val===true&&dom.toggle(val);
+    val===false&&dom.fadeOut(5000);
+    if (typeof val =='string'){
+      dom.find('span').text(val)
+      $('.mct-progress .progress-bar').width(val);
+    }
+    typeof val =='number'&& dom.find('.progress-bar').toggleClass('progress-bar-danger',!!val);
+    return progress;
+}
 // The plugin code https://gist.github.com/meleyal/3794126
 $.fn.draghover = function(options) {
   return this.each(function() {
@@ -58,25 +80,16 @@ $.fn.draghover = function(options) {
   });
 };
 function upload_files(files){
-  if (files.length > 0){
+//  return new Promise((done,fail)=>{
+    if ( !files.length )
+      return fail('no files')
     var formData = new FormData();
     for (var i = 0; i < files.length; i++) {
       var file = files[i];
       formData.append('uploads[]', file, file.name);
     }
-    function progress(val){
-      var dom = $('.mct-progress');
-      val===true&&dom.toggle(val);
-      val===false&&dom.fadeOut(2000);
-      if (typeof val =='string'){
-        dom.find('span').text(val)
-        $('.mct-progress .progress-bar').width(val);
-      }
-      typeof val =='number'&& dom.find('.progress-bar').toggleClass('progress-bar-danger',!!val);
-      return progress;
-    }
     progress(0)(true);
-    $.ajax({
+    return $.ajax({
       url: '/upload',
       type: 'POST',
       data: formData,
@@ -95,16 +108,19 @@ function upload_files(files){
             progress(percentComplete + '%');
             // update the Bootstrap progress bar with the new percentage
             // once the upload reaches 100%, set the progress bar text to done
-            if (percentComplete === 100)
+            if (percentComplete === 100){
               progress(false);
+//              done();
+            }
           }
         }, false);
         return xhr;
       }
-    }).fail(function(){
-      progress(1)('ERROR');
+    }).fail(function(e){
+      progress(1)('ERROR '+e.responseText);
+//      fail(e.responseText)
     });
-  }
+//  })
 }
 $(function(){
     //uploader decoration
@@ -130,20 +146,24 @@ $(function(){
     })
     dropZone.on('drop',function(ev) {
         ev.preventDefault();
-        upload_files(ev.originalEvent.dataTransfer.files)
+        cmdReload(upload_files(ev.originalEvent.dataTransfer.files))
     })
     $('button.mct-upload').on('click', function(){
       $('input.mct-upload').trigger('click')
     });
     $('input.mct-upload').on('change',function(){
       var files = $(this).get(0).files;
-      upload_files(files);
+      cmdReload(upload_files(files));
     });
     //end uploader decoration
 
     var defs=$.get('/json');
     defs.then(function(data){
       data.forEach(function(file){
+        if (file.type=='info'){
+          $('.mct-version').attr('href',file.pkg.homepage).text(file.pkg.name+' v'+file.pkg.version)
+          return;
+        }
         $('.mct-tags').eq(0).text(file.tag)
         var href='panel-'+file.file.name;
         _add($('template._file_tab'))
@@ -161,7 +181,7 @@ $(function(){
             var def=file.defs[define]
             if (def.changed)
               d.addClass('bg-info')
-            d.find('label').text(define);
+            d.find('label').text(define).attr('title',def.line).tooltip();
             var dis=d.find('input').eq(0).attr('checked',!getVal(def,'disabled'))
             var dv=(def.changed&&def.changed.value||def.value);
             if (def.type=='string')
@@ -205,18 +225,6 @@ $(function(){
       })
       $('.config-files li:eq(0) a').eq(0).trigger('click');
     })
-function cmdReload(cmd,modal){
-          $.ajax(cmd)
-          .then(function(data){
-            $(window).unbind('beforeunload');
-            window.location.reload();
-          })
-          .fail(function(a){
-            model&&modal.modal('hide')
-            bootstrap_alert.error(a.responseText);
-          })
-
-}
   {
     var m=$('#mct-tags-modal');
     var a=$('#mct-alert');
@@ -225,7 +233,7 @@ function cmdReload(cmd,modal){
       var row = t.find('.success');
       if(row.length){
         var tag=row.find('td').eq(1).text().split(',');
-        cmdReload('/checkout/'+tag[0],m);
+        cmdReload($.ajax('/checkout/'+tag[0]),m);
       }
     });
     m.find('table tbody').on('click',function(ev){
@@ -256,7 +264,7 @@ function cmdReload(cmd,modal){
       })
     })
     r.find('button.btn-primary').on('click',function(ev){
-        cmdReload('/checkout-force',r);
+        cmdReload($.ajax('/checkout-force'),r);
     })
   }
     $('.mct-issue').on('click',function(){
@@ -281,7 +289,7 @@ function cmdReload(cmd,modal){
               f+='//section '+section+'\n'+lines
           })
           if (f)
-            text+='//file '+file.file.base+'\n'+f;
+            text+='\n//file '+file.file.base+' Release:'+file.tag+'\n'+f;
         })
         window.open(encodeURI('https://github.com/MarlinFirmware/Marlin/issues/new?title=&body='+text).replace(/\#/g,'%23'))
       })

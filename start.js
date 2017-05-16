@@ -126,7 +126,7 @@ usage: mct help|git|tree|conf|clone
 You need to run it in Marlin git repository
 commands:
     mct
-        asks to 'clone' if no repository then run 'conf'
+        asks to 'clone' if current folder has no repository then run 'conf'
     mct conf
         open browser for interactive configuration
     mct clone
