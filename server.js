@@ -49,23 +49,55 @@ app.get('/json/', function (req, res) {
   res.set('Content-Type', 'application/json');
   get_cfg().then(a=>res.send(a))
 });
+app.get('/status', function (req, res) {
+  git.Status().then(a=>res.send(a))
+});
+app.get('/checkout-force', function (req, res) {
+  git.Checkout('--force').then(a=>res.send(a))
+});
 app.get('/hint/:name', function (req, res) {
   res.send(hints.hint(req.params.name));
 })
 app.post('/upload', function(req, res){
-  var form = new formidable.IncomingForm();
-  form.multiples = true;
-  form.uploadDir = path.join(__dirname, '/uploads');
-  form.on('file', function(field, file) {
-    fs.rename(file.path, path.join(form.uploadDir, file.name));
-  });
-  form.on('error', function(err) {
-    console.log('An error has occured: \n' + err);
-  });
-  form.on('end', function() {
-    res.end('success');
-  });
-  form.parse(req);
+  var uploadDir = path.join(__dirname, '/uploads');
+  new Promise((done,fail)=>{
+    var form = new formidable.IncomingForm();
+    form.multiples = true;
+    form.parse(req,function(err, fields, files) {
+      if ( err )
+        return fail(err);
+      files=files[Object.keys(files)[0]];
+      files=Array.isArray(files)&&t||[files]
+      done(files);
+    })
+  })
+  .then(files=>{
+    files.map(file=>{
+      if (['Configuration.h','Configuration_adv.h'].indexOf(file.name)<0)
+        throw 'wrong name';
+    })
+    return files;
+  })
+//  .then(a=>(console.log(a),a))
+//process
+  .then(files=>{
+    return Promise.all(files.map(file=>git.root().then(root=>{
+        return mctool
+          .makeCfg(file.path)
+          .then(mctool.makeHH(root,file.name))
+      })
+//        return new Promise((done,fail)=>
+//        fs.rename(file.path, path.join(uploadDir, file.name),(err,ok)=>(err&&fail(err)||done(ok))))
+    ))
+  })
+  .then(a=>res.send(a))
+//  .then(a=>res.end('success'))
+  .catch(e=>res.status(403).send(e))
+/*
+      res.writeHead(200, {'content-type': 'text/plain'});
+      res.write('received upload:\n\n');
+      res.end('success');
+*/
 });
 app.post('/set/:file/:name/:prop/:value', function (req, res) {
   git.root()

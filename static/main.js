@@ -64,7 +64,18 @@ function upload_files(files){
       var file = files[i];
       formData.append('uploads[]', file, file.name);
     }
-    $('.mct-progress').show();
+    function progress(val){
+      var dom = $('.mct-progress');
+      val===true&&dom.toggle(val);
+      val===false&&dom.fadeOut(2000);
+      if (typeof val =='string'){
+        dom.find('span').text(val)
+        $('.mct-progress .progress-bar').width(val);
+      }
+      typeof val =='number'&& dom.find('.progress-bar').toggleClass('progress-bar-danger',!!val);
+      return progress;
+    }
+    progress(0)(true);
     $.ajax({
       url: '/upload',
       type: 'POST',
@@ -81,34 +92,45 @@ function upload_files(files){
             // calculate the percentage of upload completed
             var percentComplete = evt.loaded / evt.total;
             percentComplete = parseInt(percentComplete * 100);
+            progress(percentComplete + '%');
             // update the Bootstrap progress bar with the new percentage
-            $('.mct-progress span').text(percentComplete + '%');
-            $('.mct-progress .progress-bar').width(percentComplete + '%');
             // once the upload reaches 100%, set the progress bar text to done
             if (percentComplete === 100)
-              $('.mct-progress').fadeOut(2000);
+              progress(false);
           }
         }, false);
         return xhr;
       }
+    }).fail(function(){
+      progress(1)('ERROR');
     });
   }
 }
 $(function(){
     //uploader decoration
     var dropZone=$('#mct-dragzone')
-    $(window).on('beforeunload',function(){ return "Do You want leave page?"})
+    $(window)
+    //properly check enter & leave window
     .draghover().on('draghoverstart draghoverend', function(ev) {
       dropZone.toggle(ev.type=='draghoverstart');
     });
+    $(window)
+    //.on('beforeunload',function(){ return "Do You want leave page?"})
+    //prevent drop on window
+    .on('drop',function(ev) {
+      ev.preventDefault();
+    })
+    .on('dragover', function(ev) {
+      ev.preventDefault();
+    })
     dropZone.on('dragover dragleave', function(ev) {
         dropZone.toggleClass('drop',ev.type=='dragover');
         if (ev.type=='dragover')
             ev.preventDefault();
     })
-    dropZone.on('drop',function(e) {
-        upload_files(e.originalEvent.dataTransfer.files)
-        e.preventDefault();
+    dropZone.on('drop',function(ev) {
+        ev.preventDefault();
+        upload_files(ev.originalEvent.dataTransfer.files)
     })
     $('button.mct-upload').on('click', function(){
       $('input.mct-upload').trigger('click')
@@ -183,6 +205,19 @@ $(function(){
       })
       $('.config-files li:eq(0) a').eq(0).trigger('click');
     })
+function cmdReload(cmd,modal){
+          $.ajax(cmd)
+          .then(function(data){
+            $(window).unbind('beforeunload');
+            window.location.reload();
+          })
+          .fail(function(a){
+            model&&modal.modal('hide')
+            bootstrap_alert.error(a.responseText);
+          })
+
+}
+  {
     var m=$('#mct-tags-modal');
     var a=$('#mct-alert');
     var t=m.find('table tbody');
@@ -190,15 +225,7 @@ $(function(){
       var row = t.find('.success');
       if(row.length){
         var tag=row.find('td').eq(1).text().split(',');
-          $.ajax('/checkout/'+tag[0])
-          .then(function(data){
-            $(window).unbind('beforeunload');
-            window.location.reload();
-          })
-          .fail(function(a){
-            m.modal('hide')
-            bootstrap_alert.error(a.responseText);
-          })
+        cmdReload('/checkout/'+tag[0],m);
       }
     });
     m.find('table tbody').on('click',function(ev){
@@ -215,6 +242,23 @@ $(function(){
         m.modal();
       })
     })
+  }
+  {
+    var r=$('#mct-reset-modal');
+    var p=r.find('p');
+    $('.mct-reset').on('click',function(){
+      $.ajax('/status').then(function(data){
+        p.empty();
+        data.files.map(function(file){
+          p.append(file.path+'<br>')
+        })
+        r.modal();
+      })
+    })
+    r.find('button.btn-primary').on('click',function(ev){
+        cmdReload('/checkout-force',r);
+    })
+  }
     $('.mct-issue').on('click',function(){
       defs.then(function(data){
         var text='';

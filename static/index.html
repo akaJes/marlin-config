@@ -55,19 +55,6 @@
   </head>
   <body>
 <div class="container-fluid">
-  <div class="upload-drop-zone" id="mct-dragzone" style="display:none">
-      Just drag and drop files here
-  </div>
-  <div id="mct-alert" ></div>
-  <div class="progress mct-progress" style="display:none">
-    <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
-      <span class=""></span>
-    </div>
-  </div>
-  <div class="row mct-header">
-      <div class="col-md-2 text-right" ><h2>Release:</h2></div>
-      <div class="col-md-4">
-        <h2><button type="button" class="btn btn-info mct-tags">TAGS</button></h2>
         <div class="modal fade" id="mct-tags-modal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
@@ -90,19 +77,52 @@
             </div>
           </div>
         </div>
+        <div class="modal fade" id="mct-reset-modal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="myModalLabel">Changed files</h4>
+              </div>
+              <div class="modal-body">
+                <p></p>
+              </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+<!-- main-->
+  <div class="upload-drop-zone" id="mct-dragzone" style="display:none">
+      Just drag and drop files here
+  </div>
+  <div id="mct-alert" ></div>
+  <div class="progress mct-progress" style="display:none">
+    <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+      <span class=""></span>
+    </div>
+  </div>
+  <div class="row mct-header" style0="position:fixed;z-index:1;width:100%;background:white;">
+    <h2>
+      <div class="col-md-4">
+        Release:
+        <button type="button" class="btn btn-info mct-tags">TAGS</button>
       </div>
-      <div class="col-md-2">
-        <h2>
+      <div class="col-md-2"><span  class="mct-status"></span></div>
+      <div class="col-md-4">
           <input type="checkbox" data-toggle="toggle" class="form-control" data-on="Changed" data-off="All">
+          <button type="button" class="btn btn-danger mct-reset">Reset</button>
           <button type="button" class="btn btn-warning mct-upload">Upload</button>
           <input type="file" name="files[]" class="mct-upload" multiple style="opacity:0;">
-        </h2>
       </div>
-      <div class="col-md-2"><h4><span  class="mct-status"></span></h4></div>
-      <div class="col-md-2"><h2><button type="button" class="btn btn-warning mct-issue">Issue</button></h2></div>
+      <div class="col-md-2">
+        <button type="button" class="btn btn-warning mct-issue">Issue</button>
+      </div>
     </h2>
   </div>
-  <div class="row">
+  <div class="row" style0="margin-top:6em;">
     <div class="col-md-7">
 
       <div class="tabbable config-files">

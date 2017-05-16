@@ -40,8 +40,9 @@ var addNumber=a=>{
 }
 
 var setConfig=(target,file,root)=>a=>{
+try{
   var map=remap(a);
-  return target.then(t=>{
+  return Promise.resolve(target).then(t=>{
     var undef=[];
     var res=t.map(i=>{
       var o=map[i.name];
@@ -75,14 +76,19 @@ var setConfig=(target,file,root)=>a=>{
     }
     return res;
   })
+}catch(e){
+  console.error(e);
+}
 }
 var addChanged=(target)=>a=>{
   return target.then(t=>{
     var map=remap(t);
     var res=a.map(i=>{
-      var o=map[i.name];
-      if (o){
-        var o=o[Math.min(i.number||0,o.length-1)];
+      var oo=map[i.name];
+      if (oo){
+        var o=oo[Math.min(i.number||0,oo.length-1)];
+        if (oo.length>1&&!i.number)
+          o=oo[oo.length-1]
         if (o){
           var changed = {};
           if ( o.disabled != i.disabled )
@@ -108,6 +114,13 @@ var stripConf=a=>a.map(i=>{
       if ( val )
         obj[name] =  i[name];
   });
+  return obj;
+});
+
+var stripConfA=a=>a.map(i=>{
+  var obj = { name: i.name, disabled: i.disabled, value:i.value };
+  if ( i.number != undefined )
+    obj.number = i.number;
   return obj;
 });
 
@@ -155,6 +168,7 @@ module.exports.makeJson=(root,base)=>file=>{
     .then(a=>console.log('done json: ',path.relative(root,file)))
     .catch(a=>console.log('fail json: ',file,a))
 }
+
 var groups=[
       ["DELTA", //?
       "MORGAN_SCARA", //?
@@ -258,4 +272,33 @@ module.exports.makeH=(root,base)=>file=>{
     .then(outFile(path.join(p.dir,p.name+'.h')))
     .then(a=>console.log('done h: ',path.relative(root,file)))
     .catch(a=>console.log('fail h: ',file,a))
+}
+
+module.exports.makeCfg=file=>{
+    return inFile(file)
+    .then(mc.h2json)
+    .then(addNumber)
+//    .then(stripConfA)
+//    .then(uniqueJson)
+//    .then(toJson)
+//    .then(outFile(path.join(p.dir,p.name+'.json')))
+    .then(a=>(console.log('done conf: ',file),a))
+    .catch(a=>(console.log('fail conf: ',file,a),a))
+}
+
+module.exports.makeHH=(root,name)=>conf=>{
+    var p=path.join(root||'','Marlin',name);
+    var h=inFile(p);
+    return h
+    .then(mc.h2json)
+    .then(addNumber)
+    .then(setConfig(conf))
+    .then(onlyChanged)
+    .then(stripConf)
+    .then(uniqueJson)
+//    .then(extendFrom(h))
+//    .then(array2text)
+//    .then(outFile(path.join(p.dir,p.name+'.h')))
+    .then(a=>(console.log('done conf h: ',path.relative(root,p)),a))
+    .catch(a=>(console.log('fail conf h: ',file,a),a))
 }

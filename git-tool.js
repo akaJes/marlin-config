@@ -35,8 +35,12 @@ new Promise((done,fail)=>git(root).show([branch+':'+file],(e,a)=>e?fail(e):done(
 var gitCheckout=(branch)=>
 new Promise((done,fail)=>git(root).checkout(branch,(e,a)=>e?fail(e):done(a)));
 
+var gitStatus=()=>
+new Promise((done,fail)=>git(root).status((e,a)=>e?fail(e):done(a)));
+
 
 exports.Checkout=gitCheckout;
+exports.Status=gitStatus;
 exports.Root=gitRoot;
 exports.Tag=gitTag;
 exports.Tags=gitTags;
