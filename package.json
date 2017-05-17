@@ -8,7 +8,8 @@
   },
   "bin": {
     "mct": "bin/mct",
-    "mctd": "bin/mctd"
+    "mctd": "bin/mctd",
+    "mctp": "bin/mctp"
   },
   "repository": {
     "type": "git",
@@ -30,7 +31,8 @@
     "jquery": "^3.2.1",
     "marked": "^0.3.6",
     "opn": "^5.0.0",
-    "simple-git": "^1.72.0"
+    "simple-git": "^1.72.0",
+    "which": "^1.2.14"
   },
   "devDependencies-": {
     "nodemon": "^1.11.0"
