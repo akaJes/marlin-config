@@ -20,6 +20,10 @@ in project used documentation from [MarlinDocumentation](https://github.com/Marl
 
 `sudo npm -g i marlin-conf`
 
+# dependencies
+
+[git](https://git-scm.com/downloads),[hode.js](https://nodejs.org/en/download/)
+
 # using
 open terminal in an empty folder or in a folder with Marlin repository and type
 
