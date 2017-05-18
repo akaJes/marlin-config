@@ -22,8 +22,9 @@
   },
   "homepage": "https://github.com/akaJes/marlin-config#readme",
   "dependencies": {
-    "bootstrap": "^3.3.7",
+    "bootstrap": "4.0.0-alpha.6",
     "bootstrap-toggle": "^2.2.2",
+    "css-toggle-switch": "^4.0.2",
     "express": "^4.15.2",
     "formidable": "^1.1.1",
     "get-port": "^3.1.0",
@@ -32,6 +33,7 @@
     "marked": "^0.3.6",
     "opn": "^5.0.0",
     "simple-git": "^1.72.0",
+    "tether": "^1.4.0",
     "which": "^1.2.14"
   },
   "devDependencies-": {

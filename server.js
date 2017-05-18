@@ -9,6 +9,7 @@ var hints = require('./hints');
 var fs = require('fs');
 var formidable = require('formidable');
 var pjson = require('./package.json');
+var pio = require('./pio');
 
 var port= 3000;
 
@@ -49,7 +50,35 @@ app.get('/now/', function (req, res) {
 });
 app.get('/version', function (req, res) {
   res.set('Content-Type', 'text/plain');
-  res.send("var version='"+pjson.version+"'")
+  if (!/\/jes/.test(process.cwd()))
+    res.write(`
+    ga('create', 'UA-99239389-1', 'auto');
+    ga('send', 'screenview',{ 'appName': 'marlin-conf', 'appVersion': '${pjson.version}', 'screenName': 'Home'});
+    `);
+  pio.isPIO()
+  .then(pio.list)
+//  .then(p=>"'"+p+"'")
+  .catch(()=>false)
+  .then(a=>{
+    //console.log(a)
+    var s=JSON.stringify(a);
+    res.write(`var config={pio:${s}};`);
+    res.end();
+  })
+});
+app.get('/pio', function (req, res) {
+  git.root()
+  .then(root=>{
+    process.chdir(path.join(root,'Marlin'))
+    pio.run(['run'],res);
+  });
+});
+app.get('/pio-flash', function (req, res) {
+  git.root()
+  .then(root=>{
+    process.chdir(path.join(root,'Marlin'))
+    pio.run(['run','-t','upload'],res);
+  });
 });
 app.get('/json/', function (req, res) {
   res.set('Content-Type', 'application/json');

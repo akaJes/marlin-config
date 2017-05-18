@@ -22,15 +22,7 @@ function applyProp(def,row,prop,val){
 }
 function updateChanged(sec){
   var cnt=sec.find('.form-group.bg-info').length;
-  sec.find('.panel-title span.badge:eq(1)').text(cnt);
-}
-var bootstrap_alert = function() {}
-bootstrap_alert.error = function(message) {
-    $('#mct-alert').html(`
-<div class="alert alert-danger alert-dismissible fade in" id="mct-alert" role="alert">
-  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
-  <h4>Oh snap! You got an error!</h4><p></p></div>
-    `).find('p').text(message)
+  sec.find('.card-header span.badge:eq(1)').text(cnt);
 }
 function getVal(ob,name){
   if( ob.changed != undefined)
@@ -46,7 +38,8 @@ function cmdReload(cmd,modal){
     })
     .fail(function(a){
       modal&&modal.modal('hide')
-      bootstrap_alert.error(a.responseText);
+      _add($('template._alert'))
+      .find('p').text(a.responseText)
     })
 }
 function progress(val){
@@ -122,6 +115,36 @@ function upload_files(files){
     });
 //  })
 }
+function stream_cmd(command,proc){
+    return function(){
+      if (!config.pio) return;
+      proc.init();
+      function log_message(text){
+        proc.log(text);
+      }
+      try{
+        var xhr = new XMLHttpRequest();
+        xhr.previous_text = '';
+        xhr.onload = function() { log_message("<br>Done."); };
+        xhr.onerror = function() { log_message("<br>[XHR] Fatal Error."); };
+        xhr.onreadystatechange = function(){
+          try{
+            if (xhr.readyState > 2){
+              var new_response = xhr.responseText.substring(xhr.previous_text.length);
+              log_message(new_response.replace(/\n/g,'<br>'));
+              xhr.previous_text = xhr.responseText;
+            }
+          }catch (e){
+            log_message("<br><b>[XHR] Exception: " + e + "</b>");
+          }
+        }
+        xhr.open("GET", command, true);
+        xhr.send("let's go");
+      }catch (e){
+        log_message("<br><b>[XHR] Exception: " + e + "</b>");
+      }
+    }
+}
 $(function(){
     //uploader decoration
     var dropZone=$('#mct-dragzone')
@@ -165,7 +188,7 @@ $(function(){
           return;
         }
         $('.mct-tags').eq(0).text(file.tag)
-        var href='panel-'+file.file.name;
+        var href='card-'+file.file.name;
         _add($('template._file_tab'))
         .find('a').text(file.file.name)
         .attr('href','#'+href)
@@ -173,7 +196,7 @@ $(function(){
         tab.attr('id',href)
         $.each(file.sections,function(n,section){
           var sec=_add(tab.find('template._section'));
-          sec.find('.panel-title span:eq(0)').text(section);
+          sec.find('.card-header span:eq(0)').text(section);
           var cnt=0;
           $.each(file.list[section],function(n,define){
             cnt++;
@@ -190,7 +213,7 @@ $(function(){
             function processProp(name,val){
               saveProp('/set/'+file.file.name+'/'+define+'/'+name+'/'+val)
               .then(function(){ applyProp(def,d,name,val)})
-              .then(function(){ updateChanged(d.parents('.panel'))})
+              .then(function(){ updateChanged(d.parents('.card'))})
             }
             dis.on('change',function(){
               processProp('disabled',!dis.prop('checked'));
@@ -214,31 +237,31 @@ $(function(){
             if (def.hint == undefined)
               d.find('button').remove();
           })
-          sec.find('.panel-title span.badge:eq(0)').text(cnt);
+          sec.find('.card-header span.badge:eq(0)').text(cnt);
           updateChanged(sec);
           sec.find('[type=checkbox]').bootstrapToggle()
-          with(sec.find('.panel-heading button')){
+          with(sec.find('.card-header button')){
             eq(1).on('click',function(){sec.find('.form-group').not('.bg-info').hide()})
             eq(0).on('click',function(){sec.find('.form-group').show()})
           }
         })
       })
       $('.config-files li:eq(0) a').eq(0).trigger('click');
-    })
-  {
+    });
+  (function(){
     var m=$('#mct-tags-modal');
     var a=$('#mct-alert');
     var t=m.find('table tbody');
     m.find('button.btn-primary').on('click',function(ev){
-      var row = t.find('.success');
+      var row = t.find('.table-success');
       if(row.length){
         var tag=row.find('td').eq(1).text().split(',');
         cmdReload($.ajax('/checkout/'+tag[0]),m);
       }
     });
     m.find('table tbody').on('click',function(ev){
-      $(this).find('tr').removeClass('success');
-      $(ev.target).parents('tr').addClass('success')
+      $(this).find('tr').removeClass('table-success');
+      $(ev.target).parents('tr').addClass('table-success')
     });
     $('.mct-tags').on('click',function(){
       $.ajax('/tags').then(function(data){
@@ -250,8 +273,8 @@ $(function(){
         m.modal();
       })
     })
-  }
-  {
+  })();
+  (function(){
     var r=$('#mct-reset-modal');
     var p=r.find('p');
     $('.mct-reset').on('click',function(){
@@ -266,7 +289,25 @@ $(function(){
     r.find('button.btn-primary').on('click',function(ev){
         cmdReload($.ajax('/checkout-force'),r);
     })
-  }
+  })();
+  (function(){
+    var r=$('#mct-pio-modal');
+    var p=r.find('p');
+    var proc={}
+    proc.init=function(){ p.empty(); r.modal();}
+    proc.log=function(text){ p.append(text); }
+    $('.mct-pio-compile, .mct-pio-flash, .mct-port')
+    .toggleClass('disabled',!config.pio)
+    .attr(config.pio?'title':'null','')
+    .eq(0).on('click',stream_cmd('/pio',proc)).end()
+    .eq(1).on('click',stream_cmd('/pio-flash',proc)).end()
+    var m=$('.mct-port .dropdown-menu');
+  //  m.empty();
+    config.pio&&
+    config.pio.map(function(i){
+      m.append($('<a class="dropdown-item" href="#"></a>').text(i.port))
+    });
+  })();
     $('.mct-issue').on('click',function(){
       defs.then(function(data){
         var text='';
