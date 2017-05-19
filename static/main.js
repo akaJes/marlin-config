@@ -8,7 +8,7 @@ function loadHint(name){
   })
 }
 function saveProp(cmd){
-var state=$('.mct-header .mct-status')
+var state=$('.mct-status')
   state.text('saving...').fadeIn().css({color:'black'});
   return $.post(cmd)
   .then(function(a){ state.text('saved').fadeOut(1000); return a})
@@ -341,7 +341,7 @@ $(function(){
         window.open(encodeURI('https://github.com/MarlinFirmware/Marlin/issues/new?title=&body='+text).replace(/\#/g,'%23'))
       })
     })
-    var state=$('.mct-header input')
+    var state=$('.mct-changed input')
     .on('change',function(){
       if ($(this).prop('checked'))
         $('.form-group').not('.bg-info').hide()
