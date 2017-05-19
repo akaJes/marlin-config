@@ -1,4 +1,10 @@
-/* based on https://proto.io/freebies/onoff/ */
+/*
+  based on https://proto.io/freebies/onoff/
+  auto resize
+  custom texts
+
+  TODO: wrap with  $(document).on('DOMNodeInserted', 'input', function () { });
+*/
 .onoffswitch {
     position: relative;
     -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;

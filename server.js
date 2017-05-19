@@ -1,5 +1,5 @@
 var express = require('express');
-var path= require('path');
+var path = require('path');
 var opn = require('opn');
 var mctool = require('./mc-tool');
 var app = express();
@@ -10,8 +10,11 @@ var fs = require('fs');
 var formidable = require('formidable');
 var pjson = require('./package.json');
 var pio = require('./pio');
+var serial = require('./console');
+var http = require('http');
 
-var port= 3000;
+var port = 3000;
+var server = http.Server(app);
 
 app.use('/static', express.static(path.resolve(__dirname, 'static')));
 app.use('/static/libs', express.static(path.resolve(__dirname, 'node_modules')));
@@ -23,6 +26,14 @@ app.get('/tags', function (req, res) {
   git.Tags().then(data=>{
     res.send(data);
   });
+});
+app.get('/port/:port', function (req, res) {
+  serial.init(server,req.params.port)
+  .then(data=>{
+    res.send(data);
+  })
+  .catch(a=>res.status(403).send(a))
+
 });
 app.get('/checkout/:branch', function (req, res) {
   git.Checkout(req.params.branch)
@@ -157,7 +168,7 @@ function main(){
       console.log('this git not look like Marlin repository');
     else
       getPort(3000).then(port => {
-        app.listen(port, function () {
+        server.listen(port, function () {
           console.log('Marlin config tooll started on port http://localhost:'+port);
         });
         opn('http://localhost:'+port+'/static');

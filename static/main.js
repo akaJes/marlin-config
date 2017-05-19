@@ -293,6 +293,38 @@ $(function(){
     })
   })();
   (function(){
+    var r=$('#mct-console-modal');
+    var p=r.find('textarea');
+    var b=r.find('.modal-body button');
+    var s=r.find('.modal-body input[type=text]');
+    var c=r.find('.modal-body input[type=checkbox]');
+    $('.mct-console').on('click',function(){
+      $.ajax('/port/tnt0').then(function(url){
+//        p.empty();
+          var socket = io.connect({path:url});
+          socket.on('connect', function(data) {
+            //socket.emit('message', 'Hello World from client');
+          });
+          socket.on('message',function(msg){
+            p.append(msg)
+          })
+          socket.on('close',function(msg){
+            p.text('\n[closed]')
+          })
+          b.unbind('click').on('click',function(){
+            socket.emit('message',s.val()+(c.prop('checked')?'\r\n':''));
+          })
+          r.modal();
+          r.unbind('hidden.bs.modal').on('hidden.bs.modal', function (e) {
+            socket.close();
+          })
+      })
+    })
+    r.find('button.btn-primary').on('click',function(ev){
+        cmdReload($.ajax('/checkout-force'),r);
+    })
+  })();
+  (function(){
     var r=$('#mct-pio-modal');
     var p=r.find('p');
     var proc={}

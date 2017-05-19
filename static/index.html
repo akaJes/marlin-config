@@ -13,6 +13,7 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="libs/tether/dist/js/tether.min.js"></script>
     <script src="libs/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="libs/socket.io-client/dist/socket.io.js"></script>
     <link href="toggle.css" rel="stylesheet">
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -48,11 +49,75 @@
   color: #222;
   border-color: #222;
 }
+.mct-hint{
+  position: fixed;
+  overflow-y:auto;
+  background: white;
+  top: 70%;
+  height: 30%;
+}
+@media (min-width: 992px){
+.mct-hint{
+  right: 0;
+  height:90vh;
+  top:initial;
+}
+}
 </style>
+<script>
+if(0)
+$(function(){
+  $.ajax('/port/tnt0').then(go);
+  function go(url){
+    var socket = io.connect({path:url});
+    socket.on('connect', function(data) {
+//        socket.emit('join', 'Hello World from client');
+        socket.emit('message', 'Hello World from client');
+    });
+    socket.on('message',function(msg){
+      console.log(msg)
+    })
+    socket.on('close',function(msg){
+      console.log('closed')
+    })
+  }
+})
+</script>
   </head>
   <body lang="en">
 <div class="container-fluid">
   <!-- Modal -->
+        <div class="modal fade" id="mct-console-modal" tabindex="-1" role="dialog" aria-labelledby="consoleModalLabel" aria-hidden="true" >
+          <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title" id="consoleModalLabel">Serial console</h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="modal-body">
+<div class="form-group">
+  <textarea class="form-control" rows="30"></textarea>
+</div>
+<div class="form-group">
+    <div class="input-group">
+      <span class="input-group-addon">
+        <input type="checkbox" aria-label="Checkbox for following text input" checked>
+      </span>
+      <input type="text" class="form-control" placeholder="Send it...">
+      <span class="input-group-btn">
+        <button class="btn btn-secondary" type="button">Send!</button>
+      </span>
+    </div>
+</div>
+              </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="modal fade" id="mct-tags-modal" tabindex="-1" role="dialog" aria-labelledby="tagsModalLabel" aria-hidden="true" >
           <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -123,15 +188,15 @@
   <a class="navbar-brand" href="#">Marlin</a>
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
-      <li class="nav-item mr-sm-2 my-auto">
+      <li class="nav-item mr-sm-2 my-auto p-1">
         Release:
         <button type="button" class="btn btn-info mct-tags" title="choose current release"> TAGS</button>
         <button type="button" class="btn btn-danger mct-reset" title="reset all changes">Reset</button>
       </li>
       <li class="nav-item" style="width:100px">
-        <span  class="mct-status col-md-2"></span>
+        <span  class="mct-status"></span>
       </li>
-      <li class="nav-item mr-sm-2 my-auto">
+      <li class="nav-item mr-sm-2 my-auto p-1">
 <div class="onoffswitch mct-changed"  title="toggle only changed">
     <label class="onoffswitch-label" >
         <input type="checkbox" class="onoffswitch-checkbox">
@@ -142,7 +207,8 @@
           <button type="button" class="btn btn-warning mct-upload" title="upload your old configuration or drag it in browser">Upload</button>
           <input type="file" name="files[]" class="mct-upload" multiple style="display:none;">
       </li>
-      <li class="nav-item mr-sm-2">
+      <li class="nav-item mr-sm-2 p-1">
+<!--
         <div class="input-group mct-port">
           <div class="input-group-btn">
             <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Port</button>
@@ -156,12 +222,14 @@
           </div>
           <input type="text" class="form-control" aria-label="Text input with dropdown button">
         </div>
+-->
       </li>
-      <li class="nav-item mr-sm-2">
+      <li class="nav-item mr-sm-2 p-1">
         <button type="button" class="btn btn-secondary mct-pio-compile disabled" data-toggle="toggle" title="PlatformIO not installed">compile</button>
         <button type="button" class="btn btn-secondary mct-pio-flash disabled" data-toggle="toggle" title="PlatformIO not installed">flash</button>
+        <button type="button" class="btn btn-secondary mct-console disabled" data-toggle="toggle" title="PlatformIO not installed">console</button>
       </li>
-      <li class="nav-item mr-sm-2">
+      <li class="nav-item mr-sm-2 p-1">
         <button type="button" class="btn btn-warning mct-issue" title="create an issue on Marlin github repository" >Issue</button>
       </li>
 
@@ -194,7 +262,7 @@
   </div>
 
   <div class="row">
-    <div class="col-md-7">
+    <div class="col-md-12 col-lg-7">
       <div class="tabbable config-files">
         <ul class="nav nav-tabs" role="tablist">
           <template class="_file_tab">
@@ -219,8 +287,8 @@
                   <div class="form-horizontal" role="form">
                   <template class="define">
                     <div class="form-group row">
-                      <label class="col-sm-5 col-form-label my-auto" data-toggle="tooltip" data-animation="false"></label><!--
-                    --><div class="col-sm-6 my-auto">
+                      <label class="col-sm-5 col-form-label my-auto" data-toggle="tooltip" data-animation="false"></label>
+                      <div class="col-sm-6 my-auto">
 <div class="onoffswitch">
     <label class="onoffswitch-label" >
         <input type="checkbox" class="onoffswitch-checkbox">
@@ -228,10 +296,10 @@
         <span class="onoffswitch-switch"></span>
     </label>
 </div>
-                          <p></p>
-                          <input type="text" class="form-control">
-                      </div><!--
-                    --><div class="col-sm-1 my-auto">
+                        <div class="mb-1"></div>
+                        <input type="text" class="form-control">
+                      </div>
+                      <div class="col-sm-1 my-auto">
                         <button type="button" class="btn btn-warning btn-sm">?</button>
                       </div>
                     </div>
@@ -246,7 +314,7 @@
         </div>
       </div>
     </div>
-    <div class="col-md-5 mct-hint" style="    position: fixed;overflow-y:auto;    right: 0;height:90vh">
+    <div class="col-lg-5 mct-hint">
     </div>
   </div>
 </div>

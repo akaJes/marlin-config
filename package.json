@@ -30,7 +30,9 @@
     "jquery": "^3.2.1",
     "marked": "^0.3.6",
     "opn": "^5.0.0",
+    "serialport": "^4.0.7",
     "simple-git": "^1.72.0",
+    "socket.io": "^2.0.1",
     "tether": "^1.4.0",
     "which": "^1.2.14"
   },
