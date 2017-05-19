@@ -23,8 +23,6 @@
   "homepage": "https://github.com/akaJes/marlin-config#readme",
   "dependencies": {
     "bootstrap": "4.0.0-alpha.6",
-    "bootstrap-toggle": "^2.2.2",
-    "css-toggle-switch": "^4.0.2",
     "express": "^4.15.2",
     "formidable": "^1.1.1",
     "get-port": "^3.1.0",

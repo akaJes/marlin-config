@@ -14,9 +14,8 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="libs/tether/dist/js/tether.min.js"></script>
     <script src="libs/bootstrap/dist/js/bootstrap.min.js"></script>
-    <link href="libs/css-toggle-switch/dist/toggle-switch.css" rel="stylesheet">
-    <link href="libs/bootstrap-toggle/css/bootstrap-toggle.min.css" rel="stylesheet">
-    <script src="libs/bootstrap-toggle/js/bootstrap-toggle.min.js"></script>
+    <link href="toggle.css" rel="stylesheet">
+
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
 <script>
@@ -32,11 +31,6 @@
     <![endif]-->
     <script src="main.js"></script>
 <style>
-.vcenter>* {
-    display: inline-block;
-    vertical-align: middle;
-    float: none;
-}
 /* layout.css Style */
 .upload-drop-zone {
   height: 200px;
@@ -147,22 +141,20 @@
       <div class="col-md-4">
       <h3>
         Release:
-        <button type="button" class="btn btn-info mct-tags">TAGS</button>
-        <button type="button" class="btn btn-danger mct-reset">Reset</button>
+        <button type="button" class="btn btn-info mct-tags" title="choose current release"> TAGS</button>
+        <button type="button" class="btn btn-danger mct-reset" title="reset all changes">Reset</button>
       </h3>
       </div>
       <div class="col-md-1"><span  class="mct-status"></span></div>
       <div class="col-md-2">
-          <input type="checkbox" data-toggle="toggle" class="form-control" data-on="Changed" data-off="All">
-<label class="switch-light switch-candy" onclick="">
-  <input type="checkbox">
-  <span class="large-2 columns float-left">
-    <span>All</span>
-    <span>Changed</span>
-    <a></a>
-  </span>
-</label>
-          <button type="button" class="btn btn-warning mct-upload">Upload</button>
+<div class="onoffswitch"  title="toggle only changed">
+    <label class="onoffswitch-label" >
+        <input type="checkbox" class="onoffswitch-checkbox">
+        <span class="onoffswitch-inner" data-content-on="Changed" data-content-off="All"></span>
+        <span class="onoffswitch-switch"></span>
+    </label>
+</div>
+          <button type="button" class="btn btn-warning mct-upload" title="upload your old configuration or drag it in browser">Upload</button>
           <input type="file" name="files[]" class="mct-upload" multiple style="opacity:0;">
       </div>
       <div class="col-md-2">
@@ -185,7 +177,7 @@
         <button type="button" class="btn btn-secondary mct-pio-flash disabled" data-toggle="toggle" title="PlatformIO not installed">flash</button>
       </div>
       <div class="col-md-1">
-        <button type="button" class="btn btn-warning mct-issue">Issue</button>
+        <button type="button" class="btn btn-warning mct-issue" title="create an issue on Marlin github repository" >Issue</button>
       </div>
     <a target="_blank" class="mct-version" style="position:fixed;right:0;top:0"></a>
   </div>
@@ -207,18 +199,24 @@
               <template class="_section">
               <div class="card">
                 <div class="card-header">
-                    <label class="form-control-label col-sm-2 text-right" >Section:</label><strong>><span></span></strong>
-                    <button type="button" class="btn btn btn-sm float-right">All <span class="badge badge-default"></span></button>
+                    <label class="form-control-label col-sm-2 text-right" >Section:</label><strong><span></span></strong>
+                    <button type="button" class="btn btn btn-sm float-right" title="show all">All <span class="badge badge-default"></span></button>
                     <span class="float-right">&nbsp;</span>
-                    <button type="button" class="btn btn-info btn-sm float-right">Changed <span class="badge badge-default"></span></button>
+                    <button type="button" class="btn btn-info btn-sm float-right" title="show only changed">Changed <span class="badge badge-default"></span></button>
                 </div>
                 <div class="card-block">
                   <div class="form-horizontal" role="form">
                   <template class="define">
                     <div class="form-group row">
-                      <label class="col-sm-5 col-form-label my-auto" data-toggle="tooltip"></label><!--
-                    --><div class="col-sm-6">
-                          <input type="checkbox" data-toggle="toggle" class="form-control">
+                      <label class="col-sm-5 col-form-label my-auto" data-toggle="tooltip" data-animation="false"></label><!--
+                    --><div class="col-sm-6 my-auto">
+<div class="onoffswitch">
+    <label class="onoffswitch-label" >
+        <input type="checkbox" class="onoffswitch-checkbox">
+        <span class="onoffswitch-inner" data-content-on="On" data-content-off="Off"></span>
+        <span class="onoffswitch-switch"></span>
+    </label>
+</div>
                           <p></p>
                           <input type="text" class="form-control">
                       </div><!--

@@ -117,7 +117,7 @@ function upload_files(files){
 }
 function stream_cmd(command,proc){
     return function(){
-      if (!config.pio) return;
+      if (!config.pio) return proc.info();
       proc.init();
       function log_message(text){
         proc.log(text);
@@ -204,19 +204,21 @@ $(function(){
             var def=file.defs[define]
             if (def.changed)
               d.addClass('bg-info')
-            d.find('label').text(define).attr('title',def.line).tooltip();
-            var dis=d.find('input').eq(0).attr('checked',!getVal(def,'disabled'))
+            d.find('label').eq(0).text(define).attr('title',def.line).tooltip();
+            var dis=d.find('.onoffswitch')
             var dv=(def.changed&&def.changed.value||def.value);
             if (def.type=='string')
               dv=dv.slice(1,-1)
-            var val=d.find('input').eq(1).val(dv);
+            var val=d.find('input[type=text]').val(dv);
             function processProp(name,val){
               saveProp('/set/'+file.file.name+'/'+define+'/'+name+'/'+val)
               .then(function(){ applyProp(def,d,name,val)})
               .then(function(){ updateChanged(d.parents('.card'))})
             }
-            dis.on('change',function(){
-              processProp('disabled',!dis.prop('checked'));
+            dis.find('input')
+            .attr('checked',!getVal(def,'disabled'))
+            .on('change',function(){
+              processProp('disabled',!$(this).prop('checked'));
             })
             val.on('change',function(){
               var dv=$(this).val();
@@ -239,7 +241,7 @@ $(function(){
           })
           sec.find('.card-header span.badge:eq(0)').text(cnt);
           updateChanged(sec);
-          sec.find('[type=checkbox]').bootstrapToggle()
+//          sec.find('[type=checkbox]').bootstrapToggle()
           with(sec.find('.card-header button')){
             eq(1).on('click',function(){sec.find('.form-group').not('.bg-info').hide()})
             eq(0).on('click',function(){sec.find('.form-group').show()})
@@ -295,6 +297,10 @@ $(function(){
     var p=r.find('p');
     var proc={}
     proc.init=function(){ p.empty(); r.modal();}
+    proc.info=function(){
+      _add($('template._alert'))
+      .find('p').html('to install PlatformIO use guide from <strong><a target="_blank" href="http://docs.platformio.org/en/latest/installation.html">Official site</a></strong>')
+    }
     proc.log=function(text){ p.append(text); }
     $('.mct-pio-compile, .mct-pio-flash, .mct-port')
     .toggleClass('disabled',!config.pio)
