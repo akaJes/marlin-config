@@ -23,7 +23,7 @@ exports.list=name=>new Promise((done,fail)=>{
 var compile=(commands,res)=>{
   var verbose=0;
   res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-control": "no-cache" });
-  var cmd = spawn('platformio',commands);
+  var cmd = spawn('platformio',commands);//{stdio: "inherit"});
 //  var cmd = spawn('ping', ['google.com','-c 10']);
   cmd.stdout.pipe(res);
   cmd.stderr.pipe(res);
@@ -42,6 +42,7 @@ var compile=(commands,res)=>{
   cmd.on('close', (code) => {
     res.end()
   });
+  return cmd;
 }
 exports.run=compile;
 exports.main=()=>{

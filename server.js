@@ -27,13 +27,63 @@ app.get('/tags', function (req, res) {
     res.send(data);
   });
 });
-app.get('/port/:port', function (req, res) {
-  serial.init(server,req.params.port)
+var SSEports=[];
+function SSEsend(event,data){
+  SSEports.forEach(function(res){
+    res.write("event: " + event + "\n");
+    res.write("data: " + JSON.stringify(data) + "\n\n");
+  });
+}
+
+serial.changes().then(monitor=>{
+    monitor.on("created", function (f, stat) {
+      SSEsend('created',f)
+//      serial.list().then(a=>SSEsend('list',a));
+    })
+    monitor.on("deleted", function (f, stat) {
+      SSEsend('deleted',f)
+//      serial.list().then(a=>SSEsend('list',a));
+    })
+    monitor.on("opened", function (f, stat) {
+      SSEsend('opened',f)
+    })
+    monitor.on("closed", function (f, stat) {
+      SSEsend('closed',f)
+    })
+}).catch(a=>console.log(a));
+
+app.get('/ports', function (req, res,next) {
+  req.socket.setTimeout(Number.MAX_SAFE_INTEGER);
+  console.log('SSE conected');
+  res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive'
+  });
+  SSEports.push(res);
+  serial.list().then(a=>SSEsend('list',a));
+  console.log('list sent');
+  req.on('close',function(){
+    var i=SSEports.indexOf(res);
+    if (i>=0)
+      SSEports.splice(i,1);
+    console.log('SSE removed');
+  })
+});
+
+app.get('/port/:port/:speed', function (req, res) {
+  serial.init(server,req.params.port,req.params.speed)
   .then(data=>{
     res.send(data);
   })
   .catch(a=>res.status(403).send(a))
-
+});
+app.get('/port-close/:port', function (req, res) {
+  serial.close(req.params.port)
+  .then(data=>{
+    res.send(data);
+  })
+  .catch(a=>res.status(403).send(a))
 });
 app.get('/checkout/:branch', function (req, res) {
   git.Checkout(req.params.branch)
@@ -82,6 +132,27 @@ app.get('/pio', function (req, res) {
   .then(root=>{
     process.chdir(path.join(root,'Marlin'))
     pio.run(['run'],res);
+  });
+});
+app.get('/pio-flash/:port', function (req, res) {
+  var port=Buffer.from(req.params.port,'base64').toString();
+  var params=['run','-t','upload'];
+  var close=false;
+  if (port[0]=='/'){
+    params.push('--upload-port')
+    params.push(port)
+    close=true;
+  }
+  (close?serial.close(port):Promise.resolve(true))
+  .then(a=>git.root())
+  .then(root=>{
+    console.log(root);
+    process.chdir(path.join(root,'Marlin'))
+    var cmd=pio.run(params,res);
+    req.on('close',function(){
+      cmd.kill('SIGINT');
+      console.error('flash killed')
+    })
   });
 });
 app.get('/pio-flash', function (req, res) {

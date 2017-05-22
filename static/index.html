@@ -172,7 +172,9 @@ $(function(){
                   </button>
               </div>
               <div class="modal-body">
-                <p></p>
+<div class="form-group">
+  <textarea class="form-control" rows="30"></textarea>
+</div>
               </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -208,25 +210,23 @@ $(function(){
           <input type="file" name="files[]" class="mct-upload" multiple style="display:none;">
       </li>
       <li class="nav-item mr-sm-2 p-1">
-<!--
-        <div class="input-group mct-port">
-          <div class="input-group-btn">
-            <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Port</button>
-            <div class="dropdown-menu">
-              <a class="dropdown-item" href="#">Action</a>
-              <a class="dropdown-item" href="#">Another action</a>
-              <a class="dropdown-item" href="#">Something else here</a>
-              <div role="separator" class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#">Separated link</a>
-            </div>
-          </div>
-          <input type="text" class="form-control" aria-label="Text input with dropdown button">
-        </div>
--->
-      </li>
-      <li class="nav-item mr-sm-2 p-1">
         <button type="button" class="btn btn-secondary mct-pio-compile disabled" data-toggle="toggle" title="PlatformIO not installed">compile</button>
         <button type="button" class="btn btn-secondary mct-pio-flash disabled" data-toggle="toggle" title="PlatformIO not installed">flash</button>
+      </li>
+      <li class="nav-item mr-sm-2 p-1">
+      <div class="dropdown mct-ports">
+  <a class="btn btn-secondary dropdown-toggle" href="https://example.com" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Auto port
+  </a>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+    <template class="_ports">
+    <a class="dropdown-item" href="#"></a>
+    </template>
+  </div>
+</div>
+      </li>
+      <li class="nav-item mr-sm-2 p-1">
+        <button type="button" class="btn btn-secondary mct-consoles" data-toggle="toggle" title="PlatformIO not installed">consoles</button>
         <button type="button" class="btn btn-secondary mct-console disabled" data-toggle="toggle" title="PlatformIO not installed">console</button>
       </li>
       <li class="nav-item mr-sm-2 p-1">
@@ -296,7 +296,7 @@ $(function(){
         <span class="onoffswitch-switch"></span>
     </label>
 </div>
-                        <div class="mb-1"></div>
+                        <div class="mb-1 mct-splitter"></div>
                         <input type="text" class="form-control">
                       </div>
                       <div class="col-sm-1 my-auto">

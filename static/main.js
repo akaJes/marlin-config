@@ -131,7 +131,7 @@ function stream_cmd(command,proc){
           try{
             if (xhr.readyState > 2){
               var new_response = xhr.responseText.substring(xhr.previous_text.length);
-              log_message(new_response.replace(/\n/g,'<br>'));
+              log_message(new_response);//.replace(/\n/g,'<br>'));
               xhr.previous_text = xhr.responseText;
             }
           }catch (e){
@@ -140,6 +140,7 @@ function stream_cmd(command,proc){
         }
         xhr.open("GET", command, true);
         xhr.send("let's go");
+        return xhr;
       }catch (e){
         log_message("<br><b>[XHR] Exception: " + e + "</b>");
       }
@@ -226,7 +227,7 @@ $(function(){
                 dv='"'+dv+'"';
               processProp('value',dv);
             })
-            var p=d.find('.col-sm-6 p');
+            var p=d.find('.mct-splitter');
             var b=d.find('button');
             if (/_adv$/.test(file.file.name))
               b.remove();
@@ -292,6 +293,7 @@ $(function(){
         cmdReload($.ajax('/checkout-force'),r);
     })
   })();
+  $('.mct-consoles').on('click',function(){ window.open('consoles.html','_blank') });
   (function(){
     var r=$('#mct-console-modal');
     var p=r.find('textarea');
@@ -299,7 +301,7 @@ $(function(){
     var s=r.find('.modal-body input[type=text]');
     var c=r.find('.modal-body input[type=checkbox]');
     $('.mct-console').on('click',function(){
-      $.ajax('/port/tnt0').then(function(url){
+      $.ajax('/port/ttyUSB0/115200').then(function(url){
 //        p.empty();
           var socket = io.connect({path:url});
           socket.on('connect', function(data) {
@@ -308,8 +310,9 @@ $(function(){
           socket.on('message',function(msg){
             p.append(msg)
           })
-          socket.on('close',function(msg){
-            p.text('\n[closed]')
+          socket.on('disconnect',function(msg){
+            p.append('\n[closed]')
+            socket.close();
           })
           b.unbind('click').on('click',function(){
             socket.emit('message',s.val()+(c.prop('checked')?'\r\n':''));
@@ -323,28 +326,75 @@ $(function(){
     r.find('button.btn-primary').on('click',function(ev){
         cmdReload($.ajax('/checkout-force'),r);
     })
-  })();
+  }());
+(function(){
+    var ports=$('.mct-ports')
+    var title=ports.find('a.btn')
+    ports.find('.dropdown-menu').on('click',function(ev){
+      title.text($(ev.target).text());
+    })
+
+    function createPort(p){
+      _add($('template._ports'))
+      .text(p.comName)
+    }
+    function removePort(p){
+      ports.find('.dropdown-item').filter(function(i,el){ return $(el).text()==p.comName}).remove()
+      if(title.text()==p.comName)
+        title.text('Auto port');
+    }
+      var source = new EventSource("/ports");
+      source.addEventListener('list', function(event) {
+        var list= JSON.parse(event.data);
+        $('template._ports').siblings().remove();
+        list.forEach(function(p){
+          createPort(p)
+        });
+      });
+      source.addEventListener('created', function(event) {
+        var port= JSON.parse(event.data);
+        createPort(port);
+      });
+      source.addEventListener('deleted', function(event) {
+        var port= JSON.parse(event.data);
+        removePort(port);
+      });
+}());
+
   (function(){
     var r=$('#mct-pio-modal');
-    var p=r.find('p');
+    var p=r.find('textarea');
+    var b=r.find('.modal-footer button');
     var proc={}
-    proc.init=function(){ p.empty(); r.modal();}
+    proc.init=function(){ p.text(''); r.modal();}
     proc.info=function(){
       _add($('template._alert'))
-      .find('p').html('to install PlatformIO use guide from <strong><a target="_blank" href="http://docs.platformio.org/en/latest/installation.html">Official site</a></strong>')
+      .find('p').html(`to install PlatformIO use guide from 
+<strong><a target="_blank" href="http://docs.platformio.org/en/latest/installation.html">Official site</a></strong>
+<br>Linux/Mac hint:  <code>sudo pip install -U platformio</code>`)
     }
-    proc.log=function(text){ p.append(text); }
+    proc.log=function(text){ p.append(text); p.prop('scrollTop',p.prop('scrollHeight')); }
+    var cmd;
     $('.mct-pio-compile, .mct-pio-flash, .mct-port')
     .toggleClass('disabled',!config.pio)
     .attr(config.pio?'title':'null','')
-    .eq(0).on('click',stream_cmd('/pio',proc)).end()
-    .eq(1).on('click',stream_cmd('/pio-flash',proc)).end()
+    .eq(0).on('click',function(){
+        cmd=stream_cmd('/pio',proc)()
+    }).end()
+    .eq(1).on('click',function(){
+        cmd=stream_cmd('/pio-flash/'+btoa($('.mct-ports a.btn').text().trim()),proc)()
+    }).end()
+    b.on('click',function(){
+      cmd.abort();
+    })
+/*
     var m=$('.mct-port .dropdown-menu');
   //  m.empty();
     config.pio&&
     config.pio.map(function(i){
       m.append($('<a class="dropdown-item" href="#"></a>').text(i.port))
     });
+*/
   })();
     $('.mct-issue').on('click',function(){
       defs.then(function(data){
