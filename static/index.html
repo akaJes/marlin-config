@@ -85,7 +85,9 @@
 #navbar-sections.toggled{
     width:initial;
 }
-
+.form-group.disabled{
+  opacity:.5;
+}
 </style>
 <script>
 if(0)
@@ -314,7 +316,7 @@ $(function(){
                   <template class="define">
                     <div class="form-group row">
                       <label class="col-sm-5 col-form-label my-auto" data-toggle="tooltip" data-animation="false"></label>
-                      <div class="col-sm-6 my-auto">
+                      <div class="col-sm-6 my-auto" data-toggle="tooltip"  data-animation="false">
 <div class="onoffswitch">
     <label class="onoffswitch-label" >
         <input type="checkbox" class="onoffswitch-checkbox">

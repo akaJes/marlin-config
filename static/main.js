@@ -26,8 +26,8 @@ function updateChanged(sec){
 }
 function getVal(ob,name){
   if( ob.changed != undefined)
-//    if( 'changed' in ob)
-    return ob.changed[name]
+    if( name in ob.changed)
+      return ob.changed[name]
   return ob[name]
 }
 function cmdReload(cmd,modal){
@@ -146,6 +146,35 @@ function stream_cmd(command,proc){
       }
     }
 }
+function toggleDef(name,state){
+  var inp=$('[data-def='+name+']')
+  .toggleClass('disabled',!state)
+  .find('input')
+  if(state)
+    inp.removeAttr('disabled')
+  else
+    inp.attr('disabled','')
+}
+function updateConditions(name){
+  if (deps[name])
+    deps[name].forEach(function(d){
+      checkCondition(d);
+    })
+}
+function checkCondition(name){
+  function ENABLED(v){ return !getVal(opts[v],'disabled')}
+  function DISABLED(v){ return getVal(opts[v],'disabled')}
+  var res=true;
+  if (opts[name])
+  if (opts[name].condition){
+    opts[name].condition.forEach(function(c){
+      var cond=eval(c.replace(/\)/g,'")').replace(/\(/g,'("'));
+      res=res&&cond;
+    })
+    toggleDef(name,res);
+  }
+}
+var deps={},opts={};
 $(function(){
     //uploader decoration
     var dropZone=$('#mct-dragzone')
@@ -184,6 +213,19 @@ $(function(){
     var defs=$.get('/json');
     defs.then(function(data){
       data.forEach(function(file){
+        $.each(file.defs,function(name,d){
+          if (d.condition){
+//            console.log(d.condition)
+            d.condition.forEach(function(c){
+              var m=c.match(/\((\w+)\)/g)
+              if(m)
+                m.filter(i=>i!='ENABLED').forEach(function(def){
+                  def=def.replace(/\(|\)| /g,'').trim();
+                  (deps[def]=deps[def]||[]).push(name);
+                })
+            })
+          }
+        })
         if (file.type=='info'){
           $('.mct-version').attr('href',file.pkg.homepage).text(file.pkg.name+' v'+file.pkg.version)
           return;
@@ -210,7 +252,9 @@ $(function(){
           $.each(file.list[section],function(n,define){
             cnt++;
             var d=_add(sec.find('template.define'))
+            d.attr('data-def',define);
             var def=file.defs[define]
+            opts[define]=file.defs[define];
             if (def.changed)
               d.addClass('bg-info')
             d.find('label').eq(0).text(define).attr('title',def.line.trim()).tooltip(def.line.length>24&&tooltip_large);
@@ -223,6 +267,7 @@ $(function(){
               saveProp('/set/'+file.file.name+'/'+define+'/'+name+'/'+val)
               .then(function(){ applyProp(def,d,name,val)})
               .then(function(){ updateChanged(d.parents('.card'))})
+              .then(function(){ updateConditions(define)})
             }
             dis.find('input')
             .attr('checked',!getVal(def,'disabled'))
@@ -235,6 +280,10 @@ $(function(){
                 dv='"'+dv+'"';
               processProp('value',dv);
             })
+            if (def.condition){
+              var title='( '+def.condition.join(') && (')+' )';
+              d.find('.col-sm-6').attr('title',title).tooltip(tooltip_large);
+            }
             var p=d.find('.mct-splitter');
             var b=d.find('button');
             if (/_adv$/.test(file.file.name))
@@ -418,7 +467,8 @@ $(function(){
       m.append($('<a class="dropdown-item" href="#"></a>').text(i.port))
     });
 */
-  })();
+  }());
+  (function(){
     $('.mct-issue').on('click',function(){
       defs.then(function(data){
         var text='';
@@ -446,6 +496,16 @@ $(function(){
         window.open(encodeURI('https://github.com/MarlinFirmware/Marlin/issues/new?title=&body='+text).replace(/\#/g,'%23'))
       })
     })
+  }());
+  (function(){
+      defs.then(function(data){
+        data.forEach(function(file){
+          $.each(file.defs,function(name){
+            updateConditions(name);
+          })
+        })
+      })
+  }());
     var state=$('.mct-changed input')
     .on('change',function(){
       if ($(this).prop('checked'))
