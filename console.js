@@ -96,6 +96,8 @@ exports.list=()=>new Promise((done,fail)=>{
 });
 exports.changes=()=>new Promise((done,fail)=>{
   var root='/dev'
+  if(process.platform=='win32')
+    return done(monitor); //bypass port changes detection
   fs.stat(root,function(err,stats){
     if (err)
       return fail('no '+root);
@@ -104,11 +106,13 @@ exports.changes=()=>new Promise((done,fail)=>{
     else{
 //      var monitor = new EventEmitter();
       fs.watch(root, {encoding0: 'buffer'}, (eventType, filename) => {
+        if(!/^(cu\.|tty|rfcomm)/.test(filename)) return;
         var p=path.join(root,filename);
         if (eventType=='rename')
           fs.stat(p,function(err,stats){
             if(err) return monitor.emit('deleted',{comName:err.path,err:err});
-            monitor.emit('created',{comName:p,stats:stats});
+            if(!stats.isCharacterDevice()) return;
+            monitor.emit('created',{comName:p,status:'connected',stats:stats});
           })
       })
       done(monitor);

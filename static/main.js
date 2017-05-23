@@ -180,7 +180,7 @@ $(function(){
       cmdReload(upload_files(files));
     });
     //end uploader decoration
-
+    var tooltip_large={template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner large"></div></div>'};
     var defs=$.get('/json');
     defs.then(function(data){
       data.forEach(function(file){
@@ -195,9 +195,17 @@ $(function(){
         .attr('href','#'+href)
         var tab=_add($('template._file_content'))
         tab.attr('id',href)
+        if ($('template._nav').siblings().length){
+          var nav=_add($('template._nav'))
+          nav.find('a').text('-');
+        }
         $.each(file.sections,function(n,section){
           var sec=_add(tab.find('template._section'));
+          var id=(/adv/.test(file.file.name)?'adv-':'cfg-')+section
+          sec.attr('id',id)
           sec.find('.card-header span:eq(0)').text(section);
+          var nav=_add($('template._nav'))
+          nav.find('a').attr('href','#'+id).text(section);
           var cnt=0;
           $.each(file.list[section],function(n,define){
             cnt++;
@@ -205,7 +213,7 @@ $(function(){
             var def=file.defs[define]
             if (def.changed)
               d.addClass('bg-info')
-            d.find('label').eq(0).text(define).attr('title',def.line).tooltip();
+            d.find('label').eq(0).text(define).attr('title',def.line.trim()).tooltip(def.line.length>24&&tooltip_large);
             var dis=d.find('.onoffswitch')
             var dv=(def.changed&&def.changed.value||def.value);
             if (def.type=='string')
@@ -250,6 +258,21 @@ $(function(){
         })
       })
       $('.config-files li:eq(0) a').eq(0).trigger('click');
+      $('body').scrollspy({ target: '#navbar-sections' })
+/*      $(window).on('hashchange', function() {
+        $('.config-files li').eq(/adv/.test(location.hash)?1:0).find('a').trigger('click');
+      });*/
+      $('#navbar-sections').on('click',function(ev){
+        var href=$(ev.target).attr('href')
+        if (!$(href).is(':visible')){
+          $('.config-files li').eq(/adv/.test(href)?1:0).find('a').trigger('click');
+          location.hash='';
+          ev.preventDefault();
+          setTimeout(function(){location.hash=href;},500);
+        }
+      })
+      $(window).scroll($.debounce( 250, true, function(){ $('#navbar-sections').toggleClass('toggled',true);  } ) );
+      $(window).scroll($.debounce( 1250, function(){ $('#navbar-sections').toggleClass('toggled',false); } ) );
     });
   (function(){
     var m=$('#mct-tags-modal');
@@ -375,7 +398,7 @@ $(function(){
     }
     proc.log=function(text){ p.append(text); p.prop('scrollTop',p.prop('scrollHeight')); }
     var cmd;
-    $('.mct-pio-compile, .mct-pio-flash, .mct-port')
+    $('.mct-pio-compile, .mct-pio-flash, .mct-ports a')
     .toggleClass('disabled',!config.pio)
     .attr(config.pio?'title':'null','')
     .eq(0).on('click',function(){

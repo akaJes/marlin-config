@@ -50,11 +50,10 @@ function extendTokens(tokens){
   };
   var _panel={
       regex:/\{\% panel (.*) \%\}((.|\n)*)\{\% endpanel \%\}/,
-      template:`<div class="panel panel-info"><div class="panel-heading">$$1</div><div class="panel-body">$$2</div></div>`
+      template:`<div class="card card-info"><div class="card-header">$$1</div><div class="card-block">$$2</div></div>`
   }
   var _custom={
       regex:/\{\:(.*)\}/,
-      template:`<div class="panel panel-info"><div class="panel-heading">$$1</div><div class="panel-body">$$2</div></div>`
   }
   return tokens.map(t=>{
     if (t.text){
@@ -72,7 +71,7 @@ function extendTokens(tokens){
 exports.d2i=define2index;
 exports.hint=function(name){
   var find=define2index[name]
-  var banner='<link rel="stylesheet" title="Default" href="styles/default.css">';
+  var banner='<link rel="stylesheet" title="Default" href="libs/highlight.js/styles/default.css">';
   var banner2='<script src="head.min.js"></script><script>head.load("sheetrock.min.js");</script>';
   var add_banner='';
   if (find){
@@ -86,7 +85,7 @@ exports.hint=function(name){
     if(cut.filter(i=>/sheetrock\.min/.test(i.text||'')).length)
       add_banner=banner2;
     cut.links={};
-    return add_banner+marked.parser(cut);
+    return banner+add_banner+marked.parser(cut);
   }
 }
 exports.url=url;

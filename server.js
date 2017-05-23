@@ -109,15 +109,15 @@ app.get('/now/', function (req, res) {
   res.set('Content-Type', 'text/plain');
   get_cfg().then(a=>res.send(JSON.stringify(a,null,2)))
 });
-app.get('/version', function (req, res) {
+app.get('/version/:screen', function (req, res) {
   res.set('Content-Type', 'text/plain');
   if (!/\/jes/.test(process.cwd()))
     res.write(`
     ga('create', 'UA-99239389-1', 'auto');
-    ga('send', 'screenview',{ 'appName': 'marlin-conf', 'appVersion': '${pjson.version}', 'screenName': 'Home'});
+    ga('send', 'screenview',{ 'appName': 'marlin-conf', 'appVersion': '${pjson.version}', 'screenName': req.params.screen });
     `);
   pio.isPIO()
-  .then(pio.list)
+//  .then(pio.list)
 //  .then(p=>"'"+p+"'")
   .catch(()=>false)
   .then(a=>{

@@ -1,0 +1,2 @@
+create dropdowns for specific values:
+ grep -E '\:(\[|\{)' Configuration.h Configuration_adv.h

@@ -21,7 +21,7 @@
   m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
   })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 </script>
-<script src="/version"></script>
+<script src="/version/Consoles"></script>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -54,7 +54,7 @@ function createPort(p){
           }
 }
 function removePort(p){
-  $('table tr').filter(function(i,el){ return $(el).find('td').eq(0).text()==p}).remove()
+  $('table tr').filter(function(i,el){ return $(el).find('td').eq(0).text()==p.comName}).remove()
 }
 function changePort(p){
   $('table tr').filter(function(i,el){ return $(el).find('td').eq(0).text()==p.comName})

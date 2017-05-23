@@ -14,6 +14,7 @@
     <script src="libs/tether/dist/js/tether.min.js"></script>
     <script src="libs/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="libs/socket.io-client/dist/socket.io.js"></script>
+<script src="http://benalman.com/code/projects/jquery-throttle-debounce/jquery.ba-throttle-debounce.js"></script>
     <link href="toggle.css" rel="stylesheet">
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -21,7 +22,7 @@
   m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
   })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 </script>
-<script src="/version"></script>
+<script src="/version/Home"></script>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -63,6 +64,28 @@
   top:initial;
 }
 }
+.large.tooltip-inner {
+    max-width: 350px;
+    width: 350px;
+}
+.fixed-right{
+    position: fixed;
+    *top: 0;
+    right: 0;
+    *left: 0;
+    z-index: 1030;
+}
+#navbar-sections{
+    width:1px;
+    transition: width;
+}
+#navbar-sections:hover{
+    width:initial;
+}
+#navbar-sections.toggled{
+    width:initial;
+}
+
 </style>
 <script>
 if(0)
@@ -212,9 +235,7 @@ $(function(){
       <li class="nav-item mr-sm-2 p-1">
         <button type="button" class="btn btn-secondary mct-pio-compile disabled" data-toggle="toggle" title="PlatformIO not installed">compile</button>
         <button type="button" class="btn btn-secondary mct-pio-flash disabled" data-toggle="toggle" title="PlatformIO not installed">flash</button>
-      </li>
-      <li class="nav-item mr-sm-2 p-1">
-      <div class="dropdown mct-ports">
+      <div class="dropdown d-inline-block mct-ports">
   <a class="btn btn-secondary dropdown-toggle" href="https://example.com" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     Auto port
   </a>
@@ -223,11 +244,10 @@ $(function(){
     <a class="dropdown-item" href="#"></a>
     </template>
   </div>
-</div>
       </li>
       <li class="nav-item mr-sm-2 p-1">
         <button type="button" class="btn btn-secondary mct-consoles" data-toggle="toggle" title="PlatformIO not installed">consoles</button>
-        <button type="button" class="btn btn-secondary mct-console disabled" data-toggle="toggle" title="PlatformIO not installed">console</button>
+<!--        <button type="button" class="btn btn-secondary mct-console disabled" data-toggle="toggle" title="PlatformIO not installed">console</button>-->
       </li>
       <li class="nav-item mr-sm-2 p-1">
         <button type="button" class="btn btn-warning mct-issue" title="create an issue on Marlin github repository" >Issue</button>
@@ -240,7 +260,13 @@ $(function(){
 
 <div class="row" style="margin-top:4em;">
 </div>
-
+<nav id="navbar-sections" class="navbar navbar-light bg-faded fixed-right">
+  <ul class="nav nav-pills flex-column">
+    <template class="_nav">
+      <li class="nav-item"><a class="nav-link py-0 pl-0" href="#"></a></li>
+    </template>
+  </ul>
+</nav>
   <div class="upload-drop-zone" id="mct-dragzone" style="display:none">
       Just drag and drop files here
   </div>
@@ -277,7 +303,7 @@ $(function(){
             <p>
               <template class="_section">
               <div class="card">
-                <div class="card-header">
+                <div class="card-header h5">
                     <label class="form-control-label col-sm-2 text-right" >Section:</label><strong><span></span></strong>
                     <button type="button" class="btn btn btn-sm float-right" title="show all">All <span class="badge badge-default"></span></button>
                     <span class="float-right">&nbsp;</span>
