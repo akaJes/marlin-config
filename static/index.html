@@ -43,6 +43,7 @@
   color: #ccc;
   border-style: dashed;
   border-color: #ccc;
+  background:rgba(255,255,255,.8);
   line-height: 200px;
   text-align: center
 }
@@ -68,46 +69,36 @@
     max-width: 350px;
     width: 350px;
 }
-.fixed-right{
+.navbar-side:before{
+    content: "";
+    position: absolute;
+    width: 83px;
+    height: 25px;
+    top: 50%;
+    left: -54px;
+    z-index: -1;
+    background: url(text-25.png) 0 0 no-repeat;
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+}
+.navbar-side{
     position: fixed;
-    *top: 0;
     right: 0;
-    *left: 0;
     z-index: 1030;
+    transition: right 1s;
+    right:-140px;
 }
-#navbar-sections{
-    width:1px;
-    transition: width;
-}
-#navbar-sections:hover{
-    width:initial;
-}
-#navbar-sections.toggled{
-    width:initial;
+.navbar-side.toggled,
+.navbar-side:hover{
+    right:0;
 }
 .form-group.disabled{
   opacity:.5;
 }
 </style>
-<script>
-if(0)
-$(function(){
-  $.ajax('/port/tnt0').then(go);
-  function go(url){
-    var socket = io.connect({path:url});
-    socket.on('connect', function(data) {
-//        socket.emit('join', 'Hello World from client');
-        socket.emit('message', 'Hello World from client');
-    });
-    socket.on('message',function(msg){
-      console.log(msg)
-    })
-    socket.on('close',function(msg){
-      console.log('closed')
-    })
-  }
-})
-</script>
   </head>
   <body lang="en">
 <div class="container-fluid">
@@ -208,7 +199,8 @@ $(function(){
           </div>
         </div>
 <!-- main-->
-<nav class="navbar navbar-toggleable-md navbar-light bg-faded fixed-top">
+<div class="fixed-top">
+<nav class="navbar navbar-toggleable-md navbar-light bg-faded">
   <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -260,15 +252,6 @@ $(function(){
   </div>
 </nav>
 
-<div class="row" style="margin-top:4em;">
-</div>
-<nav id="navbar-sections" class="navbar navbar-light bg-faded fixed-right">
-  <ul class="nav nav-pills flex-column">
-    <template class="_nav">
-      <li class="nav-item"><a class="nav-link py-0 pl-0" href="#"></a></li>
-    </template>
-  </ul>
-</nav>
   <div class="upload-drop-zone" id="mct-dragzone" style="display:none">
       Just drag and drop files here
   </div>
@@ -288,7 +271,18 @@ $(function(){
       <span class=""></span>
     </div>
   </div>
-
+</div>
+<div class="row" style="margin-top:4em;">
+</div>
+<div class="navbar-side">
+<nav id="navbar-sections" class="navbar navbar-light bg-faded">
+  <ul class="nav nav-pills flex-column">
+    <template class="_nav">
+      <li class="nav-item"><a class="nav-link py-0 pl-0" href="#"></a></li>
+    </template>
+  </ul>
+</nav>
+</div>
   <div class="row">
     <div class="col-md-12 col-lg-7">
       <div class="tabbable config-files">

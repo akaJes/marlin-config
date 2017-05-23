@@ -320,8 +320,8 @@ $(function(){
           setTimeout(function(){location.hash=href;},500);
         }
       })
-      $(window).scroll($.debounce( 250, true, function(){ $('#navbar-sections').toggleClass('toggled',true);  } ) );
-      $(window).scroll($.debounce( 1250, function(){ $('#navbar-sections').toggleClass('toggled',false); } ) );
+      $(window).scroll($.debounce( 250, true, function(){ $('.navbar-side').toggleClass('toggled',true);  } ) );
+      $(window).scroll($.debounce( 1250, function(){ $('.navbar-side').toggleClass('toggled',false); } ) );
     });
   (function(){
     var m=$('#mct-tags-modal');
