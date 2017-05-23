@@ -1,30 +1,33 @@
 # marlin-config
 
-This is a help tool, intended for easy configuration of [Marlin firmware](https://github.com/MarlinFirmware/Marlin)
+This is a help tool, intended for easy configuration of [Marlin firmware](https://github.com/MarlinFirmware/Marlin) supported OS: Linux,Mac,Windows
 
-Features:
+# Features:
 
 * automatically clone repository from github if you don't have it
 * instant changing of Configuration*.h files
-* filter only changed options
+* filter only changed options overall and for each section
 * show help for options
 * reset configuration changes
-* switch between releases, available after reset
-* **uploading old configuration over current**
-* creating an issue on [Marlin](https://github.com/MarlinFirmware/Marlin) with your configuration
+* switch between releases (available after reset)
+* **uploading your old configuration over current**
+* **compiling and uploading firmware** via PlatformIO
+* **access to all serial ports** using console manager (Linux/Mac with auto ports changing detection)
+* quick navigate with a right sided navigation bar
+* creating an issue on [Marlin github](https://github.com/MarlinFirmware/Marlin) with your configuration
 
 in project used documentation from [MarlinDocumentation](https://github.com/MarlinFirmware/MarlinDocumentation/_configuration/configuration.md)
 
 
-# installation
+# Installation
 
 `sudo npm -g i marlin-conf`
 
-# dependencies
+# Dependencies
 
-[git](https://git-scm.com/downloads),[hode.js](https://nodejs.org/en/download/)
+[git](https://git-scm.com/downloads), [node.js](https://nodejs.org/en/download/), optional [PlatformIO](http://docs.platformio.org/en/latest/installation.html)
 
-# using
+# Using
 open terminal in an empty folder or in a folder with Marlin repository and type
 
 `mct` and confirm action

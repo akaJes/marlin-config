@@ -1,6 +1,6 @@
 {
   "name": "marlin-conf",
-  "version": "2.4.1",
+  "version": "2.4.3",
   "description": "configuration tool for Marlin project",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -8,8 +8,7 @@
   },
   "bin": {
     "mct": "bin/mct",
-    "mctd": "bin/mctd",
-    "mctp": "bin/mctp"
+    "mctd": "bin/mctd"
   },
   "repository": {
     "type": "git",

@@ -114,7 +114,7 @@ app.get('/version/:screen', function (req, res) {
   if (!/\/jes/.test(process.cwd()))
     res.write(`
     ga('create', 'UA-99239389-1', 'auto');
-    ga('send', 'screenview',{ 'appName': 'marlin-conf', 'appVersion': '${pjson.version}', 'screenName': req.params.screen });
+    ga('send', 'screenview',{ 'appName': 'marlin-conf', 'appVersion': '${pjson.version}', 'screenName': '${req.params.screen}' });
     `);
   pio.isPIO()
 //  .then(pio.list)
