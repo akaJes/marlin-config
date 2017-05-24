@@ -22,6 +22,7 @@ renderer.code = function (code, lang) {
 }
 
 marked.setOptions({ renderer: renderer });
+exports.marked=marked;
 
 var map=type=>t=>t.map((i,n)=>(i.index=n,i)).filter(i=>i.type==type)
 var define2index=tokens=>map('code')(tokens).reduce(function(p,ob){
