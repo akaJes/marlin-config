@@ -5,7 +5,7 @@ var mctool = require('./mc-tool');
 var app = express();
 var git = require('./git-tool');
 var getPort = require('get-port');
-var hints = require('./hints');
+var hints = require('./app/hints');
 var fs = require('fs');
 var formidable = require('formidable');
 var pjson = require('./package.json');
@@ -34,8 +34,8 @@ function SSEsend(event,data){
     res.write("data: " + JSON.stringify(data) + "\n\n");
   });
 }
-
-serial.changes().then(monitor=>{
+function serial_init(){
+  serial.changes().then(monitor=>{
     monitor.on("created", function (f, stat) {
       SSEsend('created',f)
 //      serial.list().then(a=>SSEsend('list',a));
@@ -50,8 +50,8 @@ serial.changes().then(monitor=>{
     monitor.on("closed", function (f, stat) {
       SSEsend('closed',f)
     })
-}).catch(a=>console.log(a));
-
+  }).catch(a=>console.log(a));
+}
 app.get('/ports', function (req, res,next) {
   req.socket.setTimeout(Number.MAX_SAFE_INTEGER);
   console.log('SSE conected');
@@ -97,7 +97,7 @@ var get_cfg=()=>{//new Promise((res,fail)=>{
   var list=['Marlin/Configuration.h','Marlin/Configuration_adv.h'].map(f=>{
     return base
       .then(p=>git.Show(p[1],f).then(file=>mctool.getJson(p[0],file,p[1])(path.join(p[0],f))))
-      .then(o=>(o.names.filter(n=>hints.d2i[n.name],1).map(n=>o.defs[n.name].hint=!0),o))
+      .then(o=>(o.names.filter(n=>hints.d2i(n.name),1).map(n=>o.defs[n.name].hint=!0),o))
 //      .then(o=>(o.names.map(n=>o.defs[n]&&(o.defs[n].hint=1)),o))
       .then(a=>(a.names=undefined,type='file',a))
 //    .then(a=>res(a))
@@ -232,6 +232,8 @@ app.post('/set/:file/:name/:prop/:value', function (req, res) {
   .catch(a=>res.status(403).send(a))
 })
 function main(){
+  serial.init();
+  hints.init();
   git.root()
   .then(root=>{
     fs.stat(path.join(root,'Marlin'),(e,a)=>{

@@ -1,12 +1,9 @@
 var fs = require('fs');
+var promisify = require('./helpers').promisify;
 var marked = require('marked');
 var hljs=require('highlight.js');
 var path= require('path');
-var docFile=path.resolve(__dirname,"views/configuration.md")
-
 var http = require('https');
-var url="https://github.com/MarlinFirmware/MarlinDocumentation/raw/master/_configuration/configuration.md";
-
 
 marked.setOptions({
   highlight: function (code) {
@@ -26,17 +23,13 @@ renderer.code = function (code, lang) {
 
 marked.setOptions({ renderer: renderer });
 
-var md=fs.statSync(docFile)&&fs.readFileSync(docFile,'utf8')||'';
-var tokens=marked.lexer(md);
-
 var map=type=>t=>t.map((i,n)=>(i.index=n,i)).filter(i=>i.type==type)
-var define2index=map('code')(tokens).reduce(function(p,ob){
+var define2index=tokens=>map('code')(tokens).reduce(function(p,ob){
   var match,reg=/#define\s+(\w+)/g;
   while((match=reg.exec(ob.text)) !=null && match.index != reg.lastIndex)
     p[match[1]]=ob.index;
   return p;
 },{})
-var headings=map('heading')(tokens).map(i=>i.index);
 
 function extendTokens(tokens){
   var _alert={
@@ -68,9 +61,22 @@ function extendTokens(tokens){
     return t;
   })
 }
-exports.d2i=define2index;
+
+var tokens,d2i,headings;
+
+exports.d2i=(name)=>d2i[name];
+
+exports.init=()=>{
+  var docFile=path.join(__dirname,'..','views','configuration.md');
+  return promisify(fs.readFile)(docFile,'utf8')
+  .then(md=>{
+    tokens=marked.lexer(md);
+    d2i=define2index(tokens);
+    headings=map('heading')(tokens).map(i=>i.index);
+  })
+}
 exports.hint=function(name){
-  var find=define2index[name]
+  var find=d2i[name]
   var banner='<link rel="stylesheet" title="Default" href="libs/highlight.js/styles/default.css">';
   var banner2='<script src="head.min.js"></script><script>head.load("sheetrock.min.js");</script>';
   var add_banner='';
@@ -88,16 +94,5 @@ exports.hint=function(name){
     return banner+add_banner+marked.parser(cut);
   }
 }
-exports.url=url;
-exports.load=load;
-function load(){
-  var file = fs.createWriteStream(docFile);
-  var request = http.get(url, function(response) {
-    if (response.statusCode==302)
-      http.get(response.headers['location'], function(response) {
-        response.pipe(file);
-      })
-    else
-      response.pipe(file);
-  });
-}
+exports.listG=()=>0
+exports.getG=id=>0

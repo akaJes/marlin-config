@@ -45,7 +45,7 @@ If you've never configured and calibrated a RepRap machine before, here are some
 - [The Essential Calibration Set](http://www.thingiverse.com/thing:5573)
 - [Calibration of your RepRap](https://sites.google.com/site/repraplogphase/calibration-of-your-reprap)
 - [XY 20 mm Calibration Box](http://www.thingiverse.com/thing:298812)
-- [G-Code reference](http://reprap.org/wiki/G-code)
+- [G-code reference](http://reprap.org/wiki/G-code)
 - [Marlin3DprinterTool](https://github.com/cabbagecreek/Marlin3DprinterTool)
 
 
@@ -186,10 +186,21 @@ Enable `SINGLENOZZLE` if you have an E3D Cyclops or any other "multi-extruder" s
 #if ENABLED(SWITCHING_EXTRUDER)
   #define SWITCHING_EXTRUDER_SERVO_NR 0
   #define SWITCHING_EXTRUDER_SERVO_ANGLES { 0, 90 } // Angles for E0, E1
-  //#define HOTEND_OFFSET_Z {0.0, 0.0}
 #endif
 ```
 A Switching Extruder is a dual extruder that uses a single stepper motor to drive two filaments, but only one at a time. The servo is used to switch the side of the extruder that will drive the filament. The E motor also reverses direction for the second filament. Set the servo sub-settings above according to your particular extruder's setup instructions.
+
+### Switching Nozzle
+
+```cpp
+//#define SWITCHING_NOZZLE
+#if ENABLED(SWITCHING_NOZZLE)
+  #define SWITCHING_NOZZLE_SERVO_NR 0
+  #define SWITCHING_NOZZLE_SERVO_ANGLES { 0, 90 } // Angles for E0, E1
+  //#define HOTEND_OFFSET_Z {0.0, 0.0}
+#endif
+```
+A Switching Nozzle is a carriage with 2 nozzles. A servo is used to move one of the nozzles up and down. The servo either lowers the active nozzle or raises the inactive one. Set the servo sub-settings above according to your particular extruder's setup instructions.
 
 ### Mixing Extruder
 
@@ -232,7 +243,7 @@ Use this option to specify the type of power supply you're using. Marlin uses th
 ```cpp
 //#define PS_DEFAULT_OFF
 ```
-Enable this if you don't want the power supply to switch on when you turn on the printer. This is for printers that have dual powersupplies. For instance some setups have a separate powersupply for the heaters. In this situation you can save power by leaving the powersupply off until called for. If you don't know what this is leave it.
+Enable this if you don't want the power supply to switch on when you turn on the printer. This is for printers that have dual power supplies. For instance some setups have a separate power supply for the heaters. In this situation you can save power by leaving the power supply off until needed. If you don't know what this is leave it.
 
 
 ![Thermometer](/assets/images/config/thermal.jpg){: .floater}
@@ -284,7 +295,7 @@ Extruders must maintain a stable temperature for `TEMP_RESIDENCY_TIME` before `M
 #define TEMP_BED_HYSTERESIS 3       // (degC) range of +/- temperatures considered "close" to the target one
 #define TEMP_BED_WINDOW 1           // (degC) Window around target to start the residency timer x degC early.
 ```
-Bed must maintain a stable temperature for `TEMP_BED_RESIDENCY_TIME` before `M109` will return success and start the print. Tune what "stable" means using `TEMP_BED_HYSTERESIS` and `TEMP_BED_WINDOW`.
+The bed must maintain a stable temperature for `TEMP_BED_RESIDENCY_TIME` before `M109` will return success and start the print. Tune what "stable" means using `TEMP_BED_HYSTERESIS` and `TEMP_BED_WINDOW`.
 
 ### Temperature Ranges
 
@@ -1197,7 +1208,7 @@ Uncomment to add the `M100` Free Memory Watcher for debugging purposes.
 ```cpp
 //#define INCH_MODE_SUPPORT
 ```
-This option adds support for the `G20` and `G21` commands, allowing G-Code to specify units in inches.
+This option adds support for the `G20` and `G21` commands, allowing G-code to specify units in inches.
 
 ### Temperature Units
 ```cpp
@@ -1396,7 +1407,7 @@ By default Marlin assumes you have a buzzer with a fixed frequency. If you have 
 //#define LCD_FEEDBACK_FREQUENCY_DURATION_MS 100
 //#define LCD_FEEDBACK_FREQUENCY_HZ 1000
 ```
-The duration and frequency for the UI feedback sound. Set these to 0 to disable audio feedback in the LCD menus. Test audio output with the G-Code `M300 S<frequency Hz> P<duration ms>`
+The duration and frequency for the UI feedback sound. Set these to 0 to disable audio feedback in the LCD menus. Test audio output with the G-code `M300 S<frequency Hz> P<duration ms>`
 
 
 ## LCD Controller

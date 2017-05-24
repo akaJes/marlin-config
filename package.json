@@ -27,6 +27,7 @@
     "get-port": "^3.1.0",
     "highlight.js": "^9.11.0",
     "jquery": "^3.2.1",
+    "js-yaml": "^3.8.4",
     "marked": "^0.3.6",
     "opn": "^5.0.0",
     "serialport": "^4.0.7",

@@ -1,14 +1,13 @@
 //modules
 var fs = require('fs');
 var path = require('path');
-var mc = require('./mc');
 var mctool = require('./mc-tool');
 var walk = require('./walk').walk;
 var pjson = require('./package.json');
 var git = require('./git-tool');
 var server = require('./server');
 var readline = require('readline');
-var hints = require('./hints');
+var github = require('./app/github');
 
 var doJson=(root)=>
 Promise.resolve(root)
@@ -38,10 +37,8 @@ Promise.resolve(root)
 .then(a=>console.log('done rm ALL .json / .not'))
 
 function main(){
-  var is={tree:1,json:1,h:1,git:0,rm:1,help:1,txt:1,conf:1,clone:1,hints:1}
+  var is={tree:1,json:1,h:1,git:0,rm:1,help:1,txt:1,conf:1,clone:1,update:1}
   .filter((v,key,o,p,i)=>(p=process.argv,i=p.indexOf(key),!v&&i>=0&&i+1<p.length&&(o[key]=p[i+1]),i>=0));
-//    var tag=git.Tag();
-//    var tags=git.Tags();
   if ( is.help )
     help()
   else
@@ -70,8 +67,10 @@ function main(){
   if ( is.conf ){
     server.main()
   }else
-  if ( is.hints ){
-    hints.load()
+  if ( is.update ){
+    console.log('Updating files from github MarlinFirmware/MarlinDocumentation...');
+    github.getConfig(1);
+    github.getGCodes(1);
   }else
   if ( is.clone ){
     git.root().then(root=>{
