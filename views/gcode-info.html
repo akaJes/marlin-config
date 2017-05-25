@@ -13,10 +13,12 @@ This document has been marked `needs-review`. The following information may be o
 <div class="row meta">
   <div class="col-lg-12">
     <p class="text-right pull-right visible-lg-block hidden-print small custom-pt25">
-      {% set authors = gcode.author | append(',' ) | append(gcode.contrib ) | replace(' ', '','g' ) | split(',') %}
+      {% set authors = gcode.author | array| append(gcode.contrib ) %}
       {% if authors %}
         {% for author in authors %}
-          <a href="https://github.com/{{ author }}" data-toggle="tooltip" data-placement="bottom" title="Visit {{ author }}'s profile on Github">{% avatar user=author size=30 %}</a>
+          <a target="_blank" href="https://github.com/{{ author }}" data-toggle="tooltip" data-placement="bottom" title="Visit {{ author }}'s profile on Github">
+            <img src="https://github.com/{{ author }}.png?size=30" height="30">
+          </a>
         {% endfor %}
       {% endif %}
     </p>
@@ -28,26 +30,26 @@ This document has been marked `needs-review`. The following information may be o
     </h1>
 
     {% if gcode.experimental %}
-      <span class="label label-warning"><span data-toggle="tooltip" data-placement="bottom" title="Experimental feature"><i class="fa fa-flask" aria-hidden="true"></i></span></span>
+      <span class="badge badge-warning"><span data-toggle="tooltip" data-placement="bottom" title="Experimental feature"><i class="fa fa-flask" aria-hidden="true">experimental</i></span></span>
     {% endif %}
 
     {% if gcode.since %}
-      <span class="label label-success"><span data-toggle="tooltip" data-placement="bottom" title="Available since"><i class="fa fa-code" aria-hidden="true"></i>
+      <span class="badge badge-success"><span data-toggle="tooltip" data-placement="bottom" title="Available since"><i class="fa fa-code" aria-hidden="true"></i>
       {{ gcode.since }}</span></span>
     {% endif %}
 
     {% if gcode.group %}
-      <span class="label label-default"><i class="fa fa-tags" aria-hidden="true"></i>
+      <span class="badge badge-default"><i class="fa fa-tags" aria-hidden="true"></i>
       {{ gcode.group }}</span>
     {% endif %}
 
     {% if gcode.brief %}
-      <span class="label label-primary"><i class="fa fa-pencil-square" aria-hidden="true"></i> {{gcode.brief}}</span>
+      <span class="badge badge-primary"><i class="fa fa-pencil-square" aria-hidden="true"></i> {{gcode.brief}}</span>
     {% endif %}
     {% if gcode.requires %}
       {% set list = gcode.requires | split(',')  %}
       {% for item in list %}
-        <span class="label label-requires"><code>{{item}}</code></span>
+        <span class="badge badge-requires"><code>{{item}}</code></span>
       {% endfor %}
     {% endif %}
   </div>
@@ -120,7 +122,7 @@ This document has been marked `needs-review`. The following information may be o
 </div>
 
 {% if gcode.parameters %}
-  {% set list = '' | split('|') %}
+  {% set list = 0|array %}
   {% for parm in gcode.parameters|array %}
     {% if parm.tag %}
       {% set list = list | push(parm ) %}
@@ -132,7 +134,7 @@ This document has been marked `needs-review`. The following information may be o
       <div class="col-lg-12">
         <div class="table-responsive">
           <p>
-            <table class="table">
+            <table class="table table-sm">
               <thead>
                 <tr>
                   <th>Argument</th>
@@ -224,7 +226,7 @@ This document has been marked `needs-review`. The following information may be o
   {% endif %}
 {% endif %}
 
-{% if ex %}
+{% if ex.length>0 %}
   <div class="row examples">
     <div class="col-lg-12">
       <h2>Example{{ plural }}</h2>

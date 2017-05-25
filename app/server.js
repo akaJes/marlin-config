@@ -111,7 +111,7 @@ app.get('/now/', function (req, res) {
 });
 app.get('/version/:screen', function (req, res) {
   res.set('Content-Type', 'text/plain');
-  if (!/\/jes/.test(process.cwd()))
+  if (1||!/\/jes/.test(process.cwd()))
     res.write(`
     ga('create', 'UA-99239389-1', 'auto');
     ga('send', 'screenview',{ 'appName': 'marlin-conf', 'appVersion': '${pjson.version}', 'screenName': '${req.params.screen}' });

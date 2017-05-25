@@ -8,6 +8,8 @@ This is a help tool, intended for easy configuration of [Marlin firmware](https:
 * instant changing of Configuration*.h files
 * filter only changed options overall and for each section
 * show help for options
+* show help for G-codes
+* show allowed options/gcodes depends your configuration
 * reset configuration changes
 * switch between releases (available after reset)
 * **uploading your old configuration over current**

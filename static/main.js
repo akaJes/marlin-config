@@ -152,7 +152,10 @@ function stream_cmd(command,proc){
     }
 }
 function toggleDef(name,state){
-  var inp=$('[data-def='+name+']')
+//  var inp=$('.form-group[data-def='+name+']')
+  //return;
+  if (!uiDefs[name]) return;
+  var inp=uiDefs[name]
   .toggleClass('disabled',!state)
   .find('input')
   if(state)
@@ -161,7 +164,8 @@ function toggleDef(name,state){
     inp.attr('disabled','')
 }
 function toggleRed(tag,name){
-  var inp=$('[data-def='+tag+'] .col-sm-5 a').each(function(i,a){
+  if (!uiDefs[tag]) return;
+  var inp=uiDefs[tag].find('.col-sm-5 a').each(function(i,a){
     if ($(a).text()==name)
       $(a).replaceWith(
         $('<span>')
@@ -178,17 +182,21 @@ function updateConditions(name){
     })
   if (depsG[name])
     depsG[name].forEach(function(gcode){
-      var en=false;
-      optsG[gcode].requires&&optsG[gcode].requires.forEach(function(def){
-        if (opts[def])
-          en=en||!getVal(opts[def],'disabled');
-      });
-      toggleDef(gcode,en);
+      checkConditionG(gcode);
     })
 }
-function checkConditionG(name,gcode){
-//  opts.name
-  toggleDef(gcode,false);
+function checkConditionG(gcode){
+  var en=false;
+  if(optsG[gcode])
+    if(optsG[gcode].requires){
+      optsG[gcode].requires.forEach(function(def){
+        if (opts[def])
+          en=en||!getVal(opts[def],'disabled');
+        else
+          en=true;
+      });
+      toggleDef(gcode,en);
+    }
 }
 function checkCondition(name){
   function ENABLED(v){ return !getVal(opts[v],'disabled')}
@@ -197,14 +205,19 @@ function checkCondition(name){
   if (opts[name])
   if (opts[name].condition){
     opts[name].condition.forEach(function(c){
-      var cond=eval(c.replace(/\)/g,'")').replace(/\(/g,'("'));
-      res=res&&cond;
+        try{
+          var cond=eval(c.replace(/\)/g,'")').replace(/\(/g,'("'));
+          res=res&&cond;
+        }catch(e){
+          //console.error(e)
+        }
     })
     toggleDef(name,res);
   }
 }
 var deps={},opts={};
 var depsG={},optsG={};
+var uiDefs={};
 $(function(){
     //uploader decoration
     var dropZone=$('#mct-dragzone')
@@ -285,50 +298,57 @@ $(function(){
           $.each(file.list[section],function(n,define){
             cnt++;
             var d=_add(sec.find('template._define'))
-            d.attr('data-def',define);
+            uiDefs[define]=d;
+//            d.attr('data-def',define);
             var def=file.defs[define]
             opts[define]=file.defs[define];
             if (def.changed)
               d.addClass('bg-info')
             d.find('label').eq(0).text(define).attr('title',def.line.trim())//.tooltip(def.line.length>24&&tooltip_large); //take 200ms
             var dis=d.find('.onoffswitch')
-            var dv=(def.changed&&def.changed.value||def.value);
-            if (def.type=='string')
+            var p=d.find('.mct-splitter');
+            var val=d.find('input[type=text]');
+            if (def.value == undefined)
+              val.remove(),p.remove();
+            else{
+              var dv=(def.changed&&def.changed.value||def.value);
+              if (def.type=='string')
               dv=dv.slice(1,-1)
-            var val=d.find('input[type=text]').val(dv);
+              val.val(dv)
+              .on('change',function(){
+                var dv=$(this).val();
+                if (def.type=='string')
+                  dv='"'+dv+'"';
+                processProp('value',dv);
+              })
+            }
             function processProp(name,val){
               saveProp('/set/'+file.file.name+'/'+define+'/'+name+'/'+val)
               .then(function(){ applyProp(def,d,name,val)})
               .then(function(){ updateChanged(d.parents('.card'))})
               .then(function(){ updateConditions(define)})
             }
-            dis.find('input')
-            .attr('checked',!getVal(def,'disabled'))
-            .on('change',function(){
-              processProp('disabled',!$(this).prop('checked'));
-            })
-            val.on('change',function(){
-              var dv=$(this).val();
-              if (def.type=='string')
-                dv='"'+dv+'"';
-              processProp('value',dv);
-            })
+            if (! def.disabled && def.value != undefined)
+              dis.remove(),p.remove();
+            else{
+              dis.find('input')
+              .attr('checked',!getVal(def,'disabled'))
+              .on('change',function(){
+                processProp('disabled',!$(this).prop('checked'));
+              })
+            }
             if (def.condition){
               var title='( '+def.condition.join(') && (')+' )';
               d.find('.col-sm-6').attr('title',title)//.tooltip(tooltip_large);
             }
-            var p=d.find('.mct-splitter');
             var b=d.find('button');
-            if (/_adv$/.test(file.file.name))
+            if ( /_adv$/.test( file.file.name ) )
               b.remove();
             else
-              b.on('click',function(){loadHint(define)})
-            if (def.value == undefined)
-              val.remove(),p.remove();
-            if (! def.disabled && def.value != undefined)
-              dis.remove(),p.remove();
-            if (def.hint == undefined)
-              d.find('button').remove();
+            if ( def.hint == undefined )
+              b.remove();
+            else
+              b.on('click',function(){ loadHint(define) })
           })
           sec.find('.card-header span.badge:eq(0)').text(cnt);
           updateChanged(sec);
@@ -339,7 +359,7 @@ $(function(){
           }
         })
       })
-      $('.config-files a').eq(1).tab('show');
+      $('.config-files .nav-tabs a').eq(1).tab('show');
       $('body').scrollspy({ target: '#navbar-sections' })
 /*      $(window).on('hashchange', function() {
         $('.config-files li').eq(/adv/.test(location.hash)?1:0).find('a').trigger('click');
@@ -347,7 +367,7 @@ $(function(){
       $('#navbar-sections').on('click',function(ev){
         var href=$(ev.target).attr('href')
         if (!$(href).is(':visible')){
-          $('.config-files a[href*=card]').eq(/adv/.test(href)?1:0).tab('show');
+          $('.config-files .nav-tabs a[href*=card]').eq(/adv/.test(href)?1:0).tab('show');
           location.hash='';
           ev.preventDefault();
           setTimeout(function(){location.hash=href;},500);
@@ -356,7 +376,7 @@ $(function(){
       $('#navbar-tabs').on('click',function(ev){
         var href=$(ev.target).attr('href')
         if (!$(href).is(':visible')){
-          $('.config-files a[href$='+href.slice(1)+']').tab('show');
+          $('.config-files .nav-tabs a[href$='+href.slice(1)+']').tab('show');
         }
       })
       $(window).scroll($.debounce( 250, true, function(){ $('.navbar-side-right').toggleClass('toggled',true);  } ) );
@@ -368,8 +388,8 @@ $(function(){
           scrollTop: ui.offset().top-100
         }, 1000);
       }
-      var def=$('[data-def='+name+']');
-      if (def.length){
+      var def=uiDefs[name];//$('[data-def='+name+']');
+      if (def){
         var pane=def.parents('.tab-pane')
         if(pane.is(':visible'))
           scroll(def);
@@ -395,7 +415,8 @@ $(function(){
         $.each(data.list[section],function(n,tag){
 //            cnt++;
           var d=_add(sec.find('template._gcode'))
-          d.attr('data-def',tag);
+          uiDefs[tag]=d;
+//          d.attr('data-def',tag);
           var gcode=optsG[tag]=data.tags[tag]; //
           d.find('label').text(gcode.title);
           d.find('.col-sm-2').text(gcode.codes.toString());
@@ -403,7 +424,7 @@ $(function(){
             .attr('title',gcode.requires)
             .css('overflow-x','hidden')
           gcode.requires&&gcode.requires.forEach(function(req,i){
-            if(1) reqs.append('<br/>')
+            if(i) reqs.append('<br/>')
             reqs.append($('<a>').attr('href','#')
               .text(req)
               .on('click',function(ev){
@@ -602,14 +623,18 @@ $(function(){
     })
   }());
   (function(){
-    gcodes.then(function(g){
+    gcodes.then(function(gcodes){
       defs.then(function(data){
         var failG=$.extend(true,{},depsG)
         data.forEach(function(file){
-          $.each(file.defs,function(name){
-            updateConditions(name);
+          $.each(file.defs,function(name,ob){
+            checkCondition(name);
+            //updateConditions(name);
             delete failG[name]
           })
+        })
+        $.each(gcodes.tags,function(name,ob){
+            checkConditionG(name);
         })
         $.each(failG,function(name,data){
           data.forEach(function(gcode){

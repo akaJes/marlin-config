@@ -101,7 +101,7 @@ var walk=require('./helpers').walk;
 swig.setTag('alert',function(){ return true;},function(){ return '';},true);
 swig.setTag('avatar',function(){ return true;},function(){ return '';});
 
-swig.setFilter('append', function (input,val) { return input+val; })
+swig.setFilter('append', function (input,val) { return  !val&&input||Array.isArray(input)&&input.concat(val)||(input+val); })
 swig.setFilter('split', function (input,val) { return input.split(val); })
 swig.setFilter('push', function (input,val) { input.push(val); return input; })
 swig.setFilter('array', function (input) { return Array.isArray(input)&&input||input&&[input]||[]; })
