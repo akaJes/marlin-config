@@ -69,21 +69,21 @@ This document has been marked `needs-review`. The following information may be o
     <h2>Usage</h2>
     <code>{{ gcode.codes[0] }}
       {% if gcode.parameters %}
-        {% set list = '' | split('|')  %}
+        {% set list = 0| array  %}
         {% for parm in gcode.parameters |array %}
           {% if parm.tag %}
             {% set list = list | push(parm ) %}
           {% endif %}
         {% endfor %}
 
-        {% if list.size > 0 %}
+        {% if list.length > 0 %}
           {% set list = list | sort('tag') %}
           {% for parm in list %}
             <span data-toggle="tooltip" data-placement="bottom" data-original-title="{{ parm.description }}">
               {% if parm.optional == true%}&#x5B;{% endif %}<!--
               -->{{ parm.tag }}<!--
-              -->{% if parm.values.size > 0 %}<!--
-                -->{% if parm.values.size == 1 %}<!--
+              -->{% if parm.values.length > 0 %}<!--
+                -->{% if parm.values.length == 1 %}<!--
                   -->{% set pv = parm.values[0] %}<!--
                   -->{% if pv.optional == true%}&#x5B;{% else %}&lt;{% endif %}<!--
                   -->{% if pv.tag %}<!--
@@ -127,7 +127,7 @@ This document has been marked `needs-review`. The following information may be o
     {% endif %}
   {% endfor %}
 
-  {% if list.size > 0 %}
+  {% if list.length > 0 %}
     <div class="row params">
       <div class="col-lg-12">
         <div class="table-responsive">
@@ -146,8 +146,8 @@ This document has been marked `needs-review`. The following information may be o
                     <td class="arg"><code>
                       {% if parm.optional == true%}&#x5B;{% endif %}<!--
                       -->{{ parm.tag }}<!--
-                      -->{% if parm.values.size > 0 %}<!--
-                        -->{% if parm.values.size == 1 %}<!--
+                      -->{% if parm.values.length > 0 %}<!--
+                        -->{% if parm.values.length == 1 %}<!--
                           -->{% set pv = parm.values[0] %}<!--
                           -->{% if pv.optional == true%}&#x5B;{% else %}&lt;{% endif %}<!--
                           -->{% if pv.tag %}<!--
@@ -178,7 +178,7 @@ This document has been marked `needs-review`. The following information may be o
                     </code></td>
                     <td>
                       {{ parm.description | markdownify |safe }}
-                      {% if parm.values.size > 0 %}
+                      {% if parm.values.length > 0 %}
                         <ul class="param-desc-list">
                           {% for pv in parm.values %}
                             {% if pv.description %}
@@ -234,8 +234,8 @@ This document has been marked `needs-review`. The following information may be o
             {{ line | markdownify|safe }}
           {% endfor %}
         {% endif %}
-        {% highlight gcode %}{% for line in example.code|array %}{{ line }}
-{% endfor %}{% endhighlight %}
+        <pre>{% filter highlight('gcode') %}{% for line in example.code|array %}{{ line }}
+{% endfor %}{% endfilter %}</pre>
         {% if example.post %}
           <div class="post">
             {% for line in example.post|array %}

@@ -1,11 +1,11 @@
 //modules
 var fs = require('fs');
 var path = require('path');
-var mctool = require('./mc-tool');
-var walk = require('./walk').walk;
+var mctool = require('./app/mc-tool');
+var walk = require('./app/helpers').walk;
 var pjson = require('./package.json');
-var git = require('./git-tool');
-var server = require('./server');
+var git = require('./app/git-tool');
+var server = require('./app/server');
 var readline = require('readline');
 var github = require('./app/github');
 

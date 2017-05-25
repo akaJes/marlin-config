@@ -95,5 +95,68 @@ exports.hint=function(name){
     return banner+add_banner+marked.parser(cut);
   }
 }
-exports.listG=()=>0
-exports.getG=id=>0
+
+var yaml = require('js-yaml');
+var swig  = require('swig-templates');
+var walk=require('./helpers').walk;
+
+swig.setTag('alert',function(){ return true;},function(){ return '';},true);
+swig.setTag('avatar',function(){ return true;},function(){ return '';});
+
+swig.setFilter('append', function (input,val) { return input+val; })
+swig.setFilter('split', function (input,val) { return input.split(val); })
+swig.setFilter('push', function (input,val) { input.push(val); return input; })
+swig.setFilter('array', function (input) { return Array.isArray(input)&&input||input&&[input]||[]; })
+swig.setFilter('highlight', function (input,val) { return hljs.highlightAuto(input,[val]).value; })
+swig.setFilter('markdownify', function (input) {
+  var tokens = marked.lexer(input);
+  return ( marked.parser(tokens) );
+})
+
+var template = swig.compileFile(path.join(__dirname,'..','views','gcode-info.html'));
+var tags={};
+
+if(0)
+console.log(`
+<style>
+.param-desc-list p {
+    display: inline;
+}
+</style>
+`);
+function getGhint(tag){
+  var banner='<link rel="stylesheet" title="Default" href="libs/highlight.js/styles/default.css">';
+  var banner2="";
+  if (tags[tag]){
+    var output = template({
+        page: {category:[]},
+        gcode: tags[tag].doc,
+    });
+    return banner+output;
+  }
+}
+function init_gcode(){
+  walk(path.join(__dirname,'..','views','gcode'))
+  .then(a=>{
+    a.forEach(f=>{
+      try {
+        yaml.safeLoadAll(fs.readFileSync(f, 'utf8'), function (doc) {
+          if (!doc)return
+          tags[doc.tag]={title:doc.title,group:doc.group,codes:doc.codes,doc:doc};
+        });
+      } catch (e) {
+        console.log(e);
+      }
+    });
+  });
+}
+
+exports.initG=init_gcode
+exports.listG=()=>{
+  var res=[],item;
+  for (var tag in tags)
+    tags.hasOwnProperty(tag) &&
+    res.push({tag:tag,title:tags[tag].title})
+  return res;
+}
+exports.getG=id=>getGhint(id);

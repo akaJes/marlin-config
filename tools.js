@@ -3,6 +3,7 @@ var SerialPort = require('serialport');
 var fs = require('fs')
 var path = require('path')
 
+if(0)
 SerialPort.list(function (err, ports) {
   ports.forEach(function(port) {
     if (!port.manufacturer) return;
@@ -30,48 +31,59 @@ var fs   = require('fs');
 var swig  = require('swig-templates');
 var hints  = require('./app/hints');
 var hljs=require('highlight.js');
+var walk=require('./app/helpers').walk;
 
 //    return hljs.highlightAuto(code).value;
 
 //http://marlinfw.org/docs/gcode/G000-G001.html
 
 swig.setTag('alert',function(){ return true;},function(){ return '';},true);
-swig.setTag('highlight',function(str, line, parser) {
-return true;
-},function(compiler, args, content, parents, options, blockName){
-//console.log(content);
-//var txt= hljs.highlightAuto(content).value;
-return compiler(content, parents, options, blockName);
-},true);
 swig.setTag('avatar',function(){ return true;},function(){ return '';});
 
 swig.setFilter('append', function (input,val) { return input+val; })
 swig.setFilter('split', function (input,val) { return input.split(val); })
 swig.setFilter('push', function (input,val) { input.push(val); return input; })
-swig.setFilter('array', function (input) { return Array.isArray(input)&&input||[input]; })
-
+swig.setFilter('array', function (input) { return Array.isArray(input)&&input||input&&[input]||[]; })
+swig.setFilter('highlight', function (input,val) { return hljs.highlightAuto(input,[val]).value; })
 swig.setFilter('markdownify', function (input) {
-var tokens = hints.marked.lexer(input);
-//console.log( hints.marked.parser(tokens))
-return ( hints.marked.parser(tokens) );
+  var tokens = hints.marked.lexer(input);
+  return ( hints.marked.parser(tokens) );
 })
 
 var template = swig.compileFile(path.join(__dirname,'views','gcode-info.html'));
 
 // Get document, or throw exception on error
+console.log('<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>');
+console.log('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap-theme.css" />')
+console.log('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.css" />');
+console.log('<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.js"></script>');
+console.log('<link rel="stylesheet" title="Default" href="libs/highlight.js/styles/default.css">');
+console.log(`
+<style>
+.param-desc-list p {
+    display: inline;
+}
+</style>
+`);
+var tags={};
+walk('views/gcode/')
+.then(a=>{//console.log(a))
+//if(0)
+a.forEach(f=>{
 try {
-  yaml.safeLoadAll(fs.readFileSync('views/gcode/G000-G001.md', 'utf8'), function (doc) {
+//  yaml.safeLoadAll(fs.readFileSync('views/gcode/G000-G001.md', 'utf8'), function (doc) {
+  yaml.safeLoadAll(fs.readFileSync(f, 'utf8'), function (doc) {
 if (!doc)return
 var output = template({
     page: {category:[]},
     gcode:doc,
 });
-console.log('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap-theme.css" />')
-console.log('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.css" />');
-console.log('<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.js"></script>');
+  tags[doc.tag]={title:doc.title,group:doc.group,codes:doc.codes,doc:doc};
 //    console.log(doc);
-    console.log(output);
+//    console.log(output);
   });
 } catch (e) {
   console.log(e);
 }
+});
+});

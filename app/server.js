@@ -5,10 +5,10 @@ var mctool = require('./mc-tool');
 var app = express();
 var git = require('./git-tool');
 var getPort = require('get-port');
-var hints = require('./app/hints');
+var hints = require('./hints');
 var fs = require('fs');
 var formidable = require('formidable');
-var pjson = require('./package.json');
+var pjson = require('../package.json');
 var pio = require('./pio');
 var serial = require('./console');
 var http = require('http');
@@ -16,8 +16,8 @@ var http = require('http');
 var port = 3000;
 var server = http.Server(app);
 
-app.use('/static', express.static(path.resolve(__dirname, 'static')));
-app.use('/static/libs', express.static(path.resolve(__dirname, 'node_modules')));
+app.use('/static', express.static(path.join(__dirname,'..', 'static')));
+app.use('/static/libs', express.static(path.join(__dirname,'..', 'node_modules')));
 
 app.get('/', function (req, res) {
   res.send('Hello World!');
@@ -175,8 +175,14 @@ app.get('/checkout-force', function (req, res) {
 app.get('/hint/:name', function (req, res) {
   res.send(hints.hint(req.params.name));
 })
+app.get('/gcode/:name', function (req, res) {
+  res.send(hints.getG(req.params.name));
+})
+app.get('/gcodes', function (req, res) {
+  res.send(hints.listG().map(i=>(i.doc=undefined,i)));
+})
 app.post('/upload', function(req, res){
-  var uploadDir = path.join(__dirname, '/uploads');
+  //var uploadDir = path.join(__dirname, '/uploads');
   new Promise((done,fail)=>{
     var form = new formidable.IncomingForm();
     form.multiples = true;
@@ -232,8 +238,9 @@ app.post('/set/:file/:name/:prop/:value', function (req, res) {
   .catch(a=>res.status(403).send(a))
 })
 function main(){
-  serial.init();
+  //serial.init();
   hints.init();
+  hints.initG();
   git.root()
   .then(root=>{
     fs.stat(path.join(root,'Marlin'),(e,a)=>{
