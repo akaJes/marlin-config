@@ -14,7 +14,7 @@
     <script src="libs/tether/dist/js/tether.min.js"></script>
     <script src="libs/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="libs/socket.io-client/dist/socket.io.js"></script>
-<script src="http://benalman.com/code/projects/jquery-throttle-debounce/jquery.ba-throttle-debounce.js"></script>
+<script src="jquery.ba-throttle-debounce.js"></script>
     <link href="toggle.css" rel="stylesheet">
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -69,7 +69,7 @@
     max-width: 350px;
     width: 350px;
 }
-.navbar-side:before{
+.navbar-side-right:before{
     content: "";
     position: absolute;
     width: 83px;
@@ -84,17 +84,42 @@
     -o-transform: rotate(-90deg);
     transform: rotate(-90deg);
 }
-.navbar-side{
+.navbar-side-right{
     position: fixed;
-    right: 0;
     z-index: 1030;
     transition: right 1s;
     right:-140px;
 }
-.navbar-side.toggled,
-.navbar-side:hover{
+.navbar-side-right.toggled,
+.navbar-side-right:hover{
     right:0;
 }
+.navbar-side-left:after{
+    content: "";
+    position: absolute;
+    width: 83px;
+    height: 25px;
+    top: 50%;
+    right: -54px;
+    z-index: -1;
+    background: url(text-25.png) 0 0 no-repeat;
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+}
+.navbar-side-left{
+    position: fixed;
+    z-index: 1030;
+    transition: left 1s;
+    left:-180px;
+}
+.navbar-side-left.toggled,
+.navbar-side-left:hover{
+    left:0;
+}
+
 .form-group.disabled{
   opacity:.5;
 }
@@ -274,7 +299,7 @@
 </div>
 <div class="row" style="margin-top:4em;">
 </div>
-<div class="navbar-side">
+<div class="navbar-side-right">
 <nav id="navbar-sections" class="navbar navbar-light bg-faded">
   <ul class="nav nav-pills flex-column">
     <template class="_nav">
@@ -283,20 +308,28 @@
   </ul>
 </nav>
 </div>
+<div class="navbar-side-left">
+<nav id="navbar-tabs" class="navbar navbar-light bg-faded">
+  <ul class="nav nav-pills flex-column">
+    <template class="_tabs">
+      <li class="nav-item"><a class="nav-link py-0 pl-0" href="#g"></a></li>
+    </template>
+  </ul>
+</nav>
+</div>
   <div class="row">
     <div class="col-md-12 col-lg-7">
       <div class="tabbable config-files">
         <ul class="nav nav-tabs" role="tablist">
-          <template class="_file_tab">
+          <template class="_tab_item">
           <li class="nav-item">
             <a href="#panel-ID" class="nav-link" role="tab" data-toggle="tab"></a>
           </li>
           </template>
         </ul>
         <div class="tab-content">
-          <template class="_file_content">
+          <template class="_tab_content">
           <div class="tab-pane fade" id="panel-ID" role="tabpanel">
-            <p>
               <template class="_section">
               <div class="card">
                 <div class="card-header h5">
@@ -307,7 +340,7 @@
                 </div>
                 <div class="card-block">
                   <div class="form-horizontal" role="form">
-                  <template class="define">
+                  <template class="_define">
                     <div class="form-group row">
                       <label class="col-sm-5 col-form-label my-auto" data-toggle="tooltip" data-animation="false"></label>
                       <div class="col-sm-6 my-auto" data-toggle="tooltip"  data-animation="false">
@@ -330,7 +363,29 @@
                 </div>
               </div>
               </template>
-            </p>
+              <template class="_group">
+              <div class="card">
+                <div class="card-header h5">
+                    <label class="form-control-label col-sm-2 text-right" >Group:</label><strong><span></span></strong>
+                </div>
+                <div class="card-block">
+                  <div class="form-horizontal" role="form">
+                  <template class="_gcode">
+                    <div class="form-group row">
+                      <label class="col-sm-4 col-form-label my-auto" data-toggle="tooltip" data-animation="false"></label>
+                      <div class="col-sm-5 my-auto" data-toggle="tooltip"  data-animation="false">
+                      </div>
+                      <div class="col-sm-2 my-auto" data-toggle="tooltip"  data-animation="false">
+                      </div>
+                      <div class="col-sm-1 my-auto">
+                        <button type="button" class="btn btn-warning btn-sm">?</button>
+                      </div>
+                    </div>
+                  </template>
+                  </div>
+                </div>
+              </div>
+              </template>
           </div>
           </template>
         </div>

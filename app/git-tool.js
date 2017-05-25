@@ -23,10 +23,10 @@ var getTag=msg=>{
   return m&&m[1];
 }
 var simplyTag=o=>o.all.map(i=>({date:i.date,tag:getTag(i.message)})).filter(i=>i.tag) //m=?m[1]:
-var gitTags=()=>
+var gitTags=(verbose)=>
 new Promise((done,fail)=>git(root).log(['--tags','--simplify-by-decoration'],(e,a)=>e?fail(e):done(a))) //,'--pretty="format:%ci %d"'
 .then(simplyTag)
-.then(root=>(console.log('[gitTags]',root),root))
+.then(root=>(verbose&&console.log('[gitTags]',root),root))
 .catch(mst=>console.log('no tags'))
 
 var gitShow=(branch,file)=>

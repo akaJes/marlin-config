@@ -179,7 +179,7 @@ app.get('/gcode/:name', function (req, res) {
   res.send(hints.getG(req.params.name));
 })
 app.get('/gcodes', function (req, res) {
-  res.send(hints.listG().map(i=>(i.doc=undefined,i)));
+  res.send(hints.listG());//.map(i=>(i.doc=undefined,i)));
 })
 app.post('/upload', function(req, res){
   //var uploadDir = path.join(__dirname, '/uploads');
@@ -238,9 +238,7 @@ app.post('/set/:file/:name/:prop/:value', function (req, res) {
   .catch(a=>res.status(403).send(a))
 })
 function main(){
-  //serial.init();
-  hints.init();
-  hints.initG();
+  hints.init(1);
   git.root()
   .then(root=>{
     fs.stat(path.join(root,'Marlin'),(e,a)=>{

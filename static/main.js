@@ -7,6 +7,11 @@ function loadHint(name){
     $('.mct-hint').html(data);
   })
 }
+function loadGcode(name){
+  $.ajax('/gcode/'+name).then(function(data){
+    $('.mct-hint').html(data).prop('scrollTop',0);
+  })
+}
 function saveProp(cmd){
 var state=$('.mct-status')
   state.text('saving...').fadeIn().css({color:'black'});
@@ -75,7 +80,7 @@ $.fn.draghover = function(options) {
 function upload_files(files){
 //  return new Promise((done,fail)=>{
     if ( !files.length )
-      return fail('no files')
+      return ;//fail('no files')
     var formData = new FormData();
     for (var i = 0; i < files.length; i++) {
       var file = files[i];
@@ -155,11 +160,35 @@ function toggleDef(name,state){
   else
     inp.attr('disabled','')
 }
+function toggleRed(tag,name){
+  var inp=$('[data-def='+tag+'] .col-sm-5 a').each(function(i,a){
+    if ($(a).text()==name)
+      $(a).replaceWith(
+        $('<span>')
+        .text(name)
+        .css('color','red')
+        .attr('title','can\'t resolve or not found in configuration!!!')
+      )
+  })
+}
 function updateConditions(name){
   if (deps[name])
     deps[name].forEach(function(d){
       checkCondition(d);
     })
+  if (depsG[name])
+    depsG[name].forEach(function(gcode){
+      var en=false;
+      optsG[gcode].requires&&optsG[gcode].requires.forEach(function(def){
+        if (opts[def])
+          en=en||!getVal(opts[def],'disabled');
+      });
+      toggleDef(gcode,en);
+    })
+}
+function checkConditionG(name,gcode){
+//  opts.name
+  toggleDef(gcode,false);
 }
 function checkCondition(name){
   function ENABLED(v){ return !getVal(opts[v],'disabled')}
@@ -175,6 +204,7 @@ function checkCondition(name){
   }
 }
 var deps={},opts={};
+var depsG={},optsG={};
 $(function(){
     //uploader decoration
     var dropZone=$('#mct-dragzone')
@@ -211,9 +241,10 @@ $(function(){
     //end uploader decoration
     var tooltip_large={template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner large"></div></div>'};
     var defs=$.get('/json');
+    var gcodes=$.get('/gcodes');
     defs.then(function(data){
       data.forEach(function(file){
-        $.each(file.defs,function(name,d){
+        $.each(file.defs,function(name,d){ //TODO:put it into server
           if (d.condition){
 //            console.log(d.condition)
             d.condition.forEach(function(c){
@@ -232,10 +263,12 @@ $(function(){
         }
         $('.mct-tags').eq(0).text(file.tag)
         var href='card-'+file.file.name;
-        _add($('template._file_tab'))
+        _add($('template._tab_item'))
         .find('a').text(file.file.name)
         .attr('href','#'+href)
-        var tab=_add($('template._file_content'))
+        var nav=_add($('template._tabs'))
+        nav.find('a').attr('href','#'+href).text(file.file.name);
+        var tab=_add($('template._tab_content'))
         tab.attr('id',href)
         if ($('template._nav').siblings().length){
           var nav=_add($('template._nav'))
@@ -251,13 +284,13 @@ $(function(){
           var cnt=0;
           $.each(file.list[section],function(n,define){
             cnt++;
-            var d=_add(sec.find('template.define'))
+            var d=_add(sec.find('template._define'))
             d.attr('data-def',define);
             var def=file.defs[define]
             opts[define]=file.defs[define];
             if (def.changed)
               d.addClass('bg-info')
-            d.find('label').eq(0).text(define).attr('title',def.line.trim()).tooltip(def.line.length>24&&tooltip_large);
+            d.find('label').eq(0).text(define).attr('title',def.line.trim())//.tooltip(def.line.length>24&&tooltip_large); //take 200ms
             var dis=d.find('.onoffswitch')
             var dv=(def.changed&&def.changed.value||def.value);
             if (def.type=='string')
@@ -282,7 +315,7 @@ $(function(){
             })
             if (def.condition){
               var title='( '+def.condition.join(') && (')+' )';
-              d.find('.col-sm-6').attr('title',title).tooltip(tooltip_large);
+              d.find('.col-sm-6').attr('title',title)//.tooltip(tooltip_large);
             }
             var p=d.find('.mct-splitter');
             var b=d.find('button');
@@ -306,7 +339,7 @@ $(function(){
           }
         })
       })
-      $('.config-files li:eq(0) a').eq(0).trigger('click');
+      $('.config-files a').eq(1).tab('show');
       $('body').scrollspy({ target: '#navbar-sections' })
 /*      $(window).on('hashchange', function() {
         $('.config-files li').eq(/adv/.test(location.hash)?1:0).find('a').trigger('click');
@@ -314,14 +347,85 @@ $(function(){
       $('#navbar-sections').on('click',function(ev){
         var href=$(ev.target).attr('href')
         if (!$(href).is(':visible')){
-          $('.config-files li').eq(/adv/.test(href)?1:0).find('a').trigger('click');
+          $('.config-files a[href*=card]').eq(/adv/.test(href)?1:0).tab('show');
           location.hash='';
           ev.preventDefault();
           setTimeout(function(){location.hash=href;},500);
         }
       })
-      $(window).scroll($.debounce( 250, true, function(){ $('.navbar-side').toggleClass('toggled',true);  } ) );
-      $(window).scroll($.debounce( 1250, function(){ $('.navbar-side').toggleClass('toggled',false); } ) );
+      $('#navbar-tabs').on('click',function(ev){
+        var href=$(ev.target).attr('href')
+        if (!$(href).is(':visible')){
+          $('.config-files a[href$='+href.slice(1)+']').tab('show');
+        }
+      })
+      $(window).scroll($.debounce( 250, true, function(){ $('.navbar-side-right').toggleClass('toggled',true);  } ) );
+      $(window).scroll($.debounce( 1250, function(){ $('.navbar-side-right').toggleClass('toggled',false); } ) );
+    });
+    function resolveDef(name){
+      function scroll(ui){
+        $('html, body').animate({
+          scrollTop: ui.offset().top-100
+        }, 1000);
+      }
+      var def=$('[data-def='+name+']');
+      if (def.length){
+        var pane=def.parents('.tab-pane')
+        if(pane.is(':visible'))
+          scroll(def);
+        else{
+          $("[href$="+pane.attr('id')+"]").tab('show');
+          setTimeout(function(){scroll(def);},500);
+        }
+      }
+      return def.length
+    }
+    gcodes.then(function(data){
+      var href='gcodes';
+      _add($('template._tab_item'))
+      .find('a').text('Gcodes')
+      .attr('href','#'+href)
+        var nav=_add($('template._tabs'))
+        nav.find('a').attr('href','#'+href).text('Gcodes');
+      var tab=_add($('template._tab_content'))
+      tab.attr('id',href)
+      $.each(data.groups,function(n,section){
+        var sec=_add(tab.find('template._group'));
+        sec.find('.card-header span:eq(0)').text(section);
+        $.each(data.list[section],function(n,tag){
+//            cnt++;
+          var d=_add(sec.find('template._gcode'))
+          d.attr('data-def',tag);
+          var gcode=optsG[tag]=data.tags[tag]; //
+          d.find('label').text(gcode.title);
+          d.find('.col-sm-2').text(gcode.codes.toString());
+          var reqs=d.find('.col-sm-5')
+            .attr('title',gcode.requires)
+            .css('overflow-x','hidden')
+          gcode.requires&&gcode.requires.forEach(function(req,i){
+            if(1) reqs.append('<br/>')
+            reqs.append($('<a>').attr('href','#')
+              .text(req)
+              .on('click',function(ev){
+                if(!resolveDef(req))
+                  ev.preventDefault();
+              })
+            );
+          });
+          d.find('button').on('click',function(){ loadGcode(tag)});
+        });
+      })
+        $.each(data.tags,function(name,d){ //TODO:put it into server
+          if (d.requires){
+            if (/\(|\)/.test(d.requires)){
+              console.log('cant parse',d.requires)
+              toggleRed(name,d.requires);
+            }else
+            d.requires.forEach(function(c){
+              (depsG[c]=depsG[c]||[]).push(name.trim())
+            })
+          }
+        })
     });
   (function(){
     var m=$('#mct-tags-modal');
@@ -498,21 +602,29 @@ $(function(){
     })
   }());
   (function(){
+    gcodes.then(function(g){
       defs.then(function(data){
+        var failG=$.extend(true,{},depsG)
         data.forEach(function(file){
           $.each(file.defs,function(name){
             updateConditions(name);
+            delete failG[name]
           })
         })
+        $.each(failG,function(name,data){
+          data.forEach(function(gcode){
+            toggleRed(gcode,name)
+          });
+        })
       })
+    })
   }());
     var state=$('.mct-changed input')
     .on('change',function(){
+      var defs=$('.tab-pane[id*=card] .form-group')
       if ($(this).prop('checked'))
-        $('.form-group').not('.bg-info').hide()
+        defs.not('.bg-info').hide()
       else
-        $('.form-group').show();
-//      console.log(arguments)
+        defs.show();
     })
-
 })

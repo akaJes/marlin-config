@@ -1,6 +1,6 @@
 {
   "name": "marlin-conf",
-  "version": "2.4.4",
+  "version": "2.5.0",
   "description": "configuration tool for Marlin project",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

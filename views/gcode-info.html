@@ -234,8 +234,8 @@ This document has been marked `needs-review`. The following information may be o
             {{ line | markdownify|safe }}
           {% endfor %}
         {% endif %}
-        <pre>{% filter highlight('gcode') %}{% for line in example.code|array %}{{ line }}
-{% endfor %}{% endfilter %}</pre>
+        <pre><code class="hljs">{% filter highlight('gcode') %}{% for line in example.code|array %}{{ line }}
+{% endfor %}{% endfilter %}</code></pre>
         {% if example.post %}
           <div class="post">
             {% for line in example.post|array %}

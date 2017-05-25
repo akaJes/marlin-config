@@ -219,7 +219,7 @@ module.exports.getJson=(root,base,tag)=>file=>{
     .then(a=>(a.defs=a.names.reduce(section1,{}),a))
     .then(a=>(a.list=a.sections.reduce((p,s)=>(p[s]=a.names.filter(i=>(i.section||'common')==s).map(i=>i.name),p),{}),a))
 //    .then(a=>(a.all=a.sections.reduce((p,s)=>(p[s]=a.names.filter(i=>i.section==s).map(section),p),{}),a))
-    .then(a=>(a.txt=a.names.reduce(section_txt,{}),a)) //changed
+//??    .then(a=>(a.txt=a.names.reduce(section_txt,{}),a)) //changed
 //    .then(a=>(a.names=undefined,a))
     .then(a=>(console.log('done json: ',path.relative(root,file)),a))
     .catch(a=>console.log('fail json: ',file,a))

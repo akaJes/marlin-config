@@ -22,7 +22,6 @@ renderer.code = function (code, lang) {
 }
 
 marked.setOptions({ renderer: renderer });
-exports.marked=marked;
 
 var map=type=>t=>t.map((i,n)=>(i.index=n,i)).filter(i=>i.type==type)
 var define2index=tokens=>map('code')(tokens).reduce(function(p,ob){
@@ -65,9 +64,7 @@ function extendTokens(tokens){
 
 var tokens,d2i,headings;
 
-exports.d2i=(name)=>d2i[name];
-
-exports.init=()=>{
+function init_hints(){
   var docFile=path.join(__dirname,'..','views','configuration.md');
   return promisify(fs.readFile)(docFile,'utf8')
   .then(md=>{
@@ -76,7 +73,8 @@ exports.init=()=>{
     headings=map('heading')(tokens).map(i=>i.index);
   })
 }
-exports.hint=function(name){
+
+function hint(name){
   var find=d2i[name]
   var banner='<link rel="stylesheet" title="Default" href="libs/highlight.js/styles/default.css">';
   var banner2='<script src="head.min.js"></script><script>head.load("sheetrock.min.js");</script>';
@@ -114,49 +112,72 @@ swig.setFilter('markdownify', function (input) {
 })
 
 var template = swig.compileFile(path.join(__dirname,'..','views','gcode-info.html'));
-var tags={};
+var gcodes=[],tags={},list={groups:[],tags:{},list:{}};
 
-if(0)
-console.log(`
-<style>
-.param-desc-list p {
-    display: inline;
-}
-</style>
-`);
 function getGhint(tag){
   var banner='<link rel="stylesheet" title="Default" href="libs/highlight.js/styles/default.css">';
-  var banner2="";
+  var banner2="<style> .param-desc-list p { display: inline; } </style>";
   if (tags[tag]){
     var output = template({
         page: {category:[]},
-        gcode: tags[tag].doc,
+        gcode: tags[tag],
     });
-    return banner+output;
+    return banner+banner2+output;
+  }
+}
+function parse_requires(req){
+  if (req){
+    if (/\(|\)/.test(req)){
+      if (req=='AUTO_BED_LEVELING_(3POINT|LINEAR|BILINEAR)')
+        return ['AUTO_BED_LEVELING_3POINT','AUTO_BED_LEVELING_LINEAR','AUTO_BED_LEVELING_BILINEAR'];
+      if (req=='(MIN|MAX)_SOFTWARE_ENDSTOPS')
+        return ['MIN_SOFTWARE_ENDSTOPS','MAX_SOFTWARE_ENDSTOPS'];
+      if (req=='AUTO_BED_LEVELING_(3POINT|LINEAR|BILINEAR|UBL)|MESH_BED_LEVELING')
+        return ['AUTO_BED_LEVELING_3POINT','AUTO_BED_LEVELING_LINEAR','AUTO_BED_LEVELING_BILINEAR','AUTO_BED_LEVELING_UBL','MESH_BED_LEVELING'];
+      if (req=='AUTO_BED_LEVELING_(BILINEAR|UBL)|MESH_BED_LEVELING')
+        return ['AUTO_BED_LEVELING_BILINEAR','AUTO_BED_LEVELING_UBL','MESH_BED_LEVELING'];
+      console.log('cant parse',req)
+      return [req];
+    }else
+      return req.split(/,|\|/).map(i=>i.trim())
   }
 }
 function init_gcode(){
-  walk(path.join(__dirname,'..','views','gcode'))
-  .then(a=>{
-    a.forEach(f=>{
-      try {
-        yaml.safeLoadAll(fs.readFileSync(f, 'utf8'), function (doc) {
-          if (!doc)return
-          tags[doc.tag]={title:doc.title,group:doc.group,codes:doc.codes,doc:doc};
-        });
-      } catch (e) {
-        console.log(e);
-      }
-    });
+  return walk(path.join(__dirname,'..','views','gcode'))
+  .then(a=>Promise.all(a.map(f=>promisify(fs.readFile)(f,'utf8').then(txt=>{
+        try {
+          yaml.safeLoadAll(txt, function (doc) {
+            if (doc){
+              gcodes.push(doc);
+              tags[doc.tag]=doc;
+              list.tags[doc.tag]={title:doc.title,codes:doc.codes,group:doc.group,requires:parse_requires(doc.requires)}
+              with(list.groups)
+                indexOf(doc.group)<0&&push(doc.group);
+              (list.list[doc.group]=list.list[doc.group]||[]).push(doc.tag)
+            }
+          });
+        } catch (e) {
+          console.log(f,e);
+          throw e;
+        }
+      })
+    )
+  ))
+  .then(()=>{
+    for (var i in list.list)
+      list.list.hasOwnProperty(i)&&
+        list.list[i].sort();
   });
 }
 
-exports.initG=init_gcode
-exports.listG=()=>{
-  var res=[],item;
-  for (var tag in tags)
-    tags.hasOwnProperty(tag) &&
-    res.push({tag:tag,title:tags[tag].title})
-  return res;
-}
-exports.getG=id=>getGhint(id);
+exports.init=(verbose)=>
+  init_hints()
+  .then(a=>verbose&&console.log('loaded configuration hints'))
+  .then(init_gcode)
+  .then(a=>verbose&&console.log('loaded gcodes'))
+
+exports.marked=marked;
+exports.hint=hint;
+exports.d2i=(name)=>d2i[name];
+exports.listG=()=>list;//gcodes.map(i=>({tag:i.tag,title:i.title,codes:i.codes,group:i.group}))
+exports.getG=getGhint;
