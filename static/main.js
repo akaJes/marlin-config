@@ -182,7 +182,7 @@ function toggleDef(name,state){
   if (!uiDefs[name]) return;
   var inp=uiDefs[name]
   .toggleClass('disabled',!state)
-  .find('input')
+  .find('input,select')
   if(state)
     inp.removeAttr('disabled')
   else
@@ -318,13 +318,46 @@ $(function(){
             var dis=d.find('.onoffswitch')
             var p=d.find('.mct-splitter');
             var val=d.find('input[type=text]');
+            var sel=d.find('select');
             if (def.value == undefined)
-              val.remove(),p.remove();
+              val.remove(),p.remove(),sel.remove();
             else{
               var dv=(def.changed&&def.changed.value||def.value);
-              if (def.type=='string')
-              dv=dv.slice(1,-1)
-              val.val(dv)
+              if (def.type=='select'){ //try to recover ugly json
+                var json=def.select.trim();
+                if (json[0]=='[')
+                  json=json.replace(/'/g,'"'); // "
+                else
+                  json=json.replace(/'?([\w-]+)'?\:/g,'"$1":').replace(/\:\s*\'/g,':"').replace(/(\')\s*(,|\})/g,'"$2'); // '
+                try{
+                  def.select=JSON.parse(json);
+                }catch(e){
+                  console.log('detected ugly json:',def.select,json);
+                  def.type='numeric';
+                }
+              }
+              var inp=val;
+              if (['boolean','select'].indexOf(def.type)>=0){
+                inp=sel;
+                val.remove();
+                if (def.type=='boolean')
+                  sel.val(eval(dv)?'true':'false');
+                else{
+                  sel.empty()
+                  $.each(def.select,function(n,val){
+                    var s,v=Array.isArray(def.select)?val:n;
+                    sel.append(s=$('<option>').attr('value',v).text(val))
+                    if(String(v)==dv)
+                      s.attr('selected','')
+                  })
+                }
+              }else{
+                if (def.type=='string')
+                  dv=dv.slice(1,-1)
+                val.val(dv);
+                sel.remove();
+              }
+              inp
               .on('change',function(){
                 var dv=$(this).val();
                 if (def.type=='string')

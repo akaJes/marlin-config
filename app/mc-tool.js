@@ -193,10 +193,10 @@ var groups=[
       ['TODO: //LCDs'],
 ]
 var type=i=>i.value==undefined?'BOOL':'string'
-var type1=i=>i.value&&(/\".*\"/.test(i.value)?'string':'numeric')||undefined //"
+var type1=i=>i.value&&(i.select?'select':/\".*\"/.test(i.value)?'string':/false|true/.test(i.value)?'boolean':'numeric')||undefined //"
 var section0=i=>i.name+' '+type(i)+(i.condition.length&&(' == '+i.condition.join(' AND '))||'')
 var section=i=>({name:i.name,type:type(i),condition:i.condition.length&&i.condition||undefined,value:i.value||!i.disabled})
-var section1=(p,i)=>(p[i.name]={changed:i.changed,type:type1(i),condition:i.condition.length&&i.condition||undefined,value:i.value,disabled:i.disabled,line:i.line},p)
+var section1=(p,i)=>(p[i.name]={changed:i.changed,type:type1(i),condition:i.condition.length&&i.condition||undefined,value:i.value,disabled:i.disabled,line:i.line,select:i.select},p)
 var section_txt=(p,i)=>(i.changed&&(p[i.name]={value:i.changed.value||i.value,disabled:i.changed.disabled||i.disabled}),p)
 
 /* PROCESSORS */

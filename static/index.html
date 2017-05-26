@@ -94,34 +94,12 @@
 .navbar-side-right:hover{
     right:0;
 }
-.navbar-side-left:after{
-    content: "";
-    position: absolute;
-    width: 83px;
-    height: 25px;
-    top: 50%;
-    right: -54px;
-    z-index: -1;
-    background: url(text-25.png) 0 0 no-repeat;
-    -webkit-transform: rotate(-90deg);
-    -moz-transform: rotate(-90deg);
-    -ms-transform: rotate(-90deg);
-    -o-transform: rotate(-90deg);
-    transform: rotate(-90deg);
-}
-.navbar-side-left{
-    position: fixed;
-    z-index: 1030;
-    transition: left 1s;
-    left:-180px;
-}
-.navbar-side-left.toggled,
-.navbar-side-left:hover{
-    left:0;
-}
 
 .form-group.disabled{
   opacity:.5;
+}
+.form-group {
+    margin-bottom: .5rem;
 }
 </style>
   </head>
@@ -319,15 +297,6 @@
   </ul>
 </nav>
 </div>
-<div class="navbar-side-left">
-<nav id="navbar-tabs" class="navbar navbar-light bg-faded">
-  <ul class="nav nav-pills flex-column">
-    <template class="_tabs">
-      <li class="nav-item"><a class="nav-link py-0 pl-0" href="#g"></a></li>
-    </template>
-  </ul>
-</nav>
-</div>
   <div class="row">
     <div class="col-md-12 col-lg-7">
       <div class="tabbable config-files">
@@ -353,7 +322,7 @@
                   <div class="form-horizontal" role="form">
                   <template class="_define">
                     <div class="form-group row">
-                      <label class="col-sm-5 col-form-label my-auto" data-toggle="tooltip" data-animation="false"></label>
+                      <label class="col-sm-5 col-form-label col-form-label-sm my-auto" data-toggle="tooltip" data-animation="false"></label>
                       <div class="col-sm-6 my-auto" data-toggle="tooltip"  data-animation="false">
 <div class="onoffswitch">
     <label class="onoffswitch-label" >
@@ -363,7 +332,11 @@
     </label>
 </div>
                         <div class="mb-1 mct-splitter"></div>
-                        <input type="text" class="form-control">
+                        <input type="text" class="form-control form-control-sm">
+  <select class="custom-select   form-control-sm">
+    <option value="true">True</option>
+    <option value="false">False</option>
+  </select>
                       </div>
                       <div class="col-sm-1 my-auto">
                         <button type="button" class="btn btn-warning btn-sm">?</button>

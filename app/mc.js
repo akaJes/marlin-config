@@ -17,7 +17,7 @@ module.exports.build=build;
 module.exports.h2json=function(h){
   return new Promise(function(r){
     var lines=h.split(/\r\n?|\n/);
-    var section,condition=[];
+    var section,condition=[],select;
     var all=lines.map(function(val,i){
       var match;
       if (match=val.match(/^(\s|\/\/)*@section\s+(\w+)/))
@@ -28,9 +28,13 @@ module.exports.h2json=function(h){
         with(condition){ pop(); push(match[2]) }
       if (match=val.match(/^(\s)*#endif/))
         condition.pop()
+      if (match=val.match(/\:(\{.*\}|\[.*\])/))
+        select=match[1];
+      if (select&&val=='')
+        select=undefined;
 
       if (/^(\s|\/\/)*#define/.test(val)){
-        var base={ id:i, no:i+1, line:val, section:section,condition:condition.slice() };
+        var base={ id:i, no:i+1, line:val, section:section,condition:condition.slice(),select:select };
         var strip=val;
         //uncomment
         if (match=val.match(/(.*#define.+?)(\/\/.*)/)){

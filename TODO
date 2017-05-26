@@ -1,4 +1,4 @@
-create dropdowns for specific values:
+-create dropdowns for specific values:
  grep -E '\:(\[|\{)' Configuration.h Configuration_adv.h
 -move an alert & progress & drag zone to fixed-top container
 -rework sidebar with pretty slider
@@ -6,8 +6,9 @@ move marlin version anywhere
 think about file editor
 clenup code
 set consoles modals sizes proportional
-rework input values according to its types (boolean,lists,integer,floats?)
+-rework input values according to its types (boolean,lists,integer,floats?)
 put together grouped defines
 -implement switching/disabling groups with conditions
 Console instant change speed
 console save last commands, config speed,enter type per each
+implement in console https://github.com/bassjobsen/typeahead.js-bootstrap4-css
