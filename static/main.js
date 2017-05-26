@@ -2,6 +2,33 @@ function _add(tmpl){
     tmpl.parent().append(tmpl.prop('content').cloneNode(true))
     return tmpl.parent().children().last()
 }
+function addNewTab(name,href){
+    _add($('template._tab_item'))
+    .find('a').text(name)
+    .attr('href','#'+href)
+
+    _add($('template._nav_item'))
+    .find('a').text(name)
+    .attr('href','#'+href)
+
+    var tab=_add($('template._tab_content'))
+    tab.attr('id',href)
+    var nav=_add($('template._nav_content'))
+    nav.attr('name',href)
+
+    return {tab:tab,nav:nav};
+}
+function addNewSection(tab,id,section,sec){
+    var sec=_add(tab.tab.find('template.'+(sec||'_section')));
+    sec.attr('id',id)
+    sec.find('.card-header span:eq(0)').text(section);
+
+    var grp=_add(tab.nav.find('template._nav'))
+    grp.find('a').attr('href','#'+id).text(section);
+
+    return sec;
+}
+
 function loadHint(name){
   $.ajax('/hint/'+name).then(function(data){
     $('.mct-hint').html(data);
@@ -152,8 +179,6 @@ function stream_cmd(command,proc){
     }
 }
 function toggleDef(name,state){
-//  var inp=$('.form-group[data-def='+name+']')
-  //return;
   if (!uiDefs[name]) return;
   var inp=uiDefs[name]
   .toggleClass('disabled',!state)
@@ -276,30 +301,15 @@ $(function(){
         }
         $('.mct-tags').eq(0).text(file.tag)
         var href='card-'+file.file.name;
-        _add($('template._tab_item'))
-        .find('a').text(file.file.name)
-        .attr('href','#'+href)
-        var nav=_add($('template._tabs'))
-        nav.find('a').attr('href','#'+href).text(file.file.name);
-        var tab=_add($('template._tab_content'))
-        tab.attr('id',href)
-        if ($('template._nav').siblings().length){
-          var nav=_add($('template._nav'))
-          nav.find('a').text('-');
-        }
+        var tab=addNewTab(file.file.name,href)
         $.each(file.sections,function(n,section){
-          var sec=_add(tab.find('template._section'));
           var id=(/adv/.test(file.file.name)?'adv-':'cfg-')+section
-          sec.attr('id',id)
-          sec.find('.card-header span:eq(0)').text(section);
-          var nav=_add($('template._nav'))
-          nav.find('a').attr('href','#'+id).text(section);
           var cnt=0;
+          var sec=addNewSection(tab,id,section)
           $.each(file.list[section],function(n,define){
             cnt++;
             var d=_add(sec.find('template._define'))
             uiDefs[define]=d;
-//            d.attr('data-def',define);
             var def=file.defs[define]
             opts[define]=file.defs[define];
             if (def.changed)
@@ -352,33 +362,33 @@ $(function(){
           })
           sec.find('.card-header span.badge:eq(0)').text(cnt);
           updateChanged(sec);
-//          sec.find('[type=checkbox]').bootstrapToggle()
           with(sec.find('.card-header button')){
             eq(1).on('click',function(){sec.find('.form-group').not('.bg-info').hide()})
             eq(0).on('click',function(){sec.find('.form-group').show()})
           }
         })
       })
-      $('.config-files .nav-tabs a').eq(1).tab('show');
       $('body').scrollspy({ target: '#navbar-sections' })
-/*      $(window).on('hashchange', function() {
-        $('.config-files li').eq(/adv/.test(location.hash)?1:0).find('a').trigger('click');
-      });*/
+      $('.config-files .nav-tabs a[data-toggle="tab"]').on('show.bs.tab', function (e) { //sync tab with nav
+        var href=$(e.target).attr('href')
+          $('#navbar-sections .tab-content .tab-pane').each(function(){
+            $(this).toggleClass('active',$(this).attr('name')==href.slice(1));
+          })
+      })
+      $('.config-files .nav-tabs a').eq(1).tab('show');
       $('#navbar-sections').on('click',function(ev){
         var href=$(ev.target).attr('href')
+        $('.config-files .nav-tabs a').each(function(){ $(this).attr('href')==href&&$(this).tab('show') });
+      })
+      $(window).on('hashchange', function(ev) { //set visible tab
+        var href=location.hash;
         if (!$(href).is(':visible')){
-          $('.config-files .nav-tabs a[href*=card]').eq(/adv/.test(href)?1:0).tab('show');
-          location.hash='';
+          var id=$(href).parents('.tab-pane').attr('id');
+          $('.config-files .nav-tabs a').each(function(){ $(this).attr('href')=='#'+id&&$(this).tab('show') });
           ev.preventDefault();
-          setTimeout(function(){location.hash=href;},500);
+          setTimeout(function(){location.hash=href+' ';},500);
         }
-      })
-      $('#navbar-tabs').on('click',function(ev){
-        var href=$(ev.target).attr('href')
-        if (!$(href).is(':visible')){
-          $('.config-files .nav-tabs a[href$='+href.slice(1)+']').tab('show');
-        }
-      })
+      });
       $(window).scroll($.debounce( 250, true, function(){ $('.navbar-side-right').toggleClass('toggled',true);  } ) );
       $(window).scroll($.debounce( 1250, function(){ $('.navbar-side-right').toggleClass('toggled',false); } ) );
     });
@@ -388,7 +398,7 @@ $(function(){
           scrollTop: ui.offset().top-100
         }, 1000);
       }
-      var def=uiDefs[name];//$('[data-def='+name+']');
+      var def=uiDefs[name];
       if (def){
         var pane=def.parents('.tab-pane')
         if(pane.is(':visible'))
@@ -401,22 +411,14 @@ $(function(){
       return def.length
     }
     gcodes.then(function(data){
-      var href='gcodes';
-      _add($('template._tab_item'))
-      .find('a').text('Gcodes')
-      .attr('href','#'+href)
-        var nav=_add($('template._tabs'))
-        nav.find('a').attr('href','#'+href).text('Gcodes');
-      var tab=_add($('template._tab_content'))
-      tab.attr('id',href)
+      var href='card-gcodes';
+      var tab=addNewTab('Gcodes',href);
       $.each(data.groups,function(n,section){
-        var sec=_add(tab.find('template._group'));
-        sec.find('.card-header span:eq(0)').text(section);
+        var sec=addNewSection(tab,'gcode-'+section,section,'_group')
         $.each(data.list[section],function(n,tag){
 //            cnt++;
           var d=_add(sec.find('template._gcode'))
           uiDefs[tag]=d;
-//          d.attr('data-def',tag);
           var gcode=optsG[tag]=data.tags[tag]; //
           d.find('label').text(gcode.title);
           d.find('.col-sm-2').text(gcode.codes.toString());
@@ -584,14 +586,6 @@ $(function(){
     b.on('click',function(){
       cmd.abort();
     })
-/*
-    var m=$('.mct-port .dropdown-menu');
-  //  m.empty();
-    config.pio&&
-    config.pio.map(function(i){
-      m.append($('<a class="dropdown-item" href="#"></a>').text(i.port))
-    });
-*/
   }());
   (function(){
     $('.mct-issue').on('click',function(){

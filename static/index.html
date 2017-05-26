@@ -88,7 +88,7 @@
     position: fixed;
     z-index: 1030;
     transition: right 1s;
-    right:-140px;
+    right:-200px;
 }
 .navbar-side-right.toggled,
 .navbar-side-right:hover{
@@ -301,9 +301,20 @@
 </div>
 <div class="navbar-side-right">
 <nav id="navbar-sections" class="navbar navbar-light bg-faded">
-  <ul class="nav nav-pills flex-column">
-    <template class="_nav">
-      <li class="nav-item"><a class="nav-link py-0 pl-0" href="#"></a></li>
+  <ul class="nav nav-tabs flex-column" role="tablist">
+    <template class="_nav_item">
+      <li class="nav-item">
+        <a href="#" class="nav-link" role="tab" data-toggle="tab"></a>
+      </li>
+    </template>
+  </ul>
+  <div class="tab-content">
+    <template class="_nav_content">
+      <ul class="tab-pane nav nav-pills flex-column">
+        <template class="_nav">
+          <li class="nav-item"><a class="nav-link py-0 pl-0" href="#"></a></li>
+        </template>
+      </ul>
     </template>
   </ul>
 </nav>
@@ -323,7 +334,7 @@
         <ul class="nav nav-tabs" role="tablist">
           <template class="_tab_item">
           <li class="nav-item">
-            <a href="#panel-ID" class="nav-link" role="tab" data-toggle="tab"></a>
+            <a href="#" class="nav-link" role="tab" data-toggle="tab"></a>
           </li>
           </template>
         </ul>
