@@ -34,7 +34,9 @@ open terminal in an empty folder or in a folder with Marlin repository and type
 
 `mct` and confirm action
 
-then in browser you get interface for other features
+then in browser you get interface for other features:
+![image](https://cloud.githubusercontent.com/assets/3035266/26492336/2934c98c-421c-11e7-8aab-3ddab57525f3.png)
+
 
 In clean/unchanged configuration you can change current release version
 
