@@ -35,6 +35,7 @@
     "socket.io": "^2.0.1",
     "swig-templates": "^2.0.2",
     "tether": "^1.4.0",
+    "tty2html": "^1.0.0",
     "which": "^1.2.14"
   },
   "devDependencies-": {

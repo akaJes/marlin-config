@@ -21,6 +21,18 @@
   m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
   })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 </script>
+<style>
+.ct-console-form{
+    height: 100vh;
+    margin-bottom: -50px;
+    padding-bottom: 60px;
+    margin-top: -50px;
+    padding-top: 60px;
+}
+.ct-console-form textarea{
+  height:100%;
+}
+</style>
 <script src="/version/Consoles"></script>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -28,135 +40,12 @@
       <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-<!--    <script src="console.js"></script>-->
-
-    <script>
-function _add(tmpl){
-    tmpl.parent().append(tmpl.prop('content').cloneNode(true))
-    return tmpl.parent().children().last()
-}
-function createPort(p){
-          var port=_add($('template.port'));
-          var m=p.comName.match(/(\w+)$/)
-          with(port.find('td')){
-            eq(0).text(p.comName)
-            eq(1).text(p.status)
-            with(eq(2)){
-              var title=find('a.btn').text(p.speed)
-              find('.dropdown-menu').on('click',function(ev){
-                title.text($(ev.target).text());
-              })
-            }
-            with(eq(3).find('button')){
-              eq(0).on('click',function(){createConsole(m[1],title.text().trim(),port);})
-              eq(1).on('click',function(){ removeTab(m[1]); $.ajax('/port-close/'+m[1]) })
-            }
-          }
-}
-function removePort(p){
-  $('table tr').filter(function(i,el){ return $(el).find('td').eq(0).text()==p.comName}).remove()
-}
-function changePort(p){
-  $('table tr').filter(function(i,el){ return $(el).find('td').eq(0).text()==p.comName})
-  .find('td')
-  .eq(1).text(p.status).end()
-  .eq(2).find('a.btn').text(p.speed)
-}
-function removeTab(name){
-  $('#'+name).remove();
-  $('a[href$='+name+']').remove();
-}
-function createTab(name,url){
-    //check if exists
-    var tab;
-    if(!$('#'+name).length){
-      _add($('template.port-body'))
-      .attr('id',name);
-      var t=_add($('template.port-tab'));
-      tab=t.find('a')
-      .text(name).attr('href','#'+name)
-    }else
-      tab=$('a[href$='+name+']');
-    tab.tab('show')
-    return $('#'+name);
-}
-
-function createConsole(port,speed,row){
-   $.ajax('/port/'+port+'/'+speed).then(function(url){
-     var tab=createTab(port);
-      initConsole(tab,url);
-   }).fail(function(msg){ console.error(msg); row.find('td').eq(1).text('busy')})
-}
-function initConsole(tab,url){
-    var p=tab.find('textarea');
-    var b=tab.find('button');
-    var s=tab.find('input[type=text]');
-    var c=tab.find('input[type=checkbox]');
-      //p.empty();
-          var socket = io.connect({path:url});
-          socket.on('connect', function(data) {
-            //socket.emit('message', 'Hello World from client');
-          });
-          socket.on('message',function(msg){
-            p.append(msg)
-p.prop('scrollTop',p.prop('scrollHeight'));
-          })
-          socket.on('disconnect',function(msg){
-            p.append('\n[closed]')
-p.prop('scrollTop',p.prop('scrollHeight'));
-socket.close();
-          })
-          function send(){
-            socket.emit('message',s.val()+(c.prop('checked')?'\r\n':''));
-          }
-          b.unbind('click').on('click',function(){
-            send();
-          })
-          s.keypress(function (e) {
-            if (e.which == 13) {
-              send();
-              return false;
-            }
-          });
-    return;
-          r.modal();
-          r.unbind('hidden.bs.modal').on('hidden.bs.modal', function (e) {
-            socket.close();
-          })
-
-}
-$(function(){
-      var source = new EventSource("/ports");
-      source.addEventListener('list', function(event) {
-        var list= JSON.parse(event.data);
-        $('template.port').siblings().remove();
-        list.forEach(function(p){
-          createPort(p)
-        });
-      });
-      source.addEventListener('created', function(event) {
-        var port= JSON.parse(event.data);
-        createPort(port);
-      });
-      source.addEventListener('deleted', function(event) {
-        var port= JSON.parse(event.data);
-        removePort(port);
-      });
-      source.addEventListener('opened', function(event) {
-        var port= JSON.parse(event.data);
-        changePort(port);
-      });
-      source.addEventListener('closed', function(event) {
-        var port= JSON.parse(event.data);
-        changePort(port);
-      });
-});
-    </script>
+    <script src="consoles.js"></script>
   </head>
-  <body lang="en">
+<body lang="en">
 <ul class="nav nav-tabs" role="tablist">
   <li class="nav-item">
-    <a class="nav-link active" data-toggle="tab" href="#home" role="tab">Home</a>
+    <a class="nav-link active" data-toggle="tab" href="#home" role="tab">Ports</a>
   </li>
   <template class='port-tab'>
   <li class="nav-item">
@@ -169,7 +58,7 @@ $(function(){
 <table class="table table-hover">
   <thead>
     <tr>
-      <th>comName</th>
+      <th>Name</th>
       <th>Status</th>
       <th>Speed</th>
       <th>Action</th>
@@ -181,26 +70,7 @@ $(function(){
       <td>
       <td>
       <td><div class="dropdown">
-  <a class="btn btn-secondary dropdown-toggle" href="https://example.com" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    115200
-  </a>
-  <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-    <a class="dropdown-item" href="#">9600</a>
-    <a class="dropdown-item" href="#">14400</a>
-    <a class="dropdown-item" href="#">19200</a>
-    <a class="dropdown-item" href="#">28800</a>
-    <a class="dropdown-item" href="#">38400</a>
-    <a class="dropdown-item" href="#">56000</a>
-    <a class="dropdown-item" href="#">57600</a>
-    <a class="dropdown-item" href="#">115200</a>
-    <a class="dropdown-item" href="#">128000</a>
-    <a class="dropdown-item" href="#">153600</a>
-    <a class="dropdown-item" href="#">230400</a>
-    <a class="dropdown-item" href="#">256000</a>
-    <a class="dropdown-item" href="#">460800</a>
-    <a class="dropdown-item" href="#">921600</a>
-  </div>
-</div>
+        <select class="custom-select"></select>
       </td>
       <td><button type="button" class="btn btn-primary mr-1">Open</button><button type="button" class="btn btn-danger">Close</button>
     </tr>
@@ -210,23 +80,23 @@ $(function(){
   </div>
   <template class='port-body'>
   <div class="tab-pane" id="profile" role="tabpanel">
-<div class="form-group">
-  <textarea class="form-control" rows="30"></textarea>
-</div>
-<div class="form-group">
-    <div class="input-group">
-      <span class="input-group-addon">
-        <input type="checkbox" aria-label="Checkbox for following text input" checked>
-      </span>
-      <input type="text" class="form-control" placeholder="Send it...">
-      <span class="input-group-btn">
-        <button class="btn btn-secondary" type="button">Send!</button>
-      </span>
+    <div class="form-group ct-console-form">
+      <textarea class="form-control"></textarea>
     </div>
-</div>
-
+    <div class="form-group">
+      <div class="input-group">
+        <select class="custom-select input-group-addon" title="choose type of EOL of string">
+          <option value="">no EOL</option>
+          <option value="r">CR</option>
+          <option value="n">LF</option>
+          <option value="rn">CR LF</option>
+        </select>
+        <input type="text" class="form-control" placeholder="Send it...">
+        <span class="input-group-btn">
+          <button class="btn btn-secondary" type="button">Send!</button>
+        </span>
+      </div>
+    </div>
   </div>
   </template>
 </div>
-  </body>
-</html>

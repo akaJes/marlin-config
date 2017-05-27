@@ -19,14 +19,19 @@ exports.list=name=>new Promise((done,fail)=>{
     code?fail(code):done(JSON.parse(stdout.join()));
   });
 })
+var tty2html = require('tty2html');
+
+var env = Object.create( process.env );
+env.PLATFORMIO_FORCE_COLOR = true;
 
 var compile=(commands,res)=>{
   var verbose=0;
   res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-control": "no-cache" });
-  var cmd = spawn('platformio',commands);//{stdio: "inherit"});
-//  var cmd = spawn('ping', ['google.com','-c 10']);
-  cmd.stdout.pipe(res);
-  cmd.stderr.pipe(res);
+  var cmd = spawn('platformio',commands,  { env:env });
+  var mw=tty2html()
+  mw.pipe(res);
+  cmd.stdout.pipe(mw);
+  cmd.stderr.pipe(mw);
   if(verbose){
     cmd.stdout.on('data', (data) => {
       console.log('data',data.toString());

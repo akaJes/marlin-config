@@ -36,7 +36,7 @@ var open=(http,p,speed)=>new Promise((done,fail)=>{
           socket.emit('message',msg.toString());
         })
         port.on('close', function(err){
-          console.log('[PORT] closes soccket')
+          console.log('[PORT] closes socket')
           socket.disconnect();
         })
       });

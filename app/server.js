@@ -238,6 +238,7 @@ app.post('/set/:file/:name/:prop/:value', function (req, res) {
   .catch(a=>res.status(403).send(a))
 })
 function main(){
+  serial_init();
   hints.init(1);
   git.root()
   .then(root=>{

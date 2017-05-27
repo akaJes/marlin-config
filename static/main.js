@@ -595,7 +595,7 @@ $(function(){
 
   (function(){
     var r=$('#mct-pio-modal');
-    var p=r.find('textarea');
+    var p=r.find('.form-group pre');
     var b=r.find('.modal-footer button');
     var proc={}
     proc.init=function(){ p.text(''); r.modal();}
