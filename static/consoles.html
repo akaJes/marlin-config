@@ -8,8 +8,10 @@
     <title>Marlin configurator</title>
     <!-- Bootstrap -->
     <link href="libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="libs/jquery-ui-dist/jquery-ui.min.css" rel="stylesheet">
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="libs/jquery/dist/jquery.min.js"></script>
+    <script src="libs/jquery-ui-dist/jquery-ui.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="libs/tether/dist/js/tether.min.js"></script>
     <script src="libs/bootstrap/dist/js/bootstrap.min.js"></script>
@@ -83,15 +85,21 @@
     <div class="form-group ct-console-form">
       <textarea class="form-control"></textarea>
     </div>
-    <div class="form-group">
+    <div class="form-group px-4">
       <div class="input-group">
+        <span class="input-group-addon">
+          Scroll
+        </span>
+        <span class="input-group-addon">
+          <input type="checkbox" titlearia-label="Checkbox for following text input" checked>
+        </span>
         <select class="custom-select input-group-addon" title="choose type of EOL of string">
           <option value="">no EOL</option>
           <option value="r">CR</option>
           <option value="n">LF</option>
           <option value="rn">CR LF</option>
         </select>
-        <input type="text" class="form-control" placeholder="Send it...">
+        <input type="text" class="form-control" placeholder="Send it..." title="press Delete in dropup to remove history">
         <span class="input-group-btn">
           <button class="btn btn-secondary" type="button">Send!</button>
         </span>

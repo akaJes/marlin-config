@@ -63,13 +63,33 @@ function createConsole(port,speed,row){
   })
 }
 function initConsole(tab,url,port){
-    var p=tab.find('textarea');
     function add(msg){
-      p.append(msg)
-      p.prop('scrollTop',p.prop('scrollHeight'));
+      var log=tab.find('textarea');
+      var scroll=tab.find('input[type=checkbox]');
+      log.append(msg)
+      if (scroll.prop('checked'))
+        log.prop('scrollTop',log.prop('scrollHeight'));
     }
-    var b=tab.find('button');
     var s=tab.find('input[type=text]');
+    var aTags = store.gcodes||[];
+    s.autocomplete({
+//      minLength:1,
+      autoFocus: true,
+      position: { my: "left bottom", at: "left top", collision: "flip" },
+      source : aTags,
+    });
+    s.on('click',function(){
+      s.autocomplete('search','');
+    })
+    $('.ui-autocomplete-input').on('keydown',function(ev){
+      if (ev.keyCode==46){
+        var it=aTags.indexOf($('.ui-autocomplete .ui-state-active').text());
+        if (it>=0){
+          aTags.splice(it,1)
+          updateStore(0,'gcodes',aTags);
+        }
+      }
+    })
     var eol=tab.find('select');
     eol.val(store[port]&&store[port].eol)
     eol.on('change',function(){
@@ -81,18 +101,20 @@ function initConsole(tab,url,port){
     });
     socket.on('message',function(msg){
       add(msg);
-      p.append(msg)
-      p.prop('scrollTop',p.prop('scrollHeight'));
     })
     socket.on('disconnect',function(msg){
       add('\n[closed]')
       socket.close();
     })
     function send(){
+      if(aTags.indexOf(s.val())<0){
+        aTags.push(s.val());
+        updateStore(0,'gcodes',aTags);
+      }
       socket.emit('message',s.val()+eol.val().replace(/r/,'\r').replace(/n/,'\n'));
       s.val('');
     }
-    b.on('click',send)
+    tab.find('button').on('click',send)
     s.keypress(function (e) {
       if (e.which == 13) {
         send();
@@ -102,7 +124,10 @@ function initConsole(tab,url,port){
 }
 function updateStore(port,name,val){
   if (localStorage){
-    (store[port]=store[port]||{})[name]=val;
+    if (port)
+      (store[port]=store[port]||{})[name]=val;
+    else
+      store[name]=val;
     localStorage.setItem("consoles",JSON.stringify(store));
   }
 }

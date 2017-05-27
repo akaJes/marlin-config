@@ -12,7 +12,9 @@ put together grouped defines
 -implement switching/disabling groups with conditions
 Console
   instant change speed
-  save last commands
+  -save last commands
   -add changing a termination sequence
   -save to config speed,TS per each port
-  rebuild input string with https://github.com/bassjobsen/typeahead.js-bootstrap4-css
+  ?rebuild input string with https://github.com/bassjobsen/typeahead.js-bootstrap4-css
+select env from platformio.ini
+create boards list from boards.h
