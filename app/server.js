@@ -12,16 +12,16 @@ var pjson = require('../package.json');
 var pio = require('./pio');
 var serial = require('./console');
 var http = require('http');
+var ua = require('universal-analytics');
+var promisify = require('./helpers').promisify;
 
 var port = 3000;
 var server = http.Server(app);
+var visitor = ua('UA-99239389-1');
 
-app.use('/static', express.static(path.join(__dirname,'..', 'static')));
-app.use('/static/libs', express.static(path.join(__dirname,'..', 'node_modules')));
+app.use('/', express.static(path.join(__dirname,'..', 'static')));
+app.use('/libs', express.static(path.join(__dirname,'..', 'node_modules')));
 
-app.get('/', function (req, res) {
-  res.send('Hello World!');
-});
 app.get('/tags', function (req, res) {
   git.Tags().then(data=>{
     res.send(data);
@@ -102,20 +102,31 @@ var get_cfg=()=>{//new Promise((res,fail)=>{
       .then(a=>(a.names=undefined,type='file',a))
 //    .then(a=>res(a))
   });
-  list.push({type:'info',pkg:pjson})
+//  list.push({type:'info',pkg:pjson})
   return Promise.all(list)
 }
 app.get('/now/', function (req, res) {
   res.set('Content-Type', 'text/plain');
   get_cfg().then(a=>res.send(JSON.stringify(a,null,2)))
 });
+app.get('/version', function (req, res) {
+  res.set('Content-Type', 'image/svg+xml');
+  var badge={
+    text:       { name:"marlin-conf", version:pjson.version },
+    width:      { text:83, version:39, total:122 },
+    position:   { version:88 }
+  };
+
+  var file=path.join(__dirname,'..','views','version.html');
+  return promisify(fs.readFile)(file,'utf8')
+  .then(v=>{
+    res.end(v.replace(/{{([\w.]+)}}/g,(m,r)=>r.split('.').reduce((p,o)=>(p=p&&p[o],p),badge)));
+  });
+});
 app.get('/version/:screen', function (req, res) {
   res.set('Content-Type', 'text/plain');
-  if (1||!/\/jes/.test(process.cwd()))
-    res.write(`
-    ga('create', 'UA-99239389-1', 'auto');
-    ga('send', 'screenview',{ 'appName': 'marlin-conf', 'appVersion': '${pjson.version}', 'screenName': '${req.params.screen}' });
-    `);
+  if (!/\/jes/.test(process.cwd()))
+    visitor.screenview(req.params.screen, pjson.name,pjson.version).send()
   pio.isPIO()
 //  .then(pio.list)
 //  .then(p=>"'"+p+"'")
@@ -123,7 +134,7 @@ app.get('/version/:screen', function (req, res) {
   .then(a=>{
     //console.log(a)
     var s=JSON.stringify(a);
-    res.write(`var config={pio:${s}};`);
+    res.write(`var config={pio:${s},version:"${pjson.version}"}`);
     res.end();
   })
 });
@@ -134,8 +145,17 @@ app.get('/pio', function (req, res) {
     pio.run(['run'],res);
   });
 });
+function atob(b64string){
+  if (typeof Buffer.from === "function")
+    // Node 5.10+
+    return Buffer.from(b64string, 'base64');
+  else
+    // older Node versions
+    return new Buffer(b64string, 'base64');
+}
+
 app.get('/pio-flash/:port', function (req, res) {
-  var port=Buffer.from(req.params.port,'base64').toString();
+  var port=atob(req.params.port).toString();
   var params=['run','-t','upload'];
   var close=false;
   if (port[0]=='/'){
@@ -248,9 +268,9 @@ function main(){
     else
       getPort(3000).then(port => {
         server.listen(port, function () {
-          console.log('Marlin config tooll started on port http://localhost:'+port);
+          console.log('Marlin config tool started on port http://localhost:'+port);
         });
-        opn('http://localhost:'+port+'/static');
+        opn('http://localhost:'+port+'/');
       });
     })
   })

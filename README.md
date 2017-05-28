@@ -1,6 +1,8 @@
 # marlin-config
 
-This is a help tool, intended for easy configuration of [Marlin firmware](https://github.com/MarlinFirmware/Marlin) supported OS: Linux,Mac,Windows
+This is a help tool, intended for easy configuration of [Marlin firmware](https://github.com/MarlinFirmware/Marlin)
+
+supported OS: Linux,Mac,Windows
 
 # Features:
 
@@ -22,8 +24,11 @@ in project used documentation from [MarlinDocumentation](https://github.com/Marl
 
 
 # Installation
+[![npm version](https://badge.fury.io/js/marlin-conf.svg)](https://badge.fury.io/js/marlin-conf)
 
 `sudo npm -g i marlin-conf`
+
+some hints for [Windows-Installation](https://github.com/akaJes/marlin-config/wiki/Windows-Installation)
 
 # Dependencies
 

@@ -2,7 +2,7 @@
  grep -E '\:(\[|\{)' Configuration.h Configuration_adv.h
 -move an alert & progress & drag zone to fixed-top container
 -rework sidebar with pretty slider
-move marlin version anywhere
+-move marlin version anywhere
 think about file editor
 clenup code
 -support colors in compile/flash consoles

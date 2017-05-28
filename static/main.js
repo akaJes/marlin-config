@@ -295,10 +295,6 @@ $(function(){
             })
           }
         })
-        if (file.type=='info'){
-          $('.mct-version').attr('href',file.pkg.homepage).text(file.pkg.name+' v'+file.pkg.version)
-          return;
-        }
         $('.mct-tags').eq(0).text(file.tag)
         var href='card-'+file.file.name;
         var tab=addNewTab(file.file.name,href)
