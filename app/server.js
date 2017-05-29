@@ -35,7 +35,7 @@ function SSEsend(event,data){
   });
 }
 function serial_init(){
-  serial.changes().then(monitor=>{
+  return serial.changes().then(monitor=>{
     monitor.on("created", function (f, stat) {
       SSEsend('created',f)
 //      serial.list().then(a=>SSEsend('list',a));
@@ -134,7 +134,7 @@ app.get('/version/:screen', function (req, res) {
   .then(a=>{
     //console.log(a)
     var s=JSON.stringify(a);
-    res.write(`var config={pio:${s},version:"${pjson.version}"}`);
+    res.write(`var config={pio:${s},version:"${pjson.version}"};`);
     res.end();
   })
 });
@@ -146,7 +146,7 @@ app.get('/pio', function (req, res) {
   });
 });
 function atob(b64string){
-  if (typeof Buffer.from === "function")
+  if ( process.version<"v6.0.0" )
     // Node 5.10+
     return Buffer.from(b64string, 'base64');
   else
@@ -257,23 +257,31 @@ app.post('/set/:file/:name/:prop/:value', function (req, res) {
   .then(a=>res.send(req.params))
   .catch(a=>res.status(403).send(a))
 })
-function main(){
-  serial_init();
-  hints.init(1);
-  git.root()
-  .then(root=>{
-    fs.stat(path.join(root,'Marlin'),(e,a)=>{
-    if(!a)
-      console.log('this git not look like Marlin repository');
-    else
-      getPort(3000).then(port => {
-        server.listen(port, function () {
-          console.log('Marlin config tool started on port http://localhost:'+port);
-        });
-        opn('http://localhost:'+port+'/');
-      });
-    })
+function main(noOpn){
+  return Promise.resolve()
+  .then(serial_init)
+  .catch(a=>console.error('serial failed'))
+  .then(()=>hints.init(1))
+  .catch(a=>console.error('hints failed'))
+  .then(()=>git.root())
+  .then(root=>promisify(fs.stat)(path.join(root,'Marlin')))
+  .catch(a=>{
+    var e=('this git not look like Marlin repository');
+    console.log(e);
+    throw e;
   })
+  .then(()=>getPort(3000))
+  .then(port =>new Promise((done,fail)=>{
+      server.on('error',function(e){
+        fail(e)
+      })
+      server.listen(port, function () {
+        var url='http://localhost:'+port+'/';
+        console.log('Marlin config tool started on '+url);
+        done(url);
+      });
+  }))
+  .then(url=>(!noOpn&&opn(url),url));
 }
 module.exports.main=main;
 require.main===module && main();

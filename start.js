@@ -87,23 +87,22 @@ function main(){
     }
     function startWeb(){
       git.root()
-      .then(root=>{
+      .then(root=>new Promise((done,fail)=>{
         console.log('type: mct help if you need more information');
           if(root){
           var rl = getConsole();
           rl.question('press Enter to run web browser or ^C to exit', (answer) => {
             rl.close();
-            server.main()
+            server.main().then(done).catch(fail)
           });
         }
-      })
+      })).catch((e)=>{ console.log(e); })
     }
     function tryRun(){
       process.chdir('Marlin')
 console.log(process.cwd())
-      git.root('Marlin').then(a=>{
-        server.main();
-      });
+      git.root('Marlin')
+      .then(server.main);
     }
     git.root()
     .then(startWeb)
@@ -149,4 +148,5 @@ commands:
   `);
 }
 module.exports.main=main;
+console.log('Node',process.version);
 require.main===module && main();

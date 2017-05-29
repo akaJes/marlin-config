@@ -2,6 +2,7 @@
 var fs = require('fs');
 var path = require('path');
 var mc = require('./mc');
+var ht = require('./helpers');
 
 //common
 var inFile=name=>new Promise((done, fail) => fs.readFile( name, 'utf8', (err, data) => err ? fail( err ) : done( data ) ) )
@@ -10,17 +11,6 @@ var toJson=a=>JSON.stringify(a,null,2);
 var parseJson=a=>JSON.parse(a);
 var text2array=text=>text.split(/\r\n?|\n/);
 var array2text=(a,text)=>(text='',a.forEach(i=>text+=i+'\n'),text.slice(0,-1));
-
-Object.prototype.filter = function( predicate, obj ) {
-    var result = { };
-    obj = obj || this
-    for (var key in obj) {
-        if( obj.hasOwnProperty(key) && predicate( obj[key], key, obj ) ) {
-            result[key] = obj[key];
-        }
-    }
-    return result;
-};
 
 //workers
 

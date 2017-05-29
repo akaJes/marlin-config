@@ -2,6 +2,18 @@
 var fs = require('fs');
 var path = require('path');
 
+Object.prototype.filter = function( predicate, obj ) {
+    var result = { };
+    obj = obj || this
+    for (var key in obj) {
+        if( obj.hasOwnProperty(key) && predicate( obj[key], key, obj ) ) {
+            result[key] = obj[key];
+        }
+    }
+    return result;
+};
+
+
 function promisify(func) {
   return function() {
     return new Promise((resolve, reject) => {

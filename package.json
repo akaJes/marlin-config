@@ -1,8 +1,12 @@
 {
   "name": "marlin-conf",
-  "version": "2.5.6",
+  "version": "2.6.0",
   "description": "configuration tool for Marlin project",
+  "main": "./index.js",
   "scripts": {
+    "start": "electron . -G /home/jes/TEST",
+    "build": "build --dir",
+    "distw": "build -w --ia32 --x64",
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall-": "bower install"
   },
@@ -41,6 +45,8 @@
     "which": "^1.2.14"
   },
   "devDependencies-": {
+    "electron": "^1.6.10",
+    "electron-builder": "^18.1.0",
     "nodemon": "^1.11.0"
   }
 }

@@ -67,7 +67,7 @@ exports.clone=name=>new Promise((done,fail)=>{
     clearInterval(timer);
     console.log();
     if (code == 0)
-      done();
+      done(name);
     else
       fail();
   });
