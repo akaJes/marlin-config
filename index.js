@@ -1,6 +1,7 @@
 'use strict';
 const {app, BrowserWindow, Menu, dialog} = require('electron');
 console.log('Node',process.version);
+const notifier = require('node-notifier');
 
 var which=require('which');
 var path=require('path');
@@ -20,6 +21,18 @@ var getFolder=()=>new Promise((done,fail)=>
       done(folders[0])
     })
   )
+app.on('window-all-closed', () => {
+  app.quit()
+})
+function showNotify(text){
+  notifier.notify({
+    title: 'marlin-conf electron version',
+    message: text,
+    icon: path.join(__dirname, 'build/icons/icon_256x256.png'), // Absolute path (doesn't work on balloons)
+    sound: true, // Only Notification Center or Windows Toasters
+    wait: true // Wait with callback, until user action is taken against notification
+  });
+}
 app.on('ready', function() {
     var folder;
     promisify(which)('git')
@@ -40,7 +53,8 @@ app.on('ready', function() {
       if (e&&e.type=="fatal")
         throw e;
       console.log('no repository found in this folder');
-      return git.clone(path.join(folder,'Marlin'));
+      showNotify('Wait while Marlin Firmware repo cloning');
+      return git.clone(path.join(folder,'Marlin')).then(git.root).then(a=>(showNotify('Well done!'),a));
     })
     .catch(function(e){
       if (e&&e.type=="fatal")
@@ -50,16 +64,11 @@ app.on('ready', function() {
     .then(()=>server.main(1))
     .then(function(url){
       mainWindow = new BrowserWindow({
-          height: 600,
-          width: 800
+          height: 768,
+          width: 1280,
+          icon: path.join(__dirname, 'build/icons/icon_64x64.png')
       });
       mainWindow.loadURL(url);
-    return;
-      dialog.showMessageBox({
-        type:"info",
-        title:"Git repository",
-        message:folder
-      })
     })
     .catch(function(e){
       console.error(e.message)

@@ -4,11 +4,41 @@
   "description": "configuration tool for Marlin project",
   "main": "./index.js",
   "scripts": {
-    "start": "electron . -G /home/jes/TEST",
+    "start": "electron . -G ~/TEST",
     "build": "build --dir",
-    "distw": "build -w --ia32 --x64",
+    "dist": "build -wl --x64",
+    "distm": "build -m --x64",
+    "distw": "build -w --x64",
+    "distl": "build -l --x64",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall-": "bower install"
+    "postinstall-": "bower install",
+    "prebuild": "sudo apt install icnsutils graphicsmagick"
+  },
+  "build": {
+    "appId":"com.akajes.marlin.conf",
+    "linux": {
+      "target": [
+        "AppImage"
+      ]
+    },
+    "win": {
+      "icon":"build/icons/icon_256x256.png"
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 110,
+          "y": 150
+        },
+        {
+          "x": 240,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+
+    }
   },
   "bin": {
     "mct": "bin/mct",
@@ -18,7 +48,7 @@
     "type": "git",
     "url": "git+https://github.com/akaJes/marlin-config.git"
   },
-  "author": "akaJes",
+  "author": "akaJes <akaJes@gmail.com>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/akaJes/marlin-config/issues"
@@ -34,6 +64,7 @@
     "jquery-ui-dist": "^1.12.1",
     "js-yaml": "^3.8.4",
     "marked": "^0.3.6",
+    "node-notifier": "^5.1.2",
     "opn": "^5.0.0",
     "serialport": "^4.0.7",
     "simple-git": "^1.72.0",
@@ -44,7 +75,7 @@
     "universal-analytics": "^0.4.13",
     "which": "^1.2.14"
   },
-  "devDependencies-": {
+  "devDependencies": {
     "electron": "^1.6.10",
     "electron-builder": "^18.1.0",
     "nodemon": "^1.11.0"
