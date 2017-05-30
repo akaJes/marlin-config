@@ -18,3 +18,6 @@ Console
   ?rebuild input string with https://github.com/bassjobsen/typeahead.js-bootstrap4-css
 select env from platformio.ini
 create boards list from boards.h
+??serialport update script for electron-builder
+    "install": "node-pre-gyp install --fallback-to-build  --update-binary",
+-open external in electron

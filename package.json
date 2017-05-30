@@ -6,39 +6,38 @@
   "scripts": {
     "start": "electron . -G ~/TEST",
     "build": "build --dir",
-    "dist": "build -wl --x64",
+    "dist": "build -wl --x64 --ia32",
+    "distt": "build -l --x64",
     "distm": "build -m --x64",
-    "distw": "build -w --x64",
-    "distl": "build -l --x64",
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall-": "bower install",
-    "prebuild": "sudo apt install icnsutils graphicsmagick"
+    "lint": "eslint .",
+    "coveralls": "nyc report --reporter=text-lcov",
+    "rebuild": "npm rebuild serialport --update-binary",
+    "prepublish": "./node_modules/.bin/json -I -f package.json -e 'if(this.devDependencies)this.devDependenciesOff=this.devDependencies;this.devDependencies=undefined'",
+    "postpublish": "./node_modules/.bin/json -I -f package.json -e 'if(this.devDependenciesOff)this.devDependencies=this.devDependenciesOff;this.devDependenciesOff=undefined'",
+    "prebuild-": "sudo apt install icnsutils graphicsmagick"
+  },
+  "config": {
+    "production": true
   },
   "build": {
-    "appId":"com.akajes.marlin.conf",
+    "appId": "com.akajes.marlin.conf",
     "linux": {
       "target": [
         "AppImage"
       ]
     },
     "win": {
-      "icon":"build/icons/icon_256x256.png"
+      "icon": "build/icons/icon_256x256.png"
     },
-    "dmg": {
-      "contents": [
-        {
-          "x": 110,
-          "y": 150
-        },
-        {
-          "x": 240,
-          "y": 150,
-          "type": "link",
-          "path": "/Applications"
-        }
+    "nsis": {},
+    "mac": {
+      "target": [
+        "tar.gz"
       ]
-
-    }
+    },
+    "dmg": {}
   },
   "bin": {
     "mct": "bin/mct",
@@ -76,8 +75,12 @@
     "which": "^1.2.14"
   },
   "devDependencies": {
+    "coveralls": "^2.13.1",
     "electron": "^1.6.10",
     "electron-builder": "^18.1.0",
-    "nodemon": "^1.11.0"
+    "eslint": "^3.19.0",
+    "json": "^9.0.6",
+    "nodemon": "^1.11.0",
+    "nyc": "^10.3.2"
   }
 }

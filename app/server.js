@@ -50,7 +50,7 @@ function serial_init(){
     monitor.on("closed", function (f, stat) {
       SSEsend('closed',f)
     })
-  }).catch(a=>console.log(a));
+  }).catch(a=>console.error(a));
 }
 app.get('/ports', function (req, res,next) {
   req.socket.setTimeout(Number.MAX_SAFE_INTEGER);
@@ -259,17 +259,17 @@ app.post('/set/:file/:name/:prop/:value', function (req, res) {
 })
 function main(noOpn){
   return Promise.resolve()
-  .then(serial_init)
-  .catch(a=>console.error('serial failed'))
   .then(()=>hints.init(1))
   .catch(a=>console.error('hints failed'))
   .then(()=>git.root())
   .then(root=>promisify(fs.stat)(path.join(root,'Marlin')))
   .catch(a=>{
     var e=('this git not look like Marlin repository');
-    console.log(e);
+    console.error(e);
     throw e;
   })
+  .then(serial_init)
+//  .catch(a=>console.error('serial failed'))
   .then(()=>getPort(3000))
   .then(port =>new Promise((done,fail)=>{
       server.on('error',function(e){

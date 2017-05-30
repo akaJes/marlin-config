@@ -391,10 +391,9 @@ $(function(){
           })
           sec.find('.card-header span.badge:eq(0)').text(cnt);
           updateChanged(sec);
-          with(sec.find('.card-header button')){
-            eq(1).on('click',function(){sec.find('.form-group').not('.bg-info').hide()})
-            eq(0).on('click',function(){sec.find('.form-group').show()})
-          }
+          var btns=sec.find('.card-header button');
+          btns.eq(1).on('click',function(){sec.find('.form-group').not('.bg-info').hide()})
+          btns.eq(0).on('click',function(){sec.find('.form-group').show()})
         })
       })
       $('body').scrollspy({ target: '#navbar-sections' })

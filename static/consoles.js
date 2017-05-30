@@ -5,24 +5,20 @@ function _add(tmpl){
 function createPort(p){
     var uiPort=_add($('template.port'));
     var port=p.comName.match(/([\w\-\.]+)$/)[1]
-    with(uiPort.find('td')){
-      var obSpeed=find('select')
-      eq(0).text(p.comName)
-      eq(1).text(p.status)
-      with(eq(2)){
-        $.each([9600,14400,19200,28800,38400,56000,57600,115200,128000,153600,230400,256000,460800,921600],function(i,n){
-          obSpeed.append($('<option>').attr('value',n).text(n))
-        })
-        var speed=store[port]&&store[port].speed||p.speed||115200;
-        obSpeed.val(speed).on('change',function(){
-          updateStore(port,'speed',$(this).val());
-        })
-      }
-      with(eq(3).find('button')){
-        eq(0).on('click',function(){createConsole(port,obSpeed.val(),uiPort);})
-        eq(1).on('click',function(){ removeTab(port); $.ajax('/port-close/'+port) })
-      }
-    }
+    var tds=uiPort.find('td')
+    var obSpeed=tds.find('select')
+    tds.eq(0).text(p.comName)
+    tds.eq(1).text(p.status)
+    $.each([9600,14400,19200,28800,38400,56000,57600,115200,128000,153600,230400,256000,460800,921600],function(i,n){
+      obSpeed.append($('<option>').attr('value',n).text(n))
+    })
+    var speed=store[port]&&store[port].speed||p.speed||115200;
+    obSpeed.val(speed).on('change',function(){
+      updateStore(port,'speed',$(this).val());
+    })
+    var bts=tds.eq(3).find('button')
+    bts.eq(0).on('click',function(){createConsole(port,obSpeed.val(),uiPort);})
+    bts.eq(1).on('click',function(){ removeTab(port); $.ajax('/port-close/'+port) })
 }
 function removePort(p){
   $('table tr').filter(function(i,el){ return $(el).find('td').eq(0).text()==p.comName}).remove()

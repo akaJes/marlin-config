@@ -96,13 +96,13 @@ function main(){
             server.main().then(done).catch(fail)
           });
         }
-      })).catch((e)=>{ console.log(e); })
+      })).catch(a=>a)
     }
     function tryRun(){
       process.chdir('Marlin')
 console.log(process.cwd())
       git.root('Marlin')
-      .then(server.main);
+      .then(a=>server.main());
     }
     git.root()
     .then(startWeb)

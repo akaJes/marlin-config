@@ -22,8 +22,10 @@ supported OS: Linux,Mac,Windows
 
 in project used documentation from [MarlinDocumentation](https://github.com/MarlinFirmware/MarlinDocumentation/_configuration/configuration.md)
 
-
 # Installation
+## Prebuilded with Electron versions
+  [Releases](https://github.com/akaJes/marlin-config/releases)
+## NPM
 [![npm version](https://badge.fury.io/js/marlin-conf.svg)](https://badge.fury.io/js/marlin-conf)
 
 `sudo npm -g i marlin-conf`
