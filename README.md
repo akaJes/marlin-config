@@ -22,21 +22,23 @@ supported OS: Linux,Mac,Windows
 
 in project used documentation from [MarlinDocumentation](https://github.com/MarlinFirmware/MarlinDocumentation/_configuration/configuration.md)
 
-# Installation
-## Prebuilded with Electron versions
-  [Releases](https://github.com/akaJes/marlin-config/releases)
-## NPM
+# Installation prebuilt with Electron versions
+  [Releases](https://github.com/akaJes/marlin-config/releases) (Win/Mac versions has no console manager)
+## Dependencies
+[git](https://git-scm.com/downloads), optional [PlatformIO](http://docs.platformio.org/en/latest/installation.html)
+## Using
+after run - choose a folder with Marlin repo or an empty folder for cloning
+# Installation NPM
 [![npm version](https://badge.fury.io/js/marlin-conf.svg)](https://badge.fury.io/js/marlin-conf)
 
 `sudo npm -g i marlin-conf`
 
 some hints for [Windows-Installation](https://github.com/akaJes/marlin-config/wiki/Windows-Installation)
-
-# Dependencies
+## Dependencies
 
 [git](https://git-scm.com/downloads), [node.js](https://nodejs.org/en/download/), optional [PlatformIO](http://docs.platformio.org/en/latest/installation.html)
 
-# Using
+## Using
 open terminal in an empty folder or in a folder with Marlin repository and type
 
 `mct` and confirm action
