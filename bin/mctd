@@ -8,7 +8,7 @@ nodemon({
   script: path.resolve(__dirname, '..','app','server.js'),
   watch: path.resolve(__dirname, '..'),
   ext: 'js json',
-  ignore: ['tools.js'],
+  ignore: ['tools.js','dist','build'],
 });
 
 nodemon.on('start', function () {

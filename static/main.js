@@ -578,6 +578,14 @@ $(function(){
           createPort(p)
         });
       });
+      source.addEventListener('error', function(event) {
+        $('.mct-consoles').attr('disabled','')
+        $('.mct-ports a').addClass('disabled')
+      });
+      source.addEventListener('open', function(event) {
+        $('.mct-consoles').removeAttr('disabled')
+        $('.mct-ports a').removeClass('disabled')
+      });
       source.addEventListener('created', function(event) {
         var port= JSON.parse(event.data);
         createPort(port);

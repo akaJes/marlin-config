@@ -10,7 +10,6 @@ var fs = require('fs');
 var formidable = require('formidable');
 var pjson = require('../package.json');
 var pio = require('./pio');
-var serial = require('./console');
 var http = require('http');
 var ua = require('universal-analytics');
 var promisify = require('./helpers').promisify;
@@ -18,6 +17,12 @@ var promisify = require('./helpers').promisify;
 var port = 3000;
 var server = http.Server(app);
 var visitor = ua('UA-99239389-1');
+var isElectron=module.parent&&module.parent.filename.indexOf('index.js')>=0;
+
+var serial;
+var serial_enabled = !isElectron||process.platform=='linux';
+if (serial_enabled)
+  serial = require('./console');
 
 app.use('/', express.static(path.join(__dirname,'..', 'static')));
 app.use('/libs', express.static(path.join(__dirname,'..', 'node_modules')));
@@ -52,7 +57,9 @@ function serial_init(){
     })
   }).catch(a=>console.error(a));
 }
-app.get('/ports', function (req, res,next) {
+app.get('/ports', function (req, res) {
+  if(!serial_enabled)
+    return res.status(403).end()
   req.socket.setTimeout(Number.MAX_SAFE_INTEGER);
   console.log('SSE conected');
   res.writeHead(200, {
@@ -72,6 +79,8 @@ app.get('/ports', function (req, res,next) {
 });
 
 app.get('/port/:port/:speed', function (req, res) {
+  if(!serial_enabled)
+    return res.status(404)
   serial.init(server,req.params.port,req.params.speed)
   .then(data=>{
     res.send(data);
@@ -79,6 +88,8 @@ app.get('/port/:port/:speed', function (req, res) {
   .catch(a=>res.status(403).send(a))
 });
 app.get('/port-close/:port', function (req, res) {
+  if(!serial_enabled)
+    return res.status(404)
   serial.close(req.params.port)
   .then(data=>{
     res.send(data);
@@ -163,7 +174,7 @@ app.get('/pio-flash/:port', function (req, res) {
     params.push(port)
     close=true;
   }
-  (close?serial.close(port):Promise.resolve(true))
+  (close&&serial_enabled?serial.close(port):Promise.resolve(true))
   .then(a=>git.root())
   .then(root=>{
     console.log(root);
@@ -268,7 +279,7 @@ function main(noOpn){
     console.error(e);
     throw e;
   })
-  .then(serial_init)
+  .then(serial_enabled?serial_init:a=>a)
 //  .catch(a=>console.error('serial failed'))
   .then(()=>getPort(3000))
   .then(port =>new Promise((done,fail)=>{
