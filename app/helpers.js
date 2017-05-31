@@ -14,7 +14,7 @@ Object.prototype.filter = function( predicate, obj ) {
 };
 
 
-function promisify(func) {
+function promisify(func,that) {
   return function() {
     return new Promise((resolve, reject) => {
       const args = Array.prototype.slice.apply(arguments);
@@ -24,7 +24,7 @@ function promisify(func) {
         }
         resolve(data);
       });
-      func.apply(null, args);
+      (that&&that[func]||func).apply(that||null, args);
     });
   };
 }

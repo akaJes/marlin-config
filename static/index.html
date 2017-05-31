@@ -181,7 +181,7 @@
               </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Reset</button>
+                <button type="button" class="btn btn-danger">Reset</button>
               </div>
             </div>
           </div>
@@ -217,29 +217,33 @@
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item mr-sm-2 my-auto p-1">
-        Release:
-        <button type="button" class="btn btn-info mct-tags" title="choose current release"> TAGS</button>
-        <button type="button" class="btn btn-danger mct-reset" title="reset all changes">Reset</button>
-      </li>
-      <li class="nav-item" style="width:100px">
-        <span  class="mct-status"></span>
+      <div class="dropdown d-inline-block">
+        <button class="btn btn-info dropdown-toggle mct-tags" title="Current release" id="dropdownTagsLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          TAGS
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownTagsLink">
+          <button class="dropdown-item mct-change" title="Change version (git checkout)" >Change</button>
+          <button class="dropdown-item mct-update" title="Update version list from GitHub (git fetch)">Update</button>
+          <button class="dropdown-item bg-danger text-white mct-reset" title="Reset all changes (git checkout -f)">Reset</button>
+        </div>
+      </div>
       </li>
       <li class="nav-item mr-sm-2 my-auto p-1">
-<div class="onoffswitch mct-changed"  title="toggle only changed">
+<div class="onoffswitch mct-changed"  title="Toggle only changed options">
     <label class="onoffswitch-label" >
         <input type="checkbox" class="onoffswitch-checkbox">
         <span class="onoffswitch-inner" data-content-on="Changed" data-content-off="All"></span>
         <span class="onoffswitch-switch"></span>
     </label>
 </div>
-          <button type="button" class="btn btn-warning mct-upload" title="upload your old configuration or drag it in browser">Upload</button>
+          <button type="button" class="btn btn-warning mct-upload" title="Upload your old configuration or drag it in browser">Upload</button>
           <input type="file" name="files[]" class="mct-upload" multiple style="display:none;">
       </li>
       <li class="nav-item mr-sm-2 p-1">
-        <button type="button" class="btn btn-secondary mct-pio-compile disabled" data-toggle="toggle" title="PlatformIO not installed">compile</button>
-        <button type="button" class="btn btn-secondary mct-pio-flash disabled" data-toggle="toggle" title="PlatformIO not installed">flash</button>
-      <div class="dropdown d-inline-block mct-ports">
-  <a class="btn btn-secondary dropdown-toggle" href="https://example.com" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <button type="button" class="btn btn-secondary mct-pio-compile disabled" data-toggle="toggle" title="Compile Marlin with PlatformIO">Compile</button>
+        <button type="button" class="btn btn-secondary mct-pio-flash disabled" data-toggle="toggle" title="Upload firmware with PlatformIO to selected port">Flash</button>
+      <div class="dropdown d-inline-block mct-ports" title="Select port for PlatformIO">
+  <a class="btn btn-secondary dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     Auto port
   </a>
   <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
@@ -247,15 +251,14 @@
     <a class="dropdown-item" href="#"></a>
     </template>
   </div>
+      </div>
       </li>
       <li class="nav-item mr-sm-2 p-1">
-        <button type="button" class="btn btn-secondary mct-consoles" data-toggle="toggle" title="PlatformIO not installed">consoles</button>
-<!--        <button type="button" class="btn btn-secondary mct-console disabled" data-toggle="toggle" title="PlatformIO not installed">console</button>-->
+        <button type="button" class="btn btn-secondary mct-consoles" data-toggle="toggle" title="Manager of serial consoles">Consoles</button>
       </li>
       <li class="nav-item mr-sm-2 p-1">
-        <button type="button" class="btn btn-warning mct-issue" title="create an issue on Marlin github repository" >Issue</button>
+        <button type="button" class="btn btn-warning mct-issue" title="Create an issue on Marlin GitHub repository" >Issue</button>
       </li>
-
     </ul>
     <div class="text-right">
     <a target="_blank" href="https://github.com/akaJes/marlin-config"><img src="/version" title="current version" height="18"></a><br>
@@ -348,7 +351,7 @@
   </select>
                       </div>
                       <div class="col-sm-1 my-auto">
-                        <button type="button" class="btn btn-warning btn-sm">?</button>
+                        <button type="button" class="btn btn-warning btn-sm" title="Show explanation">?</button>
                       </div>
                     </div>
                   </template>
@@ -371,7 +374,7 @@
                       <div class="col-sm-2 my-auto" data-toggle="tooltip"  data-animation="false">
                       </div>
                       <div class="col-sm-1 my-auto">
-                        <button type="button" class="btn btn-warning btn-sm">?</button>
+                        <button type="button" class="btn btn-warning btn-sm" title="Show explanation">?</button>
                       </div>
                     </div>
                   </template>

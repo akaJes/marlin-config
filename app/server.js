@@ -203,6 +203,11 @@ app.get('/status', function (req, res) {
 app.get('/checkout-force', function (req, res) {
   git.Checkout('--force').then(a=>res.send(a))
 });
+app.get('/fetch', function (req, res) {
+  git.Fetch()
+  .then(a=>res.end(JSON.stringify(a)))
+  .catch(e=>res.status(403).send(e))
+});
 app.get('/hint/:name', function (req, res) {
   res.send(hints.hint(req.params.name));
 })

@@ -1,5 +1,6 @@
 var git = require('simple-git');
-var exec  = require('child_process').exec;
+var exec = require('child_process').exec;
+var promisify = require('./helpers').promisify;
 var root;
 
 
@@ -15,9 +16,6 @@ new Promise((done,fail)=>git(root).raw(['describe','--tags'],(e,a)=>e?fail(e):do
 .then(root=>(console.log('[gitTag]',root),root))
 .catch(mst=>console.log('no tag'))
 
-var gitTags2=()=>
-new Promise((done,fail)=>git(root).tags([],(e,a)=>e?fail(e):done(a)))
-.then(root=>(console.log('[gitTags]',root.all.toString()),root))
 var getTag=msg=>{
   var m=msg.match(/\(tag:\s(.*)\)/)
   return m&&m[1];
@@ -29,22 +27,13 @@ new Promise((done,fail)=>git(root).log(['--tags','--simplify-by-decoration'],(e,
 .then(root=>(verbose&&console.log('[gitTags]',root),root))
 .catch(mst=>console.log('no tags'))
 
-var gitShow=(branch,file)=>
-new Promise((done,fail)=>git(root).show([branch+':'+file],(e,a)=>e?fail(e):done(a)));
-
-var gitCheckout=(branch)=>
-new Promise((done,fail)=>git(root).checkout(branch,(e,a)=>e?fail(e):done(a)));
-
-var gitStatus=()=>
-new Promise((done,fail)=>git(root).status((e,a)=>e?fail(e):done(a)));
-
-
-exports.Checkout=gitCheckout;
-exports.Status=gitStatus;
+exports.Checkout=promisify('checkout',git(root)); //(branch)
+exports.Status=promisify('status',git(root)); //()
+exports.Fetch=promisify('fetch',git(root)); //()
 exports.Root=gitRoot;
 exports.Tag=gitTag;
 exports.Tags=gitTags;
-exports.Show=gitShow;
+exports.Show=(branch,file)=>promisify('show',git(root))([branch+':'+file]);
 exports.git=git;
 exports.root=a=>{
   if (a){

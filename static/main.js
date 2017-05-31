@@ -30,21 +30,24 @@ function addNewSection(tab,id,section,sec){
 }
 
 function loadHint(name){
-  $.ajax('/hint/'+name).then(function(data){
+  $.ajax('/hint/'+name)
+  .fail(ajaxAlert)
+  .then(function(data){
     $('.mct-hint').html(data);
   })
 }
 function loadGcode(name){
-  $.ajax('/gcode/'+name).then(function(data){
+  $.ajax('/gcode/'+name)
+  .fail(ajaxAlert)
+  .then(function(data){
     $('.mct-hint').html(data).prop('scrollTop',0);
   })
 }
 function saveProp(cmd){
-var state=$('.mct-status')
-  state.text('saving...').fadeIn().css({color:'black'});
+  progress(0)(true)('50%');
   return $.post(cmd)
-  .then(function(a){ state.text('saved').fadeOut(1000); return a})
-  .fail(function(a){ state.text(''+a.responseJSON.code).css({color:'red'})})
+  .then(function(a){ progress('100%')(false); return a})
+  .fail(function(e){ progress(1)('ERROR: '+(e.responseText||e.state())); return ajaxAlert(e) });
 }
 function applyProp(def,row,prop,val){
   def.changed=def.changed||{}
@@ -62,27 +65,29 @@ function getVal(ob,name){
       return ob.changed[name]
   return ob[name]
 }
+function ajaxAlert(fail){
+  _add($('template._alert'))
+  .find('p').text(fail.responseText||(fail.statusText+': '+fail.state()))
+  return fail;
+}
 function cmdReload(cmd,modal){
     cmd
     .then(function(data){
       $(window).unbind('beforeunload');
       window.location.reload();
     })
-    .fail(function(a){
+    .fail(function(e){
       modal&&modal.modal('hide')
-      _add($('template._alert'))
-      .find('p').text(a.responseText)
+      return ajaxAlert(e);
     })
 }
 function progress(val){
     var dom = $('.mct-progress');
     val===true&&dom.toggle(val);
-    val===false&&dom.fadeOut(5000);
-    if (typeof val =='string'){
-      dom.find('span').text(val)
-      $('.mct-progress .progress-bar').width(val);
-    }
-    typeof val =='number'&& dom.find('.progress-bar').toggleClass('progress-bar-danger',!!val);
+    val===false&&dom.stop().fadeOut(3000);
+    if (typeof val =='string')
+      dom.find('.progress-bar').width(val).find('span').text(val);
+    typeof val =='number'&& dom.find('.progress-bar').toggleClass('bg-danger',!!val);
     return progress;
 }
 // The plugin code https://gist.github.com/meleyal/3794126
@@ -105,7 +110,6 @@ $.fn.draghover = function(options) {
   });
 };
 function upload_files(files){
-//  return new Promise((done,fail)=>{
     if ( !files.length )
       return ;//fail('no files')
     var formData = new FormData();
@@ -135,17 +139,14 @@ function upload_files(files){
             // once the upload reaches 100%, set the progress bar text to done
             if (percentComplete === 100){
               progress(false);
-//              done();
             }
           }
         }, false);
         return xhr;
       }
     }).fail(function(e){
-      progress(1)('ERROR '+e.responseText);
-//      fail(e.responseText)
+      progress(1)('ERROR: '+(e.responseText||e.state()));
     });
-//  })
 }
 function stream_cmd(command,proc){
     return function(){
@@ -480,7 +481,6 @@ $(function(){
     });
   (function(){
     var m=$('#mct-tags-modal');
-    var a=$('#mct-alert');
     var t=m.find('table tbody');
     m.find('button.btn-primary').on('click',function(ev){
       var row = t.find('.table-success');
@@ -493,8 +493,10 @@ $(function(){
       $(this).find('tr').removeClass('table-success');
       $(ev.target).parents('tr').addClass('table-success')
     });
-    $('.mct-tags').on('click',function(){
-      $.ajax('/tags').then(function(data){
+    $('.mct-change').on('click',function(){
+      $.ajax('/tags')
+      .fail(ajaxAlert)
+      .then(function(data){
         data=data.sort(function(a,b){ return a.date<b.date?1:a.date>b.date?-1:0;})
         t.empty();
         data.map(function(row){
@@ -503,25 +505,34 @@ $(function(){
         m.modal();
       })
     })
-  })();
-  (function(){
-    var r=$('#mct-reset-modal');
-    var p=r.find('p');
-    $('.mct-reset').on('click',function(){
-      $.ajax('/status').then(function(data){
+  }());
+  (function(btn,ui){
+    var p=ui.find('p');
+    btn.on('click',function(){
+      $.ajax('/status')
+      .fail(ajaxAlert)
+      .then(function(data){
         p.empty();
         data.files.map(function(file){
           p.append(file.path+'<br>')
         })
-        r.modal();
+        ui.modal();
       })
     })
-    r.find('button.btn-primary').on('click',function(ev){
-        cmdReload($.ajax('/checkout-force'),r);
+    ui.find('button.btn-danger').on('click',function(ev){
+        cmdReload($.ajax('/checkout-force'),ui);
     })
-  })();
+  }($('.mct-reset'),$('#mct-reset-modal')));
+  (function(btn){
+    btn.on('click',function(){
+      progress(0)(true)('50%');
+      $.ajax('/fetch')
+      .fail(ajaxAlert)
+      .then(function(a){ progress('100%')(false); return a})
+    })
+  }($('.mct-update')));
   $('.mct-consoles').on('click',function(){ window.open('consoles.html','_blank') });
-  (function(){
+  (function(){ //REMOVE
     var r=$('#mct-console-modal');
     var p=r.find('textarea');
     var b=r.find('.modal-body button');
@@ -612,7 +623,7 @@ $(function(){
     var cmd;
     $('.mct-pio-compile, .mct-pio-flash, .mct-ports a')
     .toggleClass('disabled',!config.pio)
-    .attr(config.pio?'title':'null','')
+    .attr(!config.pio?'title':'null','PlatformIO not installed')
     .eq(0).on('click',function(){
         cmd=stream_cmd('/pio',proc)()
     }).end()
@@ -676,7 +687,7 @@ $(function(){
   }());
     var state=$('.mct-changed input')
     .on('change',function(){
-      var defs=$('.tab-pane[id*=card] .form-group')
+      var defs=$('.tab-pane[id*=card-C] .form-group')
       if ($(this).prop('checked'))
         defs.not('.bg-info').hide()
       else
