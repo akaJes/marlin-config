@@ -8,6 +8,8 @@ var git = require('./app/git-tool');
 var server = require('./app/server');
 var readline = require('readline');
 var github = require('./app/github');
+var which=require('which');
+var promisify = require('./app/helpers').promisify;
 
 var doJson=(root)=>
 Promise.resolve(root)
@@ -37,6 +39,9 @@ Promise.resolve(root)
 .then(a=>console.log('done rm ALL .json / .not'))
 
 function main(){
+  promisify(which)('git').then(marlin).catch(a=>console.error('git not found'));
+}
+function marlin(){
   var is={tree:1,json:1,h:1,git:0,rm:1,help:1,txt:1,conf:1,clone:1,update:1}
   .filter((v,key,o,p,i)=>(p=process.argv,i=p.indexOf(key),!v&&i>=0&&i+1<p.length&&(o[key]=p[i+1]),i>=0));
   if ( is.help )

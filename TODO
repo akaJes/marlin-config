@@ -16,8 +16,17 @@ Console
   -add changing a termination sequence
   -save to config speed,TS per each port
   ?rebuild input string with https://github.com/bassjobsen/typeahead.js-bootstrap4-css
+  G/M helper
 select env from platformio.ini
 create boards list from boards.h
 ??serialport update script for electron-builder
     "install": "node-pre-gyp install --fallback-to-build  --update-binary",
--open external in electron
+Electron
+  -open external in electron
+  notification image issue
+  serialport for other platforms/arch
+  remove port selector to open window in browser
+  open Issue in browser
+  list for last opened
+  progress for cloning process
+title for window when upload button pressed

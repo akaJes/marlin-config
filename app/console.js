@@ -2,12 +2,14 @@ var EventEmitter = require('events');
 var sio = require('socket.io');
 var fs = require('fs');
 var path = require('path');
-var SerialPort = require('serialport');
+var SerialPort = require('serialport-v4');
 var ports={};
 var monitor = new EventEmitter();
 exports.monitor=monitor;
 var open=(http,p,speed)=>new Promise((done,fail)=>{
     var root = '/dev/'+p;
+    if (process.platform=="win32")
+      root=p; //root='\\\\.\\'+p;
     var port = new SerialPort(root, {
       autoOpen: false,
       parser0: SerialPort.parsers.readline('\n'),

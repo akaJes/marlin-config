@@ -20,7 +20,7 @@ var visitor = ua('UA-99239389-1');
 var isElectron=module.parent&&module.parent.filename.indexOf('index.js')>=0;
 
 var serial;
-var serial_enabled = !isElectron||process.platform=='linux';
+var serial_enabled = !(isElectron&&process.platform=='darwin');
 if (serial_enabled)
   serial = require('./console');
 
