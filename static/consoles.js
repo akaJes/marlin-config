@@ -100,7 +100,7 @@ function initConsole(tab,url,port){
     })
     socket.on('disconnect',function(msg){
       add('\n[closed]')
-      socket.close();
+      //socket.close();
     })
     function send(){
       if(aTags.indexOf(s.val())<0){

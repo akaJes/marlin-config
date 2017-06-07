@@ -151,8 +151,7 @@ function init_gcode(){
               gcodes.push(doc);
               tags[doc.tag]=doc;
               list.tags[doc.tag]={title:doc.title,codes:doc.codes,group:doc.group,requires:parse_requires(doc.requires)}
-              with(list.groups)
-                indexOf(doc.group)<0&&push(doc.group);
+              list.groups.indexOf(doc.group)<0&&list.groups.push(doc.group);
               (list.list[doc.group]=list.list[doc.group]||[]).push(doc.tag)
             }
           });

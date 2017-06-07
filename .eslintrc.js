@@ -18,14 +18,14 @@ module.exports = {
         ],
         "quotes": [
             "warn",
-            "double"
+            "single"
         ],
         "no-console": [
             "warn"
         ],
         "semi": [
             "warn",
-            "never"
+            "always"
         ]
     }
 };

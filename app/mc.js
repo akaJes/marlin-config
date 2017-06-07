@@ -24,8 +24,10 @@ module.exports.h2json=function(h){
         section=match[2]
       if (match=val.match(/^(\s)*#if\s+(.*)/))
         condition.push(match[2])
-      if (match=val.match(/^(\s)*#elif\s+(.*)/))
-        with(condition){ pop(); push(match[2]) }
+      if (match=val.match(/^(\s)*#elif\s+(.*)/)){
+        condition.pop();
+        condition.push(match[2])
+      }
       if (match=val.match(/^(\s)*#endif/))
         condition.pop()
       if (match=val.match(/\:(\{.*\}|\[.*\])/))

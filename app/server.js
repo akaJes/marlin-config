@@ -149,12 +149,20 @@ app.get('/version/:screen', function (req, res) {
     res.end();
   })
 });
+function pioRoot(){
+  return git.root()
+  .then(root=>
+    promisify(fs.stat)(path.join(root,'Marlin','platformio.ini'))
+    .then(a=>path.join(root,'Marlin'))
+    .catch(a=>root)
+    .then(root=>(process.chdir(root),root))
+  );
+}
 app.get('/pio', function (req, res) {
-  git.root()
-  .then(root=>{
-    process.chdir(path.join(root,'Marlin'))
-    pio.run(['run'],res);
-  });
+  pioRoot()
+  .then(root=>
+    pio.run(['run'],res)
+  );
 });
 function atob(b64string){
   if ( process.version<"v6.0.0" )
@@ -175,10 +183,8 @@ app.get('/pio-flash/:port', function (req, res) {
     close=true;
   }
   (close&&serial_enabled?serial.close(port):Promise.resolve(true))
-  .then(a=>git.root())
+  .then(pioRoot)
   .then(root=>{
-    console.log(root);
-    process.chdir(path.join(root,'Marlin'))
     var cmd=pio.run(params,res);
     req.on('close',function(){
       cmd.kill('SIGINT');
