@@ -2,11 +2,11 @@
 var fs = require('fs');
 var path = require('path');
 var mc = require('./mc');
-var ht = require('./helpers');
+var promisify = require('./helpers').promisify;
 
 //common
-var inFile=name=>new Promise((done, fail) => fs.readFile( name, 'utf8', (err, data) => err ? fail( err ) : done( data ) ) )
-var outFile=name=>text=>new Promise((done,ex)=>fs.writeFile(name,text,err=>err?ex(err):done(text)))
+var inFile=name=>promisify(fs.readFile)( name, 'utf8' )
+var outFile=name=>text=>promisify(fs.writeFile)(name,text)
 var toJson=a=>JSON.stringify(a,null,2);
 var parseJson=a=>JSON.parse(a);
 var text2array=text=>text.split(/\r\n?|\n/);
@@ -308,4 +308,15 @@ module.exports.makeHfile=(root,name)=>conf=>{
     .then(outFile(p))
     .then(a=>(console.log('done update h file: ',path.relative(root,p)),a))
     .catch(a=>(console.log('fail update h file: ',file,a),a))
+}
+
+exports.getBoards=(file)=>{
+    return Promise.resolve(file)
+    .then(inFile)
+    .then(text2array)
+    .then(a=>a.map(i=>i.replace(/(.*#define\s+BOARD_.+?)(\/\/.*)/,"$1")))
+    .then(a=>a.map(i=>i.match(/.*#define\s+(\w+)\s+(\d+)\s*/)))
+    .then(a=>a.filter(i=>i))
+    .then(a=>a.map(i=>i[1]))
+    .then(JSON.stringify)
 }

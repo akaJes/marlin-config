@@ -662,7 +662,11 @@ $(function(){
           if (f)
             text+='\n//file '+file.file.base+' Release:'+file.tag+'\n'+f;
         })
-        window.open(encodeURI('https://github.com/MarlinFirmware/Marlin/issues/new?title=&body='+text).replace(/\#/g,'%23'))
+        var url=encodeURI('https://github.com/MarlinFirmware/Marlin/issues/new?title=&body='+text).replace(/\#/g,'%23');
+        if( typeof require === 'function' )
+          require('electron').shell.openExternal(url);
+        else
+          window.open(url)
       })
     })
   }());

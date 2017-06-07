@@ -99,13 +99,13 @@
 </style>
 <script>
   //open links externally by default
+if (typeof require === 'function') { //commonJS from electron
   $(document).on('click', 'a[href^="http"]', function(event) {
-    if (typeof require === 'function') { //commonJS from electron
       event.preventDefault();
       var shell = require('electron').shell;
       shell.openExternal(this.href);
-    }
   });
+}
 </script>
   </head>
   <body lang="en">

@@ -27,9 +27,9 @@ new Promise((done,fail)=>git(root).log(['--tags','--simplify-by-decoration'],(e,
 .then(root=>(verbose&&console.log('[gitTags]',root),root))
 .catch(mst=>console.log('no tags'))
 
-exports.Checkout=promisify('checkout',git(root)); //(branch)
-exports.Status=promisify('status',git(root)); //()
-exports.Fetch=promisify('fetch',git(root)); //()
+exports.Checkout=(branch)=>promisify('checkout',git(root))(branch);
+exports.Status=()=>promisify('status',git(root))();
+exports.Fetch=()=>promisify('fetch',git(root))(['--all']);
 exports.Root=gitRoot;
 exports.Tag=gitTag;
 exports.Tags=gitTags;
