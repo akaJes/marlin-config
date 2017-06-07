@@ -23,9 +23,10 @@ supported OS: Linux,Mac,Windows
 in project used documentation from [MarlinDocumentation](https://github.com/MarlinFirmware/MarlinDocumentation/_configuration/configuration.md)
 
 # Installation prebuilt with Electron versions
-  [Releases](https://github.com/akaJes/marlin-config/releases) (Win/Mac versions has no console manager)
+  [Releases](https://github.com/akaJes/marlin-config/releases) (Mac versions has no console manager)
 ## Dependencies
-[git](https://git-scm.com/downloads), optional [PlatformIO](http://docs.platformio.org/en/latest/installation.html)
+* [git](https://git-scm.com/downloads)
+* [PlatformIO](http://docs.platformio.org/en/latest/installation.html) (optional)
 ## Using
 after run - choose a folder with Marlin repo or an empty folder for cloning
 # Installation NPM
@@ -35,23 +36,23 @@ after run - choose a folder with Marlin repo or an empty folder for cloning
 
 some hints for [Windows-Installation](https://github.com/akaJes/marlin-config/wiki/Windows-Installation)
 ## Dependencies
-
-[git](https://git-scm.com/downloads), [node.js](https://nodejs.org/en/download/), optional [PlatformIO](http://docs.platformio.org/en/latest/installation.html)
+* [git](https://git-scm.com/downloads)
+* [node.js](https://nodejs.org/en/download/)
+* [PlatformIO](http://docs.platformio.org/en/latest/installation.html) (optional)
 
 ## Using
 open terminal in an empty folder or in a folder with Marlin repository and type
 
 `mct` and confirm action
 
-then in browser you get interface for other features:
+# Preview
 ![image](https://cloud.githubusercontent.com/assets/3035266/26492336/2934c98c-421c-11e7-8aab-3ddab57525f3.png)
 
+## hints
+* In clean/unchanged configuration you can change current release version
+* You can drag in browser your Configuration*.h files
 
-In clean/unchanged configuration you can change current release version
-
-Then you can upload or drag in browser your Configuration*.h files
-
-# mct help
+## mct help
 ```
 usage: mct help|git|tree|conf|clone
 You need to run it in Marlin git repository
