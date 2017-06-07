@@ -30,6 +30,7 @@ var addNumber=a=>{
 }
 
 var killComments=a=>a.map(i=>(i.comment=null,i))
+var killDublicated=a=>a.filter(i=>i.number==undefined||!i.disabled).map(i=>(i.number=undefined,i))
 
 var setConfig=(target,file,root)=>a=>{
   var map=remap(a);
@@ -69,15 +70,16 @@ var setConfig=(target,file,root)=>a=>{
     return res;
   })
 }
-var addChanged=(target)=>a=>{
-  return target.then(t=>{
-    var map=remap(t);
-    var res=a.map(i=>{
+var addChanged=target=>origin=>
+  target
+  .then(remap)
+  .then(map=>
+    origin.map(i=>{
+      if (i.number != undefined && i.disabled ) return; //no need dublicates
       var oo=map[i.name];
       if (oo){
-        var o=oo[Math.min(i.number||0,oo.length-1)];
-        if ( oo.length>1 && !i.number )
-          o=oo.filter(i=>!i.disabled)[oo.length-1]
+        oo=oo.filter(i=>!i.disabled)
+        o=oo[oo.length-1];
         if (o){
           var changed = {};
           if ( o.disabled != i.disabled )
@@ -91,9 +93,7 @@ var addChanged=(target)=>a=>{
       }
       return i;
     }).filter(i=>i)
-    return res;
-  })
-}
+  )
 
 var stripConf=a=>a.map(i=>{
   var obj = { name: i.name };
@@ -201,6 +201,7 @@ module.exports.getJson=(root,base,tag)=>file=>{
     .then(addNumber)
     .then(addChanged(conf))
     .then(a=>a.filter(i=>!i.number||i.number !=undefined&&!i.disabled)) //remove commented duplicates
+//    .then(a=>a.filter(i=>i.number==undefined||i.changed&&!i.changed.disabled)) //remove commented duplicates
     .then(a=>({file:path.parse(file),names:a,tag:tag}))
     .then(a=>(a.sections=unique(a.names.map(i=>i.section)).filter(i=>i),a))
     .then(a=>((a.sections=a.sections.length?a.sections:['common']),a))
@@ -268,6 +269,7 @@ module.exports.makeCfg=file=>{
     .then(mc.h2json)
     .then(addNumber)
     .then(killComments)
+    .then(killDublicated)
 //    .then(stripConfA)
 //    .then(uniqueJson)
 //    .then(toJson)

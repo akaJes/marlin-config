@@ -368,7 +368,7 @@ $(function(){
               .then(function(){ updateChanged(d.parents('.card'))})
               .then(function(){ updateConditions(define)})
             }
-            if (! def.disabled && def.value != undefined)
+            if ( !( def.changed && def.changed.disabled ) && !def.disabled && def.value != undefined)
               dis.remove(),p.remove();
             else{
               dis.find('input')
@@ -630,6 +630,9 @@ $(function(){
     .eq(1).on('click',function(){
         cmd=stream_cmd('/pio-flash/'+btoa($('.mct-ports a.btn').text().trim()),proc)()
     }).end()
+    r.on('hide.bs.modal',function(){
+      cmd.abort();
+    })
     b.on('click',function(){
       cmd.abort();
     })
