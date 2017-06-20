@@ -18,6 +18,12 @@
     <script src="libs/tether/dist/js/tether.min.js"></script>
     <script src="libs/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="libs/socket.io-client/dist/socket.io.js"></script>
+    <script src="libs/three/build/three.js"></script>
+    <script src="libs/three/examples/js/renderers/Projector.js"></script>
+    <script src="libs/three/examples/js/renderers/CanvasRenderer.js"></script>
+    <script src="libs/three/examples/js/controls/OrbitControls.js"></script>
+    <script src="ui.js"></script>
+
     <link href="toggle.css" rel="stylesheet">
 <style>
 .ct-console-form{
@@ -29,6 +35,19 @@
 }
 .ct-console-form textarea{
   height:100%;
+}
+.ct-command {
+  position:absolute;
+  width:300px;
+  height:250px;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translatey(-50%);
+}
+.ct-command.maximized {
+  width:90%;
+  height:80%;
+  margin:auto;
 }
 </style>
 <script src="/version/Consoles"></script>
@@ -79,6 +98,7 @@
   <template class='port-body'>
   <div class="tab-pane" id="profile" role="tabpanel">
     <div class="form-group ct-console-form">
+      <div class="ct-command"></div>
       <textarea class="form-control"></textarea>
     </div>
     <div class="form-group px-4">
@@ -96,6 +116,9 @@
           <option value="rn">CR LF</option>
         </select>
         <input type="text" class="form-control" placeholder="Send it..." title="press Delete in dropup to remove history">
+        <span class="input-group-btn">
+          <button class="btn btn-secondary" type="button">Command!</button>
+        </span>
         <span class="input-group-btn">
           <button class="btn btn-secondary" type="button">Send!</button>
         </span>

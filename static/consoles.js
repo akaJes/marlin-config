@@ -110,7 +110,16 @@ function initConsole(tab,url,port){
       socket.emit('message',s.val()+eol.val().replace(/r/,'\r').replace(/n/,'\n'));
       s.val('');
     }
-    tab.find('button').on('click',send)
+    tab.find('button').eq(1).on('click',send)
+    tab.find('button').eq(0).on('click',function(){
+      var cm=tab.find('.ct-command');
+      if (!cm.children().length)
+        createUI(cm[0],function(cmd){
+          if (cmd.slice(0,2)=="G1")
+            cmd='G91\r\n'+cmd;
+          socket.emit('message',cmd+'\r\n');
+        })
+    })
     s.keypress(function (e) {
       if (e.which == 13) {
         send();

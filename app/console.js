@@ -14,6 +14,7 @@ var open=(http,p,speed)=>new Promise((done,fail)=>{
       autoOpen: false,
       parser0: SerialPort.parsers.readline('\n'),
       baudRate: speed,
+//      rtscts: true,
     });
     port.open(function (err) {
       if (err) {

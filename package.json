@@ -1,6 +1,6 @@
 {
   "name": "marlin-conf",
-  "version": "2.6.4",
+  "version": "2.6.5",
   "description": "configuration tool for Marlin project",
   "main": "./index.js",
   "scripts": {
@@ -67,6 +67,7 @@
     "socket.io": "^2.0.1",
     "swig-templates": "^2.0.2",
     "tether": "^1.4.0",
+    "three": "^0.85.2",
     "tty2html": "^1.0.0",
     "universal-analytics": "^0.4.13",
     "which": "^1.2.14"
