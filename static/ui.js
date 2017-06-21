@@ -13,13 +13,13 @@ function createUI(ui,cb){
   var El=document.createElement('DIV')
   El.innerHTML='[^]';
   El.addEventListener( 'click', toggleSize, false );
-  Object.assign(El.style,{position:"absolute", cursor:"pointer", right:"20px", top:"10px", background:"white"})
+  Object.assign(El.style,{position:"absolute", cursor:"pointer", right:"20px", top:"0px", background:"white"})
   domElement.appendChild(El);
 
   var El=document.createElement('DIV')
   El.innerHTML='[X]';
   El.addEventListener( 'click', function() { domElement.dispatchEvent( new Event('destroy') ); }, false );
-  Object.assign(El.style,{position:"absolute", cursor:"pointer", right:"0px", top:"10px", background:"white"})
+  Object.assign(El.style,{position:"absolute", cursor:"pointer", right:"0px", top:"0px", background:"white"})
   domElement.appendChild(El);
 
 //  Object.assign(domElement.style,{position:"relative", cursor:"default", width:"300px", height:"250px", margin:"auto"})
@@ -32,14 +32,6 @@ function createUI(ui,cb){
       ui.className+=" maximized"
     else
       ui.className=ui.className.split(' ').filter(function(name){ return name!='maximized'; }).join(' ')
-if(0)
-    if (domElement.style.width!="300px"){
-      domElement.style.width="300px";
-      domElement.style.height="250px";
-    }else{
-      domElement.style.width="100%";
-      domElement.style.height="100%";
-    }
     window.dispatchEvent(new Event('resize'));
   }
   var defaults={

@@ -13,12 +13,14 @@ var pio = require('./pio');
 var http = require('http');
 var ua = require('universal-analytics');
 var promisify = require('./helpers').promisify;
+var walk=require('./helpers').walk;
 
 var port = 3000;
 var server = http.Server(app);
 var visitor = ua('UA-99239389-1');
 var isElectron=module.parent&&module.parent.filename.indexOf('index.js')>=0;
 
+var baseCfg='Marlin';
 var serial;
 var serial_enabled = !(isElectron&&process.platform=='darwin');
 if (serial_enabled)
@@ -105,9 +107,13 @@ app.get('/checkout/:branch', function (req, res) {
 });
 var get_cfg=()=>{
   var base=Promise.all([git.root(),git.Tag()]);
-  var list=['Marlin/Configuration.h','Marlin/Configuration_adv.h'].map(f=>{
+  var list=['Configuration.h','Configuration_adv.h']
+  .map(f=>{
     return base
-      .then(p=>git.Show(p[1],f).then(file=>mctool.getJson(p[0],file,p[1])(path.join(p[0],f))))
+      .then(p=>
+          git.Show(p[1],path.join(baseCfg,f))
+          .then(file=>mctool.getJson(p[0],file,p[1])(path.join(p[0],'Marlin',f)))
+      )
       .then(o=>(o.names.filter(n=>hints.d2i(n.name),1).map(n=>o.defs[n.name].hint=!0),o))
       .then(a=>(a.names=undefined,type='file',a))
       .then(a=>
@@ -122,6 +128,25 @@ var get_cfg=()=>{
 app.get('/now/', function (req, res) {
   res.set('Content-Type', 'text/plain');
   get_cfg().then(a=>res.send(JSON.stringify(a,null,2)))
+});
+var unique=a=>a.filter((elem, index, self)=>index == self.indexOf(elem))
+app.get('/examples', function (req, res) {
+  git.root()
+  .then(root=>{
+    var ex=path.join(root,'Marlin','example_configurations')
+    return walk(ex)
+    .then(a=>a.filter(i=>/Configuration(_adv)?\.h/.test(i)))
+    .then(a=>a.map(i=>path.parse(path.relative(ex,i)).dir))
+    .then(unique)
+    .then(a=>(a.unshift('Marlin'),a))
+    .then(a=>res.send({current:baseCfg,list:a}))
+  })
+});
+app.get('/set-base/:path', function (req, res) {
+  baseCfg=atob(req.params.path).toString();
+  if (baseCfg!='Marlin')
+    baseCfg=path.join('Marlin','example_configurations',baseCfg);
+  res.end();
 });
 app.get('/version', function (req, res) {
   res.set('Content-Type', 'image/svg+xml');
@@ -139,16 +164,18 @@ app.get('/version', function (req, res) {
 });
 app.get('/version/:screen', function (req, res) {
   res.set('Content-Type', 'text/plain');
-  if (!/\/jes/.test(process.cwd()))
-    visitor.screenview(req.params.screen, pjson.name,pjson.version).send()
-  pio.isPIO()
-//  .then(pio.list)
-//  .then(p=>"'"+p+"'")
-  .catch(()=>false)
-  .then(a=>{
+    visitor.screenview({
+      cd:req.params.screen,
+      an:pjson.name,
+      av:pjson.version,
+      ua:req.headers['user-agent'],
+      ul:req.headers['accept-language'].split(',')[0],
+    }).send()
+  Promise.all([pio.isPIO().catch(()=>false),git.root()])
+  .then(pp=>{
     //console.log(a)
-    var s=JSON.stringify(a);
-    res.write(`var config={pio:${s},version:"${pjson.version}"};`);
+    var cfg={pio:pp[0],version:pjson.version,root:pp[1],base:baseCfg};
+    res.write("var config="+JSON.stringify(cfg));
     res.end();
   })
 });
@@ -210,7 +237,21 @@ app.get('/status', function (req, res) {
   git.Status().then(a=>res.send(a))
 });
 app.get('/checkout-force', function (req, res) {
-  git.Checkout('--force').then(a=>res.send(a))
+  if (baseCfg=='Marlin')
+    git
+    .Checkout('--force')
+    .then(a=>res.send(a));
+  else
+    git.root()
+    .then(root=>
+      ['Configuration.h','Configuration_adv.h']
+      .map(f=>new Promise((done,fail)=>
+          fs.createReadStream(path.join(root,baseCfg,f))
+          .pipe(fs.createWriteStream(path.join(root,'Marlin',f)).on('finish',done))
+        )
+      )
+    )
+    .then(a=>res.send(a))
 });
 app.get('/fetch', function (req, res) {
   git.Fetch()
@@ -253,7 +294,7 @@ app.post('/upload', function(req, res){
 try{
         return mctool
           .makeCfg(file.path)
-          .then(mctool.makeHfile(root,file.name))
+          .then(mctool.makeHfile(root,file.name,baseCfg))
 }catch(e) { console.log(e); throw e; }
       })
 //        return new Promise((done,fail)=>

@@ -382,9 +382,6 @@ $(function(){
               d.find('.col-sm-6').attr('title',title)//.tooltip(tooltip_large);
             }
             var b=d.find('button');
-            if ( /_adv$/.test( file.file.name ) )
-              b.remove();
-            else
             if ( def.hint == undefined )
               b.remove();
             else
@@ -479,21 +476,20 @@ $(function(){
           }
         })
     });
-  (function(){
-    var m=$('#mct-tags-modal');
-    var t=m.find('table tbody');
-    m.find('button.btn-primary').on('click',function(ev){
+  (function(btn,ui){
+    var t=ui.find('table tbody');
+    ui.find('button.btn-primary').on('click',function(ev){
       var row = t.find('.table-success');
       if(row.length){
         var tag=row.find('td').eq(1).text().split(',');
-        cmdReload($.ajax('/checkout/'+tag[0]),m);
+        cmdReload($.ajax('/checkout/'+tag[0]),ui);
       }
     });
-    m.find('table tbody').on('click',function(ev){
+    ui.find('table tbody').on('click',function(ev){
       $(this).find('tr').removeClass('table-success');
       $(ev.target).parents('tr').addClass('table-success')
     });
-    $('.mct-change').on('click',function(){
+    btn.on('click',function(){
       $.ajax('/tags')
       .fail(ajaxAlert)
       .then(function(data){
@@ -502,10 +498,38 @@ $(function(){
         data.map(function(row){
           t.append($('<tr>').append($('<td>').text(row.date)).append($('<td>').text(row.tag)))
         })
-        m.modal();
+        ui.modal();
       })
     })
-  }());
+  }($('.mct-change'),$('#mct-tags-modal')));
+  (function(btn,ui){
+    var t=ui.find('table tbody');
+    var hdr=ui.find('.modal-body>p span');
+    ui.find('button.btn-primary').on('click',function(ev){
+      var row = t.find('.table-success');
+      if(row.length){
+        var path=btoa(row.find('td').text());
+        cmdReload($.ajax('/set-base/'+path),ui);
+      }
+    });
+    ui.find('table tbody').on('click',function(ev){
+      $(this).find('tr').removeClass('table-success');
+      $(ev.target).parents('tr').addClass('table-success')
+    });
+    btn.on('click',function(){
+      $.ajax('/examples')
+      .fail(ajaxAlert)
+      .then(function(data){
+        t.empty();
+        hdr.text(data.current)
+        config.base=data.current;
+        data.list.map(function(row){
+          t.append($('<tr>').append($('<td>').text(row)))
+        })
+        ui.modal();
+      })
+    })
+  }($('.mct-examples'),$('#mct-examples-modal')));
   (function(btn,ui){
     var p=ui.find('p');
     btn.on('click',function(){
@@ -532,40 +556,7 @@ $(function(){
     })
   }($('.mct-update')));
   $('.mct-consoles').on('click',function(){ window.open('consoles.html','_blank') });
-  (function(){ //REMOVE
-    var r=$('#mct-console-modal');
-    var p=r.find('textarea');
-    var b=r.find('.modal-body button');
-    var s=r.find('.modal-body input[type=text]');
-    var c=r.find('.modal-body input[type=checkbox]');
-    $('.mct-console').on('click',function(){
-      $.ajax('/port/ttyUSB0/115200').then(function(url){
-//        p.empty();
-          var socket = io.connect({path:url});
-          socket.on('connect', function(data) {
-            //socket.emit('message', 'Hello World from client');
-          });
-          socket.on('message',function(msg){
-            p.append(msg)
-          })
-          socket.on('disconnect',function(msg){
-            p.append('\n[closed]')
-            socket.close();
-          })
-          b.unbind('click').on('click',function(){
-            socket.emit('message',s.val()+(c.prop('checked')?'\r\n':''));
-          })
-          r.modal();
-          r.unbind('hidden.bs.modal').on('hidden.bs.modal', function (e) {
-            socket.close();
-          })
-      })
-    })
-    r.find('button.btn-primary').on('click',function(ev){
-        cmdReload($.ajax('/checkout-force'),r);
-    })
-  }());
-(function(){
+  (function(){
     var ports=$('.mct-ports')
     var title=ports.find('a.btn')
     ports.find('.dropdown-menu').on('click',function(ev){
@@ -605,8 +596,13 @@ $(function(){
         var port= JSON.parse(event.data);
         removePort(port);
       });
-}());
-
+  }());
+  (function(btn){
+    btn.on('click',function(){
+      _add($('template._info'))
+      .find('p').html(`Current directory is: ${config.root}<br>Current base files choosen from: ${config.base}`)
+    })
+  }($('.mct-info')));
   (function(){
     var r=$('#mct-pio-modal');
     var p=r.find('.form-group pre');

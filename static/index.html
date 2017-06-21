@@ -16,7 +16,7 @@
     <script src="libs/tether/dist/js/tether.min.js"></script>
     <script src="libs/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="libs/socket.io-client/dist/socket.io.js"></script>
-<script src="jquery.ba-throttle-debounce.js"></script>
+    <script src="js/jquery.ba-throttle-debounce.js"></script>
     <link href="toggle.css" rel="stylesheet">
 <script src="/version/Home"></script>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -167,6 +167,31 @@ if (typeof require === 'function') { //commonJS from electron
             </div>
           </div>
         </div>
+        <div class="modal fade" id="mct-examples-modal" tabindex="-1" role="dialog" aria-labelledby="examplesModalLabel" aria-hidden="true" >
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title" id="examplesModalLabel">Available examples</h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="modal-body">
+                <p>Current is:<br><span></sapn></p>
+                <table class="table table-hover table-sm">
+                  <thead>
+                    <tr>
+                      <th>Name
+                  <tbody>
+                </table>
+              </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Change</button>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="modal fade" id="mct-reset-modal" role="dialog" aria-labelledby="resetModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
@@ -225,9 +250,13 @@ if (typeof require === 'function') { //commonJS from electron
         <div class="dropdown-menu" aria-labelledby="dropdownTagsLink">
           <button class="dropdown-item mct-change" title="Change version (git checkout)" >Change</button>
           <button class="dropdown-item mct-update" title="Update version list from GitHub (git fetch)">Update</button>
-          <button class="dropdown-item bg-danger text-white mct-reset" title="Reset all changes (git checkout -f)">Reset</button>
+          <button class="dropdown-item bg-danger text-white mct-reset" title="Reset all changes (git checkout -f) or copy from examples if choosen">Reset</button>
+          <button class="dropdown-item mct-examples" title="Choose base file from examples">Examples</button>
         </div>
       </div>
+      </li>
+      <li class="nav-item mr-sm-2 my-auto p-1">
+        <button type="button" class="btn btn-warning mct-info" title="Show information">?</button>
       </li>
       <li class="nav-item mr-sm-2 my-auto p-1">
 <div class="onoffswitch mct-changed"  title="Toggle only changed options">
@@ -278,6 +307,15 @@ if (typeof require === 'function') { //commonJS from electron
         <span aria-hidden="true">&times;</span>
       </button>
       <h4 class="alert-heading">Oh snap!</h4>
+      <p></p>
+    </div>
+    </template>
+    <template class="_info">
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      <h4 class="alert-heading">Information</h4>
       <p></p>
     </div>
     </template>

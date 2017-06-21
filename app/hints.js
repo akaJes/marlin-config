@@ -77,7 +77,7 @@ function init_hints(){
 function hint(name){
   var find=d2i[name]
   var banner='<link rel="stylesheet" title="Default" href="libs/highlight.js/styles/default.css">';
-  var banner2='<script src="head.min.js"></script><script>head.load("sheetrock.min.js");</script>';
+  var banner2='<script src="js/head.min.js"></script><script>head.load("js/sheetrock.min.js");</script>';
   var add_banner='';
   if (find){
     var ob=headings.reduce((ob,v)=>{

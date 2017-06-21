@@ -78,7 +78,7 @@ var addChanged=target=>origin=>
       if (i.number != undefined && i.disabled ) return; //no need dublicates
       var oo=map[i.name];
       if (oo){
-        oo=oo.filter(i=>!i.disabled)
+        oo=oo.filter(i=>!i.disabled|| i.number == undefined)
         o=oo[oo.length-1];
         if (o){
           var changed = {};
@@ -225,7 +225,7 @@ module.exports.updateH=(root,file,json)=>{
     .then(onlyChanged)
     .then(extendFrom(h))
     .then(array2text)
-    .then(outFile(file))
+    .then(outFile(path.join(root,'Marlin',path.parse(file).base)))
     .then(a=>(console.log('updated h: ',path.relative(root,file)),a))
     .catch(a=>{ console.log('fail h: ',file,a); throw a;})
 }
@@ -295,8 +295,8 @@ module.exports.makeHH=(root,name)=>conf=>{
     .catch(a=>(console.log('fail conf h: ',file,a),a))
 }
 
-module.exports.makeHfile=(root,name)=>conf=>{
-    var p=path.join(root||'','Marlin',name);
+module.exports.makeHfile=(root,name,dir)=>conf=>{
+    var p=path.join(root||'',dir||'Marlin',name);
     var h=inFile(p);
     return h
     .then(mc.h2json)
