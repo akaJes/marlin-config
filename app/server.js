@@ -237,7 +237,7 @@ app.get('/status', function (req, res) {
   git.Status().then(a=>res.send(a))
 });
 app.get('/checkout-force', function (req, res) {
-  var cp=baseCfg=='Marlin'?a=>a:
+  var cp=baseCfg=='Marlin'?a=>a:a=>
     git.root()
     .then(root=>
       ['Configuration.h','Configuration_adv.h']
