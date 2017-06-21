@@ -237,11 +237,7 @@ app.get('/status', function (req, res) {
   git.Status().then(a=>res.send(a))
 });
 app.get('/checkout-force', function (req, res) {
-  if (baseCfg=='Marlin')
-    git
-    .Checkout('--force')
-    .then(a=>res.send(a));
-  else
+  var cp=baseCfg=='Marlin'?a=>a:
     git.root()
     .then(root=>
       ['Configuration.h','Configuration_adv.h']
@@ -251,7 +247,9 @@ app.get('/checkout-force', function (req, res) {
         )
       )
     )
-    .then(a=>res.send(a))
+  git.Checkout('--force')
+  .then(cp)
+  .then(a=>res.send(a));
 });
 app.get('/fetch', function (req, res) {
   git.Fetch()

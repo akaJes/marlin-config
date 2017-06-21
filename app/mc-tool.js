@@ -305,7 +305,7 @@ module.exports.makeHfile=(root,name,dir)=>conf=>{
     .then(onlyChanged)
     .then(extendFrom(h))
     .then(array2text)
-    .then(outFile(p))
+    .then(outFile(path.join(root||'','Marlin',name)))
     .then(a=>(console.log('done update h file: ',path.relative(root,p)),a))
     .catch(a=>(console.log('fail update h file: ',file,a),a))
 }
