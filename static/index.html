@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link type="image/x-icon" rel="shortcut icon" href="favicon.ico">
+    <link type="image/x-icon" rel="shortcut icon" href="css/favicon.ico">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <title>Marlin configurator</title>
     <!-- Bootstrap -->
@@ -17,7 +17,9 @@
     <script src="libs/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="libs/socket.io-client/dist/socket.io.js"></script>
     <script src="js/jquery.ba-throttle-debounce.js"></script>
-    <link href="toggle.css" rel="stylesheet">
+    <link href="css/toggle.css" rel="stylesheet">
+    <link href="libs/font-awesome/css/font-awesome.css" rel="stylesheet"> <!-- rework to svg-->
+    <link href="css/spinner.css" rel="stylesheet">
 <script src="/version/Home"></script>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -73,7 +75,7 @@
     top: 50%;
     left: -54px;
     z-index: -1;
-    background: url(text-25.png) 0 0 no-repeat;
+    background: url(css/text-25.png) 0 0 no-repeat;
     -webkit-transform: rotate(-90deg);
     -moz-transform: rotate(-90deg);
     -ms-transform: rotate(-90deg);
@@ -417,6 +419,17 @@ if (typeof require === 'function') { //commonJS from electron
                       </div>
                     </div>
                   </template>
+                  </div>
+                </div>
+              </div>
+              </template>
+              <template class="_snippet">
+              <div class="card">
+                <div class="card-header h5">
+                    <label class="form-control-label col-sm-2 text-right" >Name:</label><strong><span></span></strong>
+                </div>
+                <div class="card-block">
+                  <div class="form-horizontal" role="form">
                   </div>
                 </div>
               </div>

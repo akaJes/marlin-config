@@ -1,0 +1,107 @@
+<script>
+$(function(){
+  var base=$('.calculator-E')
+  base.find('.spinner .btn').on('click', function() {
+    var inp=$(this).parent().siblings('input')
+    inp.val(parseInt(inp.val())+($(this).hasClass('fa-caret-up')?1:-1)).change()
+  });
+  var inps=base.find('input,select')
+  inps.on('change',function(){
+    var vals={};
+    inps.each(function(i,inp){
+      vals[$(inp).attr('name')]=parseFloat($(this).val());
+    })
+    var StepsPerMM = ((360/vals.StepSize)*vals.MicroStepping)/(vals.GearDiameter*Math.PI)*(vals.PulleyLeadscrew/vals.PulleyMotor);
+    var res=base.find('.results p');
+    res.eq(0).text(StepsPerMM.toFixed(2))
+    res.eq(1).text("M92 Z"+StepsPerMM.toFixed(2))
+    var Resolution = ((1./StepsPerMM)*1000);
+    res.eq(2).text(Resolution.toFixed(2))
+  }).eq(0).change()
+});
+</script>
+    <div class="calculator-E jumbotron">
+    <h2>Steps per millimeter - leadscrew driven systems</h2>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="StepSize">Motor step angle</label>
+            <select name="StepSize" class="form-control change">
+              <option value="1.8" selected="">1.8° (200 per revolution)</option>
+              <option value="0.9">0.9° (400 per revolution)</option>
+              <option value="7.5">7.5° (48 per revolution)</option>
+              </select>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="MicroStepping">Driver microstepping</label>
+            <select name="MicroStepping" class="form-control change">
+              <option value="1">1 - full step</option>
+              <option value="2">1/2 - half step</option>
+              <option value="4">1/4 - quater step</option>
+              <option value="8">1/8 - uStep (mostly Gen6)</option>
+              <option value="16" selected="">1/16 - uStep (mostly Pololu)</option>
+              <option value="32">1/32 - uStep</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+         <div class="form-group">
+            <label for="GearDiameter">Gear word diameter</label>
+            <div class="input-group spinner">
+              <input type="text" name="GearDiameter" value="8" class="change form-control">
+              <div class="input-group-btn-vertical">
+                <button class="btn btn-secondary fa fa-caret-up" type="button"></button>
+                <button class="btn btn-secondary fa fa-caret-down" type="button"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <div class="row">
+            <div class="col-md-7">
+              <label for="PulleyMotor">Motor gear ratio</label>
+            </div>
+            <div class="col-md-5">
+              <label for="PulleyLeadscrew">Extruder gear ratio</label>
+            </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <input type="text" name="PulleyMotor" value="10" class="form-control change">
+              </div>
+              <div class="col-md-1"> :</div>
+              <div class="col-md-5">
+                <input type="text" name="PulleyLeadscrew" value="34" class="form-control change">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row results">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="ToothCount">Result</label>
+            <p class="form-control-static text-success"></p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="ToothCount">G-code</label>
+            <p class="form-control-static text-success"></p>
+          </div>
+        </div>
+      </div>
+      <div class="row results">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="ToothCount">Resolution (microns)</label>
+            <p class="form-control-static text-success"></p>
+          </div>
+        </div>
+      </div>
+    </div>

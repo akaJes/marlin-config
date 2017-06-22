@@ -281,6 +281,9 @@ $(function(){
     var tooltip_large={template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner large"></div></div>'};
     var defs=$.get('/json');
     var gcodes=$.get('/gcodes');
+    var snippets=$.get('/snippets');
+    var tabGcodes=addNewTab('Gcodes','card-gcodes');
+    var tabSnippets=addNewTab('Snippets','card-snippets');
     defs.then(function(data){
       data.forEach(function(file){
         $.each(file.defs,function(name,d){ //TODO:put it into server
@@ -392,6 +395,7 @@ $(function(){
           var btns=sec.find('.card-header button');
           btns.eq(1).on('click',function(){sec.find('.form-group').not('.bg-info').hide()})
           btns.eq(0).on('click',function(){sec.find('.form-group').show()})
+          $('.config-files a[href$=Configuration]').tab('show');
         })
       })
       $('body').scrollspy({ target: '#navbar-sections' })
@@ -401,7 +405,6 @@ $(function(){
             $(this).toggleClass('active',$(this).attr('name')==href.slice(1));
           })
       })
-      $('.config-files .nav-tabs a').eq(1).tab('show');
       $('#navbar-sections').on('click',function(ev){
         var href=$(ev.target).attr('href')
         $('.config-files .nav-tabs a').each(function(){ $(this).attr('href')==href&&$(this).tab('show') });
@@ -437,10 +440,8 @@ $(function(){
       return def.length
     }
     gcodes.then(function(data){
-      var href='card-gcodes';
-      var tab=addNewTab('Gcodes',href);
       $.each(data.groups,function(n,section){
-        var sec=addNewSection(tab,'gcode-'+section,section,'_group')
+        var sec=addNewSection(tabGcodes,'gcode-'+section,section,'_group')
         $.each(data.list[section],function(n,tag){
 //            cnt++;
           var d=_add(sec.find('template._gcode'))
@@ -475,6 +476,12 @@ $(function(){
             })
           }
         })
+    });
+    snippets.then(function(data){
+      $.each(data,function(n,snip){
+        var sec=addNewSection(tabSnippets,'gcode-'+snip.file,snip.file,'_snippet')
+        $(sec).find('.form-horizontal').html(snip.data);
+      })
     });
   (function(btn,ui){
     var t=ui.find('table tbody');

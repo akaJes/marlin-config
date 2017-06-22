@@ -233,6 +233,12 @@ app.get('/json/', function (req, res) {
   res.set('Content-Type', 'application/json');
   get_cfg().then(a=>res.send(a))
 });
+app.get('/snippets', function (req, res) {
+  var ex=path.join(__dirname,'..','views','snippets')
+  walk(ex)
+  .then(a=>Promise.all(a.map(file=>promisify(fs.readFile)(file,'utf8').then(data=>({data:data,file:path.parse(file).name})))))
+  .then(a=>res.send(a))
+});
 app.get('/status', function (req, res) {
   git.Status().then(a=>res.send(a))
 });

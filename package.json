@@ -1,6 +1,6 @@
 {
   "name": "marlin-conf",
-  "version": "2.6.7",
+  "version": "2.7.0",
   "description": "configuration tool for Marlin project",
   "main": "./index.js",
   "scripts": {
@@ -53,6 +53,7 @@
   "dependencies": {
     "bootstrap": "4.0.0-alpha.6",
     "express": "^4.15.2",
+    "font-awesome": "^4.7.0",
     "formidable": "^1.1.1",
     "get-port": "^3.1.0",
     "highlight.js": "^9.11.0",
