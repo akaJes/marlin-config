@@ -240,9 +240,49 @@ function getTitle(text){
 app.get('/snippets', function (req, res) {
   var ex=path.join(__dirname,'..','views','snippets')
   walk(ex)
-  .then(a=>Promise.all(a.map(file=>promisify(fs.readFile)(file,'utf8').then(data=>({data:data,file:path.parse(file).name,title:getTitle(data)})))))
+  .then(a=>Promise.all(a.map(file=>promisify(fs.readFile)(file,'utf8').then(data=>({data:data,name:path.parse(file).name,title:getTitle(data)})))))
   .then(a=>a.sort(function(a,b){ return b.name>a.name?-1:a.name>b.name?1:0; }))
   .then(a=>res.send(a))
+});
+function getMatch(reg,data,second){
+  var m=reg.exec(data);
+  if (second)
+    m=reg.exec(data);
+  return m[1];
+}
+app.get('/bs/default', function (req, res) {
+  git.root()
+  .then(f=>path.join(f,'Marlin','dogm_bitmaps.h'))
+  .then(file=>promisify(fs.readFile)(file,'utf8'))
+  .then(data=>{
+    var second=/\/\/\s*#define\s+START_BMPHIGH/g.test(data);
+    var d=getMatch(/start_bmp.*{(([^}]|\r\n?|\n)*)}/g,data,second);
+    d=d.replace(/\n/g,'').replace(/ /g,'');
+    return {
+      width:  getMatch(/#define\s+START_BMPWIDTH\s+(\d*)/g,data,second),
+      height: getMatch(/#define\s+START_BMPHEIGHT\s+(\d*)/g,data,second),
+      data:   d,
+    }
+  })
+  .then(a=>res.send(a))
+  .catch(e=>res.status(403).send(e))
+});
+app.get('/bs/custom', function (req, res) {
+  git.root()
+  .then(f=>path.join(f,'Marlin','_Bootscreen.h'))
+  .then(file=>promisify(fs.readFile)(file,'utf8'))
+  .then(data=>{
+    var d=getMatch(/{(([^}]|\r\n?|\n)*)}/g,data);
+    d=d.replace(/\n/g,'').replace(/ /g,'');
+    return {
+      width:    getMatch(/#define\s+CUSTOM_BOOTSCREEN_BMPWIDTH\s+(\d*)/g,data),
+      height:   getMatch(/#define\s+CUSTOM_BOOTSCREEN_BMPHEIGHT\s+(\d*)/g,data),
+      timeout:  getMatch(/#define\s+CUSTOM_BOOTSCREEN_TIMEOUT\s+(\d*)/g,data),
+      data:     d,
+    }
+  })
+  .then(a=>res.send(a))
+  .catch(e=>res.status(403).send(e))
 });
 app.get('/status', function (req, res) {
   git.Status().then(a=>res.send(a))

@@ -22,3 +22,24 @@ function readValues(inps){
     })
   return vals;
 }
+function drawBootscreen(canvas,screen,size){
+    Object.assign(canvas,{width:screen.width*size,height:screen.height*size});
+
+    function reader(screen){
+      var bit=0x80>>(screen.pos%8);
+      var pixel=!!(screen.data[parseInt(screen.pos/8)]&bit);
+      screen.pos++;
+      return pixel;
+    }
+    var ctx = canvas.getContext("2d");
+    for (var y=0;screen.height>y;y++){
+      screen.pos=y*Math.ceil(screen.width/8)*8;
+      for (var x=0;screen.width>x;x++)
+        if (reader(screen)){
+          ctx.beginPath();
+          ctx.rect(x*size,y*size,size,size)
+          ctx.fillStyle="black";
+          ctx.fill();
+        }
+    }
+}

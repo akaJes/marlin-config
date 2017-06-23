@@ -479,7 +479,7 @@ $(function(){
     });
     snippets.then(function(data){
       $.each(data,function(n,snip){
-        var sec=addNewSection(tabSnippets,'gcode-'+snip.file,snip.title,'_snippet')
+        var sec=addNewSection(tabSnippets,'gcode-'+snip.name,snip.title,'_snippet')
         $(sec).find('.form-horizontal').html(snip.data);
       })
     });

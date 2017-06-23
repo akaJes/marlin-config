@@ -1,0 +1,18 @@
+<title>Custom marlin bootscreen</title>
+<div style="text-align:center" class="bs-custom">
+  <p>This is custom boot screen with size <span></span></p>
+  <canvas></canvas>
+  <p>Maximal allowed image can be placed on screen 128x64</p>
+</div>
+<script>
+$(function(){
+  var base=$('.bs-custom');
+  $.ajax('/bs/custom')
+  .fail(function(){ base.empty().text('NOT FOUND') })
+  .then(function(screen){
+    base.find('p span').text(screen.width+'x'+screen.height);
+    screen.data=eval('['+screen.data+']');
+    drawBootscreen(base.find('canvas')[0],screen,10);
+  })
+});
+</script>
