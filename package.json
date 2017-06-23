@@ -52,6 +52,7 @@
   "homepage": "https://github.com/akaJes/marlin-config#readme",
   "dependencies": {
     "bootstrap": "4.0.0-alpha.6",
+    "cropper": "^3.0.0-rc.2",
     "express": "^4.15.2",
     "font-awesome": "^4.7.0",
     "formidable": "^1.1.1",

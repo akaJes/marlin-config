@@ -1,0 +1,64 @@
+<title>Custom marlin bootscreen</title>
+<style>
+.bs-custom .uploaded{
+  max-width:640px;
+  max-height:320px;
+}
+</style>
+<div style="text-align:center" class="bs-custom">
+  <div class="form-group row">
+    <div class="col-md-12">Maximal allowed image can be placed on screen 128x64</div>
+  </div>
+            <div class="form-group row">
+              <div class="col-md-3">
+               <div class="input-group spinner">
+                  <input type="text" name="bsWidth" value="128" class="form-control change">
+                  <div class="input-group-btn-vertical">
+                    <button class="btn btn-secondary fa fa-caret-up" type="button"></button>
+                    <button class="btn btn-secondary fa fa-caret-down" type="button"></button>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-1">X</div>
+              <div class="col-md-3">
+               <div class="input-group spinner">
+                  <input type="text" name="bsHeight" value="64" class="form-control change">
+                  <div class="input-group-btn-vertical">
+                    <button class="btn btn-secondary fa fa-caret-up" type="button"></button>
+                    <button class="btn btn-secondary fa fa-caret-down" type="button"></button>
+                  </div>
+                </div>
+              </div>
+    <div class="col-md-4">
+      <label class="custom-file">
+        <input type="file" class="file custom-file-input">
+        <span class="custom-file-control"></span>
+      </label>
+    </div>
+            </div>
+  <div class="row form-group mx-auto">
+    <canvas></canvas>
+  </div>
+  <div class="row form-group">
+    <img class="uploaded"></img>
+  </div>
+</div>
+<script>
+$(function(){
+  var base=$('.bs-custom');
+  var img=base.find('.uploaded')
+  imgReader(base.find('.file'),img,base.find('canvas'));
+  bindSpinner(base);
+  var inps=base.find('.spinner input');
+  inps.on('change',function(){
+    img.trigger('aspect',inps.eq(0).val()/inps.eq(1).val())
+  })
+  $.ajax('/bs/custom')
+//  .fail(function(){ base.empty().text('NOT FOUND') })
+  .then(function(screen){
+    base.find('p span').text(screen.width+'x'+screen.height);
+    screen.data=eval('['+screen.data+']');
+    drawBootscreen(base.find('canvas')[0],screen,10);
+  })
+});
+</script>
