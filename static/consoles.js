@@ -18,7 +18,7 @@ function createPort(p){
     })
     var bts=tds.eq(3).find('button')
     bts.eq(0).on('click',function(){createConsole(port,obSpeed.val(),uiPort);})
-    bts.eq(1).on('click',function(){ removeTab(port); $.ajax('/port-close/'+port) })
+    bts.eq(1).on('click',function(){removeConsole(port,true);})
 }
 function removePort(p){
   $('table tr').filter(function(i,el){ return $(el).find('td').eq(0).text()==p.comName}).remove()
@@ -38,13 +38,21 @@ function createTab(name,url){
     if(!$('#'+name).length){
       _add($('template.port-body'))
       .attr('id',name);
-      tmpl=_add($('template.port-tab'));
-      tab=tmpl.find('a')
-      .text(name).attr('href','#'+name)
+      tmpl=_add($('template._port-tab'));
+      tab=tmpl.find('a').attr('href','#'+name)
+      tab.find('>span').text(name)
+      tmpl.find('a button').on('click',function(){ removeConsole(name); })
     }else
       tab=$('a[href$='+name+']');
     tab.tab('show')
     return tmpl&&$('#'+name);
+}
+
+function removeConsole(port,force){
+  removeTab(port);
+  $('a[href$=home]').tab('show');
+  if(force)
+    $.ajax('/port-close/'+port)
 }
 
 function createConsole(port,speed,row){
@@ -102,22 +110,32 @@ function initConsole(tab,url,port){
       add('\n[closed]')
       //socket.close();
     })
+    var sentG91=false;
     function send(){
       if(aTags.indexOf(s.val())<0){
         aTags.push(s.val());
         updateStore(0,'gcodes',aTags);
       }
-      socket.emit('message',s.val()+eol.val().replace(/r/,'\r').replace(/n/,'\n'));
+      sendCmd(s.val());
       s.val('');
+    }
+    function sendCmd(cmd){
+      var cmd2=cmd.slice(0,3).toUpperCase();
+      if (cmd2=="G90")
+        sentG91=false;
+      if (cmd2=="G91")
+        sentG91=true;
+      socket.emit('message',cmd+eol.val().replace(/r/,'\r').replace(/n/,'\n'));
     }
     tab.find('button').eq(1).on('click',send)
     tab.find('button').eq(0).on('click',function(){
       var cm=tab.find('.ct-command');
       if (!cm.children().length)
         createUI(cm[0],function(cmd){
-          if (cmd.slice(0,2)=="G1")
-            cmd='G91\r\n'+cmd;
-          socket.emit('message',cmd+'\r\n');
+          if (cmd.slice(0,2).toUpperCase()=="G1")
+            if(!sentG91)
+              sendCmd('G91');
+          sendCmd(cmd);
         })
     })
     s.keypress(function (e) {

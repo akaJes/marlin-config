@@ -1,16 +1,12 @@
+<title>Belt driven systems, XY</title>
 <script>
 $(function(){
   var base=$('.calculator-XY')
-  base.find('.spinner .btn').on('click', function() {
-    var inp=$(this).parent().siblings('input')
-    inp.val(parseInt(inp.val())+($(this).hasClass('fa-caret-up')?1:-1)).change()
-  });
+  bindSpinner(base);
+  bindClipboard(base);
   var inps=base.find('input,select')
   inps.on('change',function(){
-    var vals={};
-    inps.each(function(i,inp){
-      vals[$(inp).attr('name')]=parseFloat($(this).val());
-    })
+    var vals=readValues(inps);
     var StepsPerMM = ((360/vals.StepSize)*vals.MicroStepping)/(vals.BeltPitch*vals.ToothCount);
     var Resolution = ((1./StepsPerMM)*1000);
     var res=base.find('.results p');
@@ -20,9 +16,7 @@ $(function(){
   }).eq(0).change()
 });
 </script>
-
-    <div class="calculator-XY jumbotron">
-    <h2>Steps per millimeter - belt driven systems</h2>
+    <div class="calculator-XY">
       <div class="row">
         <div class="col-md-6">
           <div class="form-group">
@@ -78,13 +72,13 @@ $(function(){
       <div class="row results">
         <div class="col-md-6">
           <div class="form-group">
-            <label for="ToothCount">Result</label>
+            <label for="ToothCount">Steps per millimeter:<i class="fa fa-clipboard ml-2" aria-hidden="true" title="copy to clipboard"></i></label>
             <p class="form-control-static text-success"></p>
           </div>
         </div>
         <div class="col-md-6">
           <div class="form-group">
-            <label for="ToothCount">G-code</label>
+            <label for="ToothCount">G-code:<i class="fa fa-clipboard ml-2" aria-hidden="true" title="copy to clipboard"></i></label>
             <p class="form-control-static text-success"></p>
           </div>
         </div>

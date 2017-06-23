@@ -233,10 +233,15 @@ app.get('/json/', function (req, res) {
   res.set('Content-Type', 'application/json');
   get_cfg().then(a=>res.send(a))
 });
+function getTitle(text){
+  var m=text.match(/<title>(.*)<\/title>/)
+  return m&&m[1];
+}
 app.get('/snippets', function (req, res) {
   var ex=path.join(__dirname,'..','views','snippets')
   walk(ex)
-  .then(a=>Promise.all(a.map(file=>promisify(fs.readFile)(file,'utf8').then(data=>({data:data,file:path.parse(file).name})))))
+  .then(a=>Promise.all(a.map(file=>promisify(fs.readFile)(file,'utf8').then(data=>({data:data,file:path.parse(file).name,title:getTitle(data)})))))
+  .then(a=>a.sort(function(a,b){ return b.name>a.name?-1:a.name>b.name?1:0; }))
   .then(a=>res.send(a))
 });
 app.get('/status', function (req, res) {

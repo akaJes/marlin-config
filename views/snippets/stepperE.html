@@ -1,27 +1,22 @@
+<title>Geared or direct driven Extruders</title>
 <script>
 $(function(){
   var base=$('.calculator-E')
-  base.find('.spinner .btn').on('click', function() {
-    var inp=$(this).parent().siblings('input')
-    inp.val(parseInt(inp.val())+($(this).hasClass('fa-caret-up')?1:-1)).change()
-  });
+  bindSpinner(base);
+  bindClipboard(base);
   var inps=base.find('input,select')
   inps.on('change',function(){
-    var vals={};
-    inps.each(function(i,inp){
-      vals[$(inp).attr('name')]=parseFloat($(this).val());
-    })
+    var vals=readValues(inps);
     var StepsPerMM = ((360/vals.StepSize)*vals.MicroStepping)/(vals.GearDiameter*Math.PI)*(vals.PulleyLeadscrew/vals.PulleyMotor);
     var res=base.find('.results p');
     res.eq(0).text(StepsPerMM.toFixed(2))
-    res.eq(1).text("M92 Z"+StepsPerMM.toFixed(2))
+    res.eq(1).text("M92 E"+StepsPerMM.toFixed(2))
     var Resolution = ((1./StepsPerMM)*1000);
     res.eq(2).text(Resolution.toFixed(2))
   }).eq(0).change()
 });
 </script>
-    <div class="calculator-E jumbotron">
-    <h2>Steps per millimeter - leadscrew driven systems</h2>
+    <div class="calculator-E">
       <div class="row">
         <div class="col-md-6">
           <div class="form-group">
@@ -50,9 +45,9 @@ $(function(){
       <div class="row">
         <div class="col-md-6">
          <div class="form-group">
-            <label for="GearDiameter">Gear word diameter</label>
+            <label for="GearDiameter">Extruder gear work diameter</label>
             <div class="input-group spinner">
-              <input type="text" name="GearDiameter" value="8" class="change form-control">
+              <input type="text" name="GearDiameter" value="8.0" class="change form-control">
               <div class="input-group-btn-vertical">
                 <button class="btn btn-secondary fa fa-caret-up" type="button"></button>
                 <button class="btn btn-secondary fa fa-caret-down" type="button"></button>
@@ -72,11 +67,23 @@ $(function(){
             </div>
             <div class="row">
               <div class="col-md-6">
-                <input type="text" name="PulleyMotor" value="10" class="form-control change">
+                <div class="input-group spinner">
+                  <input type="text" name="PulleyMotor" value="10" class="form-control change">
+                  <div class="input-group-btn-vertical">
+                    <button class="btn btn-secondary fa fa-caret-up" type="button"></button>
+                    <button class="btn btn-secondary fa fa-caret-down" type="button"></button>
+                  </div>
+                </div>
               </div>
               <div class="col-md-1"> :</div>
               <div class="col-md-5">
-                <input type="text" name="PulleyLeadscrew" value="34" class="form-control change">
+                <div class="input-group spinner">
+                  <input type="text" name="PulleyLeadscrew" value="34" class="form-control change">
+                  <div class="input-group-btn-vertical">
+                    <button class="btn btn-secondary fa fa-caret-up" type="button"></button>
+                    <button class="btn btn-secondary fa fa-caret-down" type="button"></button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -85,13 +92,13 @@ $(function(){
       <div class="row results">
         <div class="col-md-6">
           <div class="form-group">
-            <label for="ToothCount">Result</label>
+            <label for="ToothCount">Steps per millimeter:<i class="fa fa-clipboard ml-2" aria-hidden="true" title="copy to clipboard"></i></label>
             <p class="form-control-static text-success"></p>
           </div>
         </div>
         <div class="col-md-6">
           <div class="form-group">
-            <label for="ToothCount">G-code</label>
+            <label for="ToothCount">G-code:<i class="fa fa-clipboard ml-2" aria-hidden="true" title="copy to clipboard"></i></label>
             <p class="form-control-static text-success"></p>
           </div>
         </div>

@@ -1,16 +1,12 @@
+<title>Leadscrew driven systems, Z</title>
 <script>
 $(function(){
   var base=$('.calculator-Z');
-  base.find('.spinner .btn').on('click', function() {
-    var inp=$(this).parent().siblings('input')
-    inp.val(parseInt(inp.val())+($(this).hasClass('fa-caret-up')?1:-1)).change()
-  });
+  bindSpinner(base);
+  bindClipboard(base);
   var inps=base.find('input,select')
   inps.on('change',function(){
-    var vals={};
-    inps.each(function(i,inp){
-      vals[$(inp).attr('name')]=parseFloat($(this).val());
-    })
+    var vals=readValues(inps);
     var StepsPerMM = ((360/vals.StepSize)*vals.MicroStepping)/(vals.LeadscrewPitch)*(vals.PulleyLeadscrew/vals.PulleyMotor);
     var res=base.find('.results p');
     res.eq(0).text(StepsPerMM.toFixed(2))
@@ -20,8 +16,7 @@ $(function(){
   }).eq(0).change()
 });
 </script>
-    <div class="calculator-Z jumbotron">
-    <h2>Steps per millimeter - leadscrew driven systems</h2>
+    <div class="calculator-Z">
       <div class="row">
         <div class="col-md-6">
           <div class="form-group">
@@ -69,11 +64,23 @@ $(function(){
             <label for="PulleyMotor">Gear ratio</label>
             <div class="row">
               <div class="col-md-5">
-                <input type="text" name="PulleyMotor" value="1" class="form-control change">
+               <div class="input-group spinner">
+                  <input type="text" name="PulleyMotor" value="1" class="form-control change">
+                  <div class="input-group-btn-vertical">
+                    <button class="btn btn-secondary fa fa-caret-up" type="button"></button>
+                    <button class="btn btn-secondary fa fa-caret-down" type="button"></button>
+                  </div>
+                </div>
               </div>
               <div class="col-md-1"> :</div>
               <div class="col-md-5">
-                <input type="text" name="PulleyLeadscrew" value="1" class="form-control change">
+               <div class="input-group spinner">
+                  <input type="text" name="PulleyLeadscrew" value="1" class="form-control change">
+                  <div class="input-group-btn-vertical">
+                    <button class="btn btn-secondary fa fa-caret-up" type="button"></button>
+                    <button class="btn btn-secondary fa fa-caret-down" type="button"></button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -82,13 +89,13 @@ $(function(){
       <div class="row results">
         <div class="col-md-6">
           <div class="form-group">
-            <label for="ToothCount">Result</label>
+            <label for="ToothCount">Steps per millimeter:<i class="fa fa-clipboard ml-2" aria-hidden="true" title="copy to clipboard"></i></label>
             <p class="form-control-static text-success"></p>
           </div>
         </div>
         <div class="col-md-6">
           <div class="form-group">
-            <label for="ToothCount">G-code</label>
+            <label for="ToothCount">G-code:<i class="fa fa-clipboard ml-2" aria-hidden="true" title="copy to clipboard"></i></label>
             <p class="form-control-static text-success"></p>
           </div>
         </div>
