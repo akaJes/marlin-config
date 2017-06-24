@@ -1,6 +1,6 @@
 {
   "name": "marlin-conf",
-  "version": "2.7.1",
+  "version": "2.7.2",
   "description": "configuration tool for Marlin project",
   "main": "./index.js",
   "scripts": {
@@ -51,6 +51,7 @@
   },
   "homepage": "https://github.com/akaJes/marlin-config#readme",
   "dependencies": {
+    "body-parser": "^1.17.2",
     "bootstrap": "4.0.0-alpha.6",
     "cropper": "^3.0.0-rc.2",
     "express": "^4.15.2",

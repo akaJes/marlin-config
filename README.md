@@ -8,15 +8,17 @@ supported OS: Linux,Mac,Windows
 
 * automatically clone repository from github if you don't have it
 * instant changing of Configuration*.h files
-* filter only changed options overall and for each section
-* show help for options
+* allow to filter only changed options overall and for each section
+* show help for all options
 * show help for G-codes
 * show allowed options/gcodes depends your configuration
 * reset configuration changes
-* switch between releases (available after reset)
+* switch between releases and update git repository from github
 * **uploading your old configuration over current**
 * **compiling and uploading firmware** via PlatformIO
 * **access to all serial ports** using console manager (Linux/Mac with auto ports changing detection)
+* simple 3D tool for positioning printer head in console manager
+* **snippets** allow edit upload BootScreen, calculate a step values for various stepper motors
 * quick navigate with a right sided navigation bar
 * creating an issue on [Marlin github](https://github.com/MarlinFirmware/Marlin) with your configuration
 
@@ -28,7 +30,7 @@ in project used documentation from [MarlinDocumentation](https://github.com/Marl
 * [git](https://git-scm.com/downloads)
 * [PlatformIO](http://docs.platformio.org/en/latest/installation.html) (optional)
 ## Using
-after run - choose a folder with Marlin repo or an empty folder for cloning
+After run appears a File dialog and asks to open any empty folder (then will be cloning for last version of marlin from github) or folder with the Marlin git repository
 # Installation NPM
 [![npm version](https://badge.fury.io/js/marlin-conf.svg)](https://badge.fury.io/js/marlin-conf)
 
@@ -46,7 +48,7 @@ open terminal in an empty folder or in a folder with Marlin repository and type
 `mct` and confirm action
 
 # Preview
-![image](https://cloud.githubusercontent.com/assets/3035266/26492336/2934c98c-421c-11e7-8aab-3ddab57525f3.png)
+![image](https://user-images.githubusercontent.com/3035266/26917440-f626e258-4c36-11e7-9d1c-3ae199a497ee.png)
 
 ## hints
 * In clean/unchanged configuration you can change current release version

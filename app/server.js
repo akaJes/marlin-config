@@ -1,4 +1,5 @@
 var express = require('express');
+var bodyParser = require('body-parser');
 var path = require('path');
 var opn = require('opn');
 var mctool = require('./mc-tool');
@@ -28,6 +29,8 @@ if (serial_enabled)
 
 app.use('/', express.static(path.join(__dirname,'..', 'static')));
 app.use('/libs', express.static(path.join(__dirname,'..', 'node_modules')));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/tags', function (req, res) {
   git.Tags().then(data=>{
@@ -265,6 +268,16 @@ app.get('/bs/default', function (req, res) {
     }
   })
   .then(a=>res.send(a))
+  .catch(e=>res.status(403).send(e))
+});
+app.post('/bs/custom', function (req, res) {
+  var name='_Bootscreen.h';
+  Promise
+  .resolve(path.join(__dirname,'..','views',name))
+  .then(file=>promisify(fs.readFile)(file,'utf8'))
+  .then(text=>text.replace(/{{([\w.]+)}}/g,(m,r)=>r.split('.').reduce((p,o)=>(p=p&&p[o],p),req.body)))
+  .then(file=>git.root().then(p=>promisify(fs.writeFile)(path.join(p,'Marlin',name),file)))
+  .then(a=>res.end('writed'))
   .catch(e=>res.status(403).send(e))
 });
 app.get('/bs/custom', function (req, res) {

@@ -1,64 +1,141 @@
 <title>Custom marlin bootscreen</title>
 <style>
+.bs-custom canvas{
+  border:1px solid gray;
+}
 .bs-custom .uploaded{
   max-width:640px;
   max-height:320px;
 }
 </style>
 <div style="text-align:center" class="bs-custom">
-  <div class="form-group row">
-    <div class="col-md-12">Maximal allowed image can be placed on screen 128x64</div>
-  </div>
-            <div class="form-group row">
-              <div class="col-md-3">
-               <div class="input-group spinner">
-                  <input type="text" name="bsWidth" value="128" class="form-control change">
+        <div class="row">
+          <div class="col-md-12 text-danger">
+            Do not forget to enable option <strong>SHOW_CUSTOM_BOOTSCREEN</strong>
+          </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+              <div class="form-group">
+                <label for="bsWidth">Width:</label>
+                <div class="input-group spinner">
+                  <input type="text" name="bsWidth" value="128" class="form-control change" title="maximal is 128">
                   <div class="input-group-btn-vertical">
                     <button class="btn btn-secondary fa fa-caret-up" type="button"></button>
                     <button class="btn btn-secondary fa fa-caret-down" type="button"></button>
                   </div>
                 </div>
               </div>
-              <div class="col-md-1">X</div>
-              <div class="col-md-3">
-               <div class="input-group spinner">
-                  <input type="text" name="bsHeight" value="64" class="form-control change">
-                  <div class="input-group-btn-vertical">
-                    <button class="btn btn-secondary fa fa-caret-up" type="button"></button>
-                    <button class="btn btn-secondary fa fa-caret-down" type="button"></button>
-                  </div>
-                </div>
-              </div>
-    <div class="col-md-4">
-      <label class="custom-file">
-        <input type="file" class="file custom-file-input">
-        <span class="custom-file-control"></span>
-      </label>
-    </div>
             </div>
-  <div class="row form-group mx-auto">
-    <canvas></canvas>
-  </div>
-  <div class="row form-group">
-    <img class="uploaded"></img>
-  </div>
+            <div class="col-md-2">
+              <div class="form-group">
+                <label for="bsHeight">Height:</label>
+                <div class="input-group spinner">
+                  <input type="text" name="bsHeight" value="64" class="form-control change" title="maximal is 64">
+                  <div class="input-group-btn-vertical">
+                    <button class="btn btn-secondary fa fa-caret-up" type="button"></button>
+                    <button class="btn btn-secondary fa fa-caret-down" type="button"></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="form-group">
+                <label for="bsTimeout">Timeout:</label>
+                <div class="input-group spinner">
+                  <input type="text" name="bsTimeout" value="64" class="form-control change" title="milliseconds">
+                  <div class="input-group-btn-vertical">
+                    <button class="btn btn-secondary fa fa-caret-up" type="button"></button>
+                    <button class="btn btn-secondary fa fa-caret-down" type="button"></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 text-right">
+              <div class="form-group">
+                <label class="form-text">Pick your file:</label>
+                <label class="custom-file text-left">
+                  <input type="file" class="file custom-file-input">
+                  <span class="custom-file-control"></span>
+                </label>
+              </div>
+            </div>
+        </div>
+        <div class="row">
+          <div class="col-md-10">
+            <div class="form-group">
+              <canvas class="mx-auto"></canvas>
+            </div>
+          </div>
+            <div class="col-md-2 text-right">
+              <div class="form-group">
+                <label class="form-text"">Brightness:</label>
+                <div class="input-group spinner">
+                  <input type="text" name="bsBrightness" value="127" class="form-control change" title="in range 0-255">
+                  <div class="input-group-btn-vertical">
+                    <button class="btn btn-secondary fa fa-caret-up" type="button"></button>
+                    <button class="btn btn-secondary fa fa-caret-down" type="button"></button>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-text">Inversion:</label>
+                <div class="onoffswitch">
+                  <label class="onoffswitch-label">
+                    <input type="checkbox" class="onoffswitch-checkbox" >
+                    <span class="onoffswitch-inner" data-content-on="On" data-content-off="Off"></span>
+                    <span class="onoffswitch-switch"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-text">Tools:</label>
+                <button type="button" class="btn btn-secondary bsc-reload" data-toggle="toggle" title="Reload custom bootscreen file">Reload</button>
+              </div>
+              <div class="form-group">
+                <button type="button" class="btn btn-secondary bsc-save" data-toggle="toggle" title="Create custom bootscreen file">Save</button>
+              </div>
+            </div>
+        </div>
+        <div class="row form-group">
+          <img class="uploaded"></img>
+        </div>
 </div>
 <script>
 $(function(){
   var base=$('.bs-custom');
   var img=base.find('.uploaded')
-  imgReader(base.find('.file'),img,base.find('canvas'));
+  var inps=base.find('.spinner input,.onoffswitch input');
+  imgReader(base.find('.file'),img,base.find('canvas'),inps);
   bindSpinner(base);
-  var inps=base.find('.spinner input');
-  inps.on('change',function(){
-    img.trigger('aspect',inps.eq(0).val()/inps.eq(1).val())
-  })
-  $.ajax('/bs/custom')
-//  .fail(function(){ base.empty().text('NOT FOUND') })
-  .then(function(screen){
-    base.find('p span').text(screen.width+'x'+screen.height);
-    screen.data=eval('['+screen.data+']');
-    drawBootscreen(base.find('canvas')[0],screen,10);
-  })
+  function loadBS(){
+    $.ajax('/bs/custom')
+    .fail(function(){ console.log('Not found'); })
+    .then(function(screen){
+      inps.eq(0).val(screen.width);
+      inps.eq(1).val(screen.height);
+      inps.eq(2).val(screen.timeout);
+      screen.data=eval('['+screen.data+']');
+      drawBootscreen(base.find('canvas')[0],screen,5);
+    })
+  }
+  loadBS();
+  base.find('.bsc-reload').on('click',loadBS);
+  base.find('.bsc-save').on('click',function(){
+    if (!resized)
+      _add($('template._alert')).find('p').text('Pick file at start');
+    var width=parseInt(inps.eq(0).val()),height=parseInt(inps.eq(1).val());
+    var timeout=parseInt(inps.eq(2).val());
+    $.post('/bs/custom',{
+      data:createBootscreen(resized,width,height),
+      width:width,
+      height:height,
+      timeout:timeout,
+      bytes:Math.ceil(width/8)*height,
+    })
+    .then(function(data){
+      _add($('template._info')).find('p').text(data);
+    })
+  });
 });
 </script>

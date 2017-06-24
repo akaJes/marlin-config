@@ -24,6 +24,7 @@
     display: block; overflow: hidden; cursor: pointer;
     border: 1px solid #999999; border-radius: 20px;
     margin-bottom:0;
+    text-align: left;
 }
 .onoffswitch-inner {
     display: block; width: 200%; margin-left: -100%;
