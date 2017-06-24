@@ -4,7 +4,7 @@ const exec = require("child_process").exec;
 const builder = require("electron-builder")
 const Platform = builder.Platform
 
-var electron_version="1.6.10";
+var electron_version="1.6.11";
 var archs="all";//"ia32","x64","all"
 var platforms=[
   Platform.WINDOWS,
@@ -14,9 +14,8 @@ var platforms=[
 
 const pjson = require('./package.json');
 var config=Object.assign({},pjson.build);
-//confilct! unpacked files placed in folder with path contains '.unpacked' , but bindings can't find it
-//config.asarUnpack=["node_modules/serialport/build/Release/*"];
 //config.asar=false;
+
 //prebuild serialport
 config.beforeBuild=(args)=>new Promise((done,fail)=>{
   if (args.platform.nodeName=='darwin')//skip it
