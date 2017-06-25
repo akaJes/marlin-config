@@ -11,16 +11,16 @@ supported OS: Linux,Mac,Windows
 * allow to filter only changed options overall and for each section
 * show help for all options
 * show help for G-codes
-* show allowed options/gcodes depends your configuration
+* show allowed options/gcodes depend to your configuration
 * reset configuration changes
 * switch between releases and update git repository from github
-* **uploading your old configuration over current**
-* **compiling and uploading firmware** via PlatformIO
+* **upload your old configuration over current**
+* **compile and upload the firmware** to your device via PlatformIO
 * **access to all serial ports** using console manager (Linux/Mac with auto ports changing detection)
 * simple 3D tool for positioning printer head in console manager
-* **snippets** allow edit upload BootScreen, calculate a step values for various stepper motors
-* quick navigate with a right sided navigation bar
-* creating an issue on [Marlin github](https://github.com/MarlinFirmware/Marlin) with your configuration
+* **snippets** allow compose the BootScreen, calculate a step values for various stepper motors
+* quick navigation with a right sided menu
+* create an issue on [Marlin github](https://github.com/MarlinFirmware/Marlin) with your configuration
 
 in project used documentation from [MarlinDocumentation](https://github.com/MarlinFirmware/MarlinDocumentation/_configuration/configuration.md)
 

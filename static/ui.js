@@ -7,22 +7,22 @@ setTimeout(function(){
 //  dom.dispatchEvent(new Event('destroy'));
 },1000);
 */
+function aButton(dom,name,fn,right){
+  var El=document.createElement('DIV')
+  El.innerHTML=name;
+  El.addEventListener( 'click', fn, false );
+  Object.assign(El.style,{position:"absolute", cursor:"pointer", right:right+"px", top:"0px", background:"white"})
+  dom.appendChild(El);
+}
 function createUI(ui,cb){
   var domElement=document.createElement('DIV')
+  aButton(domElement,'[s]',getScene,40);
+  aButton(domElement,'[^]',toggleSize,20);
+  aButton(domElement,'[X]',killSelf,0);
+  function killSelf() {
+    domElement.dispatchEvent( new Event('destroy') );
+  }
 
-  var El=document.createElement('DIV')
-  El.innerHTML='[^]';
-  El.addEventListener( 'click', toggleSize, false );
-  Object.assign(El.style,{position:"absolute", cursor:"pointer", right:"20px", top:"0px", background:"white"})
-  domElement.appendChild(El);
-
-  var El=document.createElement('DIV')
-  El.innerHTML='[X]';
-  El.addEventListener( 'click', function() { domElement.dispatchEvent( new Event('destroy') ); }, false );
-  Object.assign(El.style,{position:"absolute", cursor:"pointer", right:"0px", top:"0px", background:"white"})
-  domElement.appendChild(El);
-
-//  Object.assign(domElement.style,{position:"relative", cursor:"default", width:"300px", height:"250px", margin:"auto"})
   Object.assign(domElement.style,{position:"relative",height:"100%"})
   ui.appendChild(domElement);
 
@@ -53,6 +53,8 @@ function createUI(ui,cb){
         cmd="M106 S"+parseInt(ev.detail.value)*2.5;
       else if (ev.detail.command =="speedFlow")
         cmd="M221 S"+ev.detail.value;
+    }else if (ev.detail.command[0]=='G') {
+      cmd=ev.detail.command;
     }else{
       var cmd="G1 ";
       if (ev.detail.command=="Z")
@@ -76,6 +78,10 @@ function createUI(ui,cb){
     domElement.removeEventListener('command', onCommand);
     ui.removeChild(domElement);
   });
+  function getScene(){
+    var stl= new THREE.STLBinaryExporter();
+    saveByteArray([stl.parse(scene)],'scene.stl');
+  }
   return domElement;
 }
 function addWidgets(scene,defaults){
@@ -105,6 +111,9 @@ function addWidgets(scene,defaults){
   scene.add(translate(5,5,-10)(rotate(0,0,90)(scroller("Print speed","speedPrint",{min:10,max:300,pos:defaults.speedPrint}))))
   scene.add(translate(-10,0,5)(rotate(0,0,0)(scroller("Fan speed","speedFan",{min:0,max:100,pos:defaults.speedFan}))))
   scene.add(translate(-5,10,0)(rotate(90,0,0)(scroller("Flow speed","speedFlow",{min:10,max:300,pos:defaults.speedFlow}))))
+
+  scene.add(translate(5,0,-10)(home()))
+  scene.add(translate(10,0,-15)(detector()))
 }
 
 
@@ -216,8 +225,9 @@ function createScene(domElement){
             _offset.copy( _intersection ).sub( oPos );
           }
         }else{
-          if (INTERSECTED.parent._command)
-            domElement.dispatchEvent(new CustomEvent('command',{detail:{type:'button',command:INTERSECTED.parent._command,value:INTERSECTED.parent._val}}));
+          var obj=getBaseObject(INTERSECTED)
+          if (obj._command)
+            domElement.dispatchEvent(new CustomEvent('command',{detail:{type:'button',command:obj._command,value:obj._val}}));
         }
       }
   }
@@ -227,7 +237,7 @@ function createScene(domElement){
     event.preventDefault();
     controls.enabled=true;
     if (sobj){
-      sobj._over&&sobj._over(sobj._val);
+      sobj._over&&sobj._over(sobj._val); //??
       domElement.dispatchEvent(new CustomEvent('command',{detail:{type:'scroll',command:sobj._command,value:sobj._val}}));
     }
     sobj=null;
@@ -294,7 +304,15 @@ function createScene(domElement){
     popup.rotation.copy(camera.rotation);
     scene.add(popup)
   }
-
+  function getBaseObject(o){
+    var obj=o;
+    for (var i=0;i<3;i++)
+      if (obj.name.length)
+        break;
+      else
+        obj=obj.parent;
+    return obj;
+  }
   function select(){
     if ( INTERSECTED )
       if (INTERSECTED.material.emissive)
@@ -303,13 +321,8 @@ function createScene(domElement){
       INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
       INTERSECTED.material.emissive.setHex( 0xff0000 );
       INTERSECTED.material.opacity=1;
-      var obj=INTERSECTED;
-      if (INTERSECTED.parent.name.length){
-        obj=obj.parent;
-      }
-      var text=obj.name;
-      if (obj.name=="scroll")
-        text=obj._val;
+      var obj=getBaseObject(INTERSECTED);
+      var text=obj.name=="scroll"?obj._val:obj.name;
       updatePopup(obj,text);
     }
   }
@@ -384,9 +397,27 @@ function createScene(domElement){
     })
     return group.apply(0,grp)
   }
+  function home(){
+    return props({name:'home',_command:'G28',_title:'home'})(group(
+//    return (group(
+      cube(2,2,2),
+      translate(0,0,2)(rotate(90,45,0)(cylinder(0,2,2,0xff0000,4)))
+    ));
+  }
+  function detector(){
+    return rotate(90,0,0)(props({name:'calibrate',_command:'G29',_title:'calibrate'})(group(
+      cylinder(1,1,1),
+      translate(0,4,0)(cylinder(1,1,6,0x555555))
+    )));
+  }
 // OpenScad style helpers
 function cylinder(dt,db,l,color,s) {
   var geometry = new THREE.CylinderGeometry( dt, db, l, s||32 );
+  var material = new THREE.MeshLambertMaterial( {color: color||0xffff00} );
+  return new THREE.Mesh( geometry, material );
+}
+function cube(w,h,d,color) {
+  var geometry = new THREE.BoxGeometry( w, h, d );
   var material = new THREE.MeshLambertMaterial( {color: color||0xffff00} );
   return new THREE.Mesh( geometry, material );
 }
@@ -432,5 +463,3 @@ function group(){
   })
   return group
 }
-
-
