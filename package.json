@@ -68,6 +68,7 @@
     "serialport-v4": "^4.0.7",
     "simple-git": "^1.72.0",
     "socket.io": "^2.0.1",
+    "socket.io-stream": "^0.9.1",
     "swig-templates": "^2.0.2",
     "tether": "^1.4.0",
     "three": "^0.85.2",
@@ -75,7 +76,7 @@
     "universal-analytics": "^0.4.13",
     "which": "^1.2.14"
   },
-  "devDependencies": {
+  "devDependenciesOff": {
     "electron": "^1.6.10",
     "electron-builder": "^18.1.0",
     "eslint": "^3.19.0",

@@ -12,9 +12,11 @@ var formidable = require('formidable');
 var pjson = require('../package.json');
 var pio = require('./pio');
 var http = require('http');
+var https = require('https');
 var ua = require('universal-analytics');
 var promisify = require('./helpers').promisify;
 var walk=require('./helpers').walk;
+var cam = require('./cam');
 
 var port = 3000;
 var server = http.Server(app);
@@ -26,6 +28,15 @@ var serial;
 var serial_enabled = !(isElectron&&process.platform=='darwin');
 if (serial_enabled)
   serial = require('./console');
+
+var privateKey  = fs.readFileSync(path.join(__dirname,'..','sslcert','server.key'), 'utf8');
+var certificate = fs.readFileSync(path.join(__dirname,'..','sslcert','server.crt'), 'utf8');
+var credentials = {key: privateKey, cert: certificate};
+
+var camServer = https.Server(credentials, app);
+camServer.listen(3002);
+cam.init(server);
+cam.init(camServer);
 
 app.use('/', express.static(path.join(__dirname,'..', 'static')));
 app.use('/libs', express.static(path.join(__dirname,'..', 'node_modules')));
@@ -150,6 +161,13 @@ app.get('/set-base/:path', function (req, res) {
   if (baseCfg!='Marlin')
     baseCfg=path.join('Marlin','example_configurations',baseCfg);
   res.end();
+});
+app.get('/cert', function (req, res) { //??
+  res.set('Content-Type', 'application/x-x509-ca-cert');
+  res.set('Content-Disposition','inline; filename="server.der"');
+  var file=path.join(__dirname,'sslcert','server.der');
+  return promisify(fs.readFile)(file)
+  .then(data=>res.send(data))
 });
 app.get('/version', function (req, res) {
   res.set('Content-Type', 'image/svg+xml');
