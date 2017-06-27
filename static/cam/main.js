@@ -6,14 +6,16 @@ $(function(){
   navigator.mediaDevices
   .enumerateDevices()
   .then(gotDevices)
-  .then(getStream)
+//  .then(getStream)
   .catch(handleError);
-
+  function handleError(error) {
+    console.log('Error: ', error);
+  }
   function gotDevices(deviceInfos) {
     deviceInfos.forEach(function(deviceInfo){
       if (!(deviceInfo.kind in selects ))
         console.log('Found ome other kind of source/device: ', deviceInfo);
-      else{
+      else {
         var select = selects[deviceInfo.kind];
         $('<option>').val(deviceInfo.deviceId)
         .appendTo(select.ui)
@@ -22,38 +24,51 @@ $(function(){
     })
   }
   $('select').on('change',getStream)
-  function getStream() {
-    if (window.stream) {
-      window.stream.getTracks().forEach(function(track) {
-        track.stop();
+  function getStream(){
+    connection.attachStreams.forEach(function(stream) {
+      stream.getVideoTracks().forEach(function(track) {
+        stream.removeTrack(track);
+        if(track.stop) {
+          track.stop();
+        }
       });
-    }
-    var constraints = {
-      audio: {
-        optional: [{
-          sourceId: selects.audioinput.ui.val()
-        }]
-      },
-      video: {
-        optional: [{
-          sourceId: selects.videoinput.ui.val()
-        }]
-      }
-    };
-    navigator.mediaDevices
-    .getUserMedia(constraints)
-    .then(gotStream)
-    .catch(handleError);
+    });
+    connection.attachStreams.forEach(function(stream) {
+      stream.getAudioTracks().forEach(function(track) {
+        stream.removeTrack(track);
+        if(track.stop) {
+          track.stop();
+        }
+      });
+    });
+    connection.mediaConstraints.video.optional = [{
+      sourceId: selects.videoinput.ui.val()
+    }];
+    connection.mediaConstraints.audio.optional = [{
+      sourceId: selects.audioinput.ui.val()
+    }];
+    connection.captureUserMedia();
   }
-  var sstream = ss.createStream();
-  var socket = io.connect({path:'/web-cam'});
-  function gotStream(stream) {
-    window.stream = stream;
-    ss(socket).emit('stream', sstream);
-    ss.createBlobReadStream(stream).pipe(sstream);
-    $('video')[0].srcObject = stream;
-  }
-  function handleError(error) {
-    console.log('Error: ', error);
-  }
+
+  var connection = new RTCMultiConnection();
+  connection.socketURL = '/';
+  connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+  connection.socketMessageEvent = 'marlin-conf-cam';
+  connection.session = {
+    audio: true,
+    video: true,
+    oneway: true,
+  };
+  connection.sdpConstraints.mandatory = {
+    OfferToReceiveAudio: false,
+    OfferToReceiveVideo: false
+  };
+  connection.onstream = function(event) {
+    $('video')[0].src = event.mediaElement.src;
+    connection.renegotiate();
+  };
+  connection.onstreamended = function(event) {
+  };
+  connection.open('uofgi4qqdvd', function() {
+  });
 })

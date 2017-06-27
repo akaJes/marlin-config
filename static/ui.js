@@ -407,7 +407,7 @@ function createScene(domElement){
   function detector(){
     return rotate(90,0,0)(props({name:'calibrate',_command:'G29',_title:'calibrate'})(group(
       cylinder(1,1,1),
-      translate(0,4,0)(cylinder(1,1,6,0x555555))
+      translate(0,3.5,0)(cylinder(1,1,6,0x555555))
     )));
   }
 // OpenScad style helpers

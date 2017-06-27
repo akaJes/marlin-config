@@ -17,6 +17,19 @@ var ua = require('universal-analytics');
 var promisify = require('./helpers').promisify;
 var walk=require('./helpers').walk;
 var cam = require('./cam');
+var qr = require('qr-image');
+var os = require('os');
+var ifaces = os.networkInterfaces();
+
+function getIP(){
+  return Object.keys(ifaces).map(function (ifname) {
+    return ifaces[ifname].map(function (iface) {
+      if ('IPv4' !== iface.family || iface.internal !== false)
+        return;
+      return iface.address;
+    }).filter(a=>a)[0];
+  }).filter(a=>a);
+}
 
 var port = 3000;
 var server = http.Server(app);
@@ -42,7 +55,12 @@ app.use('/', express.static(path.join(__dirname,'..', 'static')));
 app.use('/libs', express.static(path.join(__dirname,'..', 'node_modules')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
+app.get('/web-qr', function (req, res) {
+  res.set('Content-Type', 'image/svg+xml');
+  var ip=getIP();
+  var qr_svg = qr.image('https://'+ip+':3002/cam/', { type: 'svg' });
+  qr_svg.pipe(res);
+})
 app.get('/tags', function (req, res) {
   git.Tags().then(data=>{
     res.send(data);
