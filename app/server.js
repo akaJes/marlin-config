@@ -20,6 +20,11 @@ var cam = require('./cam');
 var qr = require('qr-image');
 var os = require('os');
 var ifaces = os.networkInterfaces();
+var natUpnp = require('nat-upnp');
+
+var natClient = natUpnp.createClient();
+natClient.timeout=10*1000;
+
 
 function getIP(){
   return Object.keys(ifaces).map(function (ifname) {
@@ -31,7 +36,7 @@ function getIP(){
   }).filter(a=>a);
 }
 
-var port = 3000;
+var httpPort = 3000;
 var server = http.Server(app);
 var visitor = ua('UA-99239389-1');
 var isElectron=module.parent&&module.parent.filename.indexOf('index.js')>=0;
@@ -61,11 +66,48 @@ app.get('/web-qr', function (req, res) {
   var qr_svg = qr.image('https://'+ip+':3002/cam/', { type: 'svg' });
   qr_svg.pipe(res);
 })
-app.get('/tags', function (req, res) {
-  git.Tags().then(data=>{
-    res.send(data);
+
+/* UPNP */
+
+app.get('/upnp/open', function (req, res) {
+  natClient.portMapping({
+    public: httpPort,
+    private: httpPort,
+    ttl: 0,
+    description: 'Marlin-conf public port'
+  }, function(err) {
+    if (err)
+      return res.status(403).send(err)
+    natClient.externalIp(function(err, ip) {
+      if (err)
+        return res.status(403).send(err)
+      res.send({ip:ip,port:httpPort});
+    });
   });
-});
+})
+app.get('/upnp/local', function (req, res) {
+  res.send({ip:getIP(),port:httpPort});
+})
+app.get('/upnp/check', function (req, res) {
+  natClient.getMappings(function(err, results) {
+    if (err)
+      return res.status(403).send(err)
+    natClient.externalIp(function(err, ip) {
+      if (err)
+        return res.status(403).send(err)
+      res.send(results.filter(i=>i.public.port==httpPort).map(i=>({ip:ip,port:i.public.port})));
+    });
+  });
+})
+app.get('/upnp/close', function (req, res) {
+  natClient.portUnmapping({
+    public: httpPort,
+  })
+  res.end();
+})
+
+/* SERIAL */
+
 var SSEports=[];
 function SSEsend(event,data){
   SSEports.forEach(function(res){
@@ -130,6 +172,14 @@ app.get('/port-close/:port', function (req, res) {
   })
   .catch(a=>res.status(403).send(a))
 });
+
+/* GIT */
+
+app.get('/tags', function (req, res) {
+  git.Tags().then(data=>{
+    res.send(data);
+  });
+});
 app.get('/checkout/:branch', function (req, res) {
   git.Checkout(req.params.branch)
   .then(data=>{
@@ -157,7 +207,7 @@ var get_cfg=()=>{
   });
   return Promise.all(list)
 }
-app.get('/now/', function (req, res) {
+app.get('/now/', function (req, res) { //???
   res.set('Content-Type', 'text/plain');
   get_cfg().then(a=>res.send(JSON.stringify(a,null,2)))
 });
@@ -180,6 +230,32 @@ app.get('/set-base/:path', function (req, res) {
     baseCfg=path.join('Marlin','example_configurations',baseCfg);
   res.end();
 });
+app.get('/status', function (req, res) {
+  git.Status().then(a=>res.send(a))
+});
+app.get('/checkout-force', function (req, res) {
+  var cp=baseCfg=='Marlin'?a=>a:a=>
+    git.root()
+    .then(root=>
+      ['Configuration.h','Configuration_adv.h']
+      .map(f=>new Promise((done,fail)=>
+          fs.createReadStream(path.join(root,baseCfg,f))
+          .pipe(fs.createWriteStream(path.join(root,'Marlin',f)).on('finish',done))
+        )
+      )
+    )
+  git.Checkout('--force')
+  .then(cp)
+  .then(a=>res.send(a));
+});
+app.get('/fetch', function (req, res) {
+  git.Fetch()
+  .then(a=>res.end(JSON.stringify(a)))
+  .catch(e=>res.status(403).send(e))
+});
+
+/* VERSION */
+
 app.get('/cert', function (req, res) { //??
   res.set('Content-Type', 'application/x-x509-ca-cert');
   res.set('Content-Disposition','inline; filename="server.der"');
@@ -218,6 +294,9 @@ app.get('/version/:screen', function (req, res) {
     res.end();
   })
 });
+
+/* PIO */
+
 function pioRoot(){
   return git.root()
   .then(root=>
@@ -268,10 +347,9 @@ app.get('/pio-flash', function (req, res) {
     pio.run(['run','-t','upload'],res);
   });
 });
-app.get('/json/', function (req, res) {
-  res.set('Content-Type', 'application/json');
-  get_cfg().then(a=>res.send(a))
-});
+
+/* SNIPPETS */
+
 function getTitle(text){
   var m=text.match(/<title>(.*)<\/title>/)
   return m&&m[1];
@@ -333,29 +411,9 @@ app.get('/bs/custom', function (req, res) {
   .then(a=>res.send(a))
   .catch(e=>res.status(403).send(e))
 });
-app.get('/status', function (req, res) {
-  git.Status().then(a=>res.send(a))
-});
-app.get('/checkout-force', function (req, res) {
-  var cp=baseCfg=='Marlin'?a=>a:a=>
-    git.root()
-    .then(root=>
-      ['Configuration.h','Configuration_adv.h']
-      .map(f=>new Promise((done,fail)=>
-          fs.createReadStream(path.join(root,baseCfg,f))
-          .pipe(fs.createWriteStream(path.join(root,'Marlin',f)).on('finish',done))
-        )
-      )
-    )
-  git.Checkout('--force')
-  .then(cp)
-  .then(a=>res.send(a));
-});
-app.get('/fetch', function (req, res) {
-  git.Fetch()
-  .then(a=>res.end(JSON.stringify(a)))
-  .catch(e=>res.status(403).send(e))
-});
+
+/* HINTS */
+
 app.get('/hint/:name', function (req, res) {
   res.send(hints.hint(req.params.name));
 })
@@ -365,6 +423,13 @@ app.get('/gcode/:name', function (req, res) {
 app.get('/gcodes', function (req, res) {
   res.send(hints.listG());//.map(i=>(i.doc=undefined,i)));
 })
+
+/* MAIN */
+
+app.get('/json/', function (req, res) {
+  res.set('Content-Type', 'application/json');
+  get_cfg().then(a=>res.send(a))
+});
 app.post('/upload', function(req, res){
   //var uploadDir = path.join(__dirname, '/uploads');
   new Promise((done,fail)=>{
@@ -434,8 +499,9 @@ function main(noOpn){
   })
   .then(serial_enabled?serial_init:a=>a)
 //  .catch(a=>console.error('serial failed'))
-  .then(()=>getPort(3000))
+  .then(()=>getPort(httpPort))
   .then(port =>new Promise((done,fail)=>{
+      httpPort=port;
       server.on('error',function(e){
         fail(e)
       })

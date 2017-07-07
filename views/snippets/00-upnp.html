@@ -1,0 +1,44 @@
+<title>External access (UPnP)</title>
+<div style="text-align:center" class="upnp-access">
+  <p>You can connect to this host from local network <a></a></p>
+  <p>Current state of public access is: <span>unknown</span> at: <a></a></p>
+  <button type="button" class="btn btn-secondary upnp-open" data-toggle="toggle" title="Open external public port">Open</button>
+  <button type="button" class="btn btn-secondary upnp-close" data-toggle="toggle" title="Close external public port">Close</button>
+<script>
+$(function(){
+  var base=$('.upnp-access');
+  $.ajax('/upnp/local')
+  .then(function(data){
+    var url='http://'+data.ip+':'+data.port;
+    base.find('p:eq(0) a').text(url).attr('href',url);
+  });
+  function setState(data){
+    var url='',state='Closed';
+    if (data){
+      state=('Opened');
+      url='http://'+data.ip+':'+data.port;
+    }
+    base.find('p:eq(1) span').text(state);
+    base.find('p:eq(1) a').text(url).attr('href',url);
+  }
+  $.ajax('/upnp/check')
+  .then(function(data){
+    if (data.length)
+      setState(data[0])
+    else
+      setState();
+  });
+  base.find('.upnp-close').on('click',function(){
+    $.ajax('/upnp/close')
+    .then(function(data){
+      setState();
+    });
+  })
+  base.find('.upnp-open').on('click',function(){
+    $.ajax('/upnp/open')
+    .then(function(data){
+      setState(data);
+    });
+  })
+});
+</script>

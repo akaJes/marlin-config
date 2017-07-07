@@ -63,6 +63,7 @@
     "jquery-ui-dist": "^1.12.1",
     "js-yaml": "^3.8.4",
     "marked": "^0.3.6",
+    "nat-upnp": "^1.1.0",
     "node-notifier": "^5.1.2",
     "opn": "^5.0.0",
     "qr-image": "^3.2.0",
