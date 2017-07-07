@@ -37,6 +37,7 @@ function getIP(){
 }
 
 var httpPort = 3000;
+var httpsPort = 3002;
 var server = http.Server(app);
 var visitor = ua('UA-99239389-1');
 var isElectron=module.parent&&module.parent.filename.indexOf('index.js')>=0;
@@ -52,9 +53,26 @@ var certificate = fs.readFileSync(path.join(__dirname,'..','sslcert','server.crt
 var credentials = {key: privateKey, cert: certificate};
 
 var camServer = https.Server(credentials, app);
-camServer.listen(3002);
+//camServer.listen(3002);
 cam.init(server);
 cam.init(camServer);
+  Promise.resolve(getPort(httpsPort))
+  .then(port =>new Promise((done,fail)=>{
+      camServer.on('error',function(e){
+        fail(e)
+      })
+      camServer.listen(port, function () {
+        httpsPort=port;
+        var url='https://localhost:'+port+'/';
+        console.log('Marlin cam started on '+url);
+        if(0)
+        cam.map(port)
+        .then(a=>console.log('mapped'))
+        .catch(a=>console.error('not mapped',a))
+        done(url);
+      });
+  }))
+
 
 app.use('/', express.static(path.join(__dirname,'..', 'static')));
 app.use('/libs', express.static(path.join(__dirname,'..', 'node_modules')));
@@ -484,6 +502,7 @@ app.post('/set/:file/:name/:prop/:value', function (req, res) {
     return mctool.updateH(root,path.join(root,'Marlin',req.params.file+'.h'),ob);
   })
   .then(a=>res.send(req.params))
+  .then(a=>SSEsend('set',req.params))
   .catch(a=>res.status(403).send(a))
 })
 function main(noOpn){

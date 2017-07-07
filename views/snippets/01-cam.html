@@ -1,0 +1,16 @@
+<title>Scan QR code with your mobile phone</title>
+<div style="text-align:center" class="bs-default">
+  <p>This is default boot screen with size <span></span></p>
+  <img src="web-qr" style="width:50%"></img>
+<script>
+$(function(){
+  return
+  var base=$('.bs-default');
+  $.ajax('/web-qr')
+  .then(function(screen){
+    base.find('p span').text(screen.width+'x'+screen.height);
+    screen.data=eval('['+screen.data+']');
+    drawBootscreen(base.find('canvas')[0],screen,10);
+  })
+});
+</script>

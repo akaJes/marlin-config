@@ -2,8 +2,8 @@
 <div style="text-align:center" class="upnp-access">
   <p>You can connect to this host from local network <a></a></p>
   <p>Current state of public access is: <span>unknown</span> at: <a></a></p>
-  <button type="button" class="btn btn-secondary upnp-open" data-toggle="toggle" title="Open external public port">Open</button>
-  <button type="button" class="btn btn-secondary upnp-close" data-toggle="toggle" title="Close external public port">Close</button>
+  <button type="button" class="btn btn-secondary upnp-open disabled" data-toggle="toggle" title="Open external public port">Open</button>
+  <button type="button" class="btn btn-secondary upnp-close disabled" data-toggle="toggle" title="Close external public port">Close</button>
 <script>
 $(function(){
   var base=$('.upnp-access');
@@ -23,18 +23,21 @@ $(function(){
   }
   $.ajax('/upnp/check')
   .then(function(data){
-    if (data.length)
+    if (data.length){
       setState(data[0])
-    else
+      base.find('button').removeClass('disabled')
+    }else
       setState();
   });
   base.find('.upnp-close').on('click',function(){
+    if ($(this).hasClass('disabled')) return;
     $.ajax('/upnp/close')
     .then(function(data){
       setState();
     });
   })
   base.find('.upnp-open').on('click',function(){
+    if ($(this).hasClass('disabled')) return;
     $.ajax('/upnp/open')
     .then(function(data){
       setState(data);

@@ -59,6 +59,14 @@ function updateChanged(sec){
   var cnt=sec.find('.form-group.bg-info').length;
   sec.find('.card-header span.badge:eq(1)').text(cnt);
 }
+var lastChanged;
+function setProp(name,prop,val){
+  var row=uiDefs[name];
+  applyProp(opts[name],row,prop,val)
+  updateChanged(row.parents('.card'))
+  updateConditions(name)
+}
+
 function getVal(ob,name){
   if( ob.changed != undefined)
     if( name in ob.changed)
@@ -366,10 +374,11 @@ $(function(){
               })
             }
             function processProp(name,val){
+              lastChanged=define+name;
               saveProp('/set/'+file.file.name+'/'+define+'/'+name+'/'+val)
-              .then(function(){ applyProp(def,d,name,val)})
-              .then(function(){ updateChanged(d.parents('.card'))})
-              .then(function(){ updateConditions(define)})
+              .then(function(){
+                setProp(define,name,val);
+              });
             }
             if ( !( def.changed && def.changed.disabled ) && !def.disabled && def.value != undefined)
               dis.remove(),p.remove();
@@ -602,6 +611,28 @@ $(function(){
       source.addEventListener('deleted', function(event) {
         var port= JSON.parse(event.data);
         removePort(port);
+      });
+      source.addEventListener('set', function(event) {
+        var data= JSON.parse(event.data);
+        if (lastChanged!==data.name+data.prop){
+          var def=opts[data.name],val=data.value,ui=uiDefs[data.name];
+          if (data.prop=='disabled'){
+            val=val=='true';
+            ui.find('.onoffswitch input').prop('checked',!val)
+          }else
+          if (['boolean','select'].indexOf(def.type)>=0){
+            ui.find('select').val(val)
+          }else{
+            var dv=val;
+            if (def.type=='string')
+              dv=dv.slice(1,-1)
+            ui.find('input[type=text]').val(dv);
+          }
+          setProp(data.name,data.prop,val);
+          _add($('template._info'))
+          .find('p').html('changed option '+data.name+' '+data.prop+'='+data.value);
+        }
+        lastChanged='';
       });
   }());
   (function(btn){
