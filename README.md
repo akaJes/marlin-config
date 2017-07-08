@@ -1,11 +1,13 @@
 # marlin-config
-
 This is a help tool, intended for easy configuration of [Marlin firmware](https://github.com/MarlinFirmware/Marlin)
 
 supported OS: Linux,Mac,Windows
-
+# Main features
+* instant changing of Configuration*.h files
+* quick help for Marlin options and Gcodes
+* compilation and uploading your customized firmware
+* console for access to serial ports
 # Features:
-
 * automatically clone repository from github if you don't have it
 * instant changing of Configuration*.h files
 * allow to filter only changed options overall and for each section
@@ -21,10 +23,17 @@ supported OS: Linux,Mac,Windows
 * **snippets** allow compose the BootScreen, calculate a step values for various stepper motors
 * quick navigation with a right sided menu
 * create an issue on [Marlin github](https://github.com/MarlinFirmware/Marlin) with your configuration
+## Snippets
+* stepper motors calculators (belt driven, screw driven, extruder)
+* startup bootscreen preview
+* custom bootscreen editor
+* sharing UPnP helper with QRcodes
+* using your phone as webcam
+
 
 in project used documentation from [MarlinDocumentation](https://github.com/MarlinFirmware/MarlinDocumentation/_configuration/configuration.md)
-
-# Installation prebuilt with Electron versions
+# Installation files
+(prebuilt with Electron versions)
   [Releases](https://github.com/akaJes/marlin-config/releases) (Mac versions has no console manager)
 ## Dependencies
 * [git](https://git-scm.com/downloads)
@@ -46,14 +55,11 @@ some hints for [Windows-Installation](https://github.com/akaJes/marlin-config/wi
 open terminal in an empty folder or in a folder with Marlin repository and type
 
 `mct` and confirm action
-
 # Preview
 ![image](https://user-images.githubusercontent.com/3035266/26917440-f626e258-4c36-11e7-9d1c-3ae199a497ee.png)
-
 ## hints
 * In clean/unchanged configuration you can change current release version
 * You can drag in browser your Configuration*.h files
-
 ## mct help
 ```
 usage: mct help|git|tree|conf|clone
