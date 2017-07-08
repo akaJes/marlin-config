@@ -20,9 +20,7 @@ var qr = require('qr-image');
 var os = require('os');
 var ifaces = os.networkInterfaces();
 var natUpnp = require('nat-upnp');
-
-var natClient = natUpnp.createClient();
-natClient.timeout=10*1000;
+var natClient;
 
 
 function getIP(){
@@ -55,20 +53,6 @@ var camServer = https.Server(credentials, app);
 var ss=require('../rtcmc-v3/Signaling-Server.js');
 var ssio=ss(camServer);
 ssio.attach(server);
-
-  Promise.resolve(getPort(httpsPort))
-  .then(port =>new Promise((done,fail)=>{
-      camServer.on('error',function(e){
-        fail(e)
-      })
-      camServer.listen(port, function () {
-        httpsPort=port;
-        var url='https://localhost:'+port+'/';
-        console.log('Marlin cam started on '+url);
-        done(url);
-      });
-  }))
-
 
 app.use('/', express.static(path.join(__dirname,'..', 'static')));
 app.use('/libs', express.static(path.join(__dirname,'..', 'node_modules')));
@@ -503,6 +487,8 @@ app.post('/set/:file/:name/:prop/:value', function (req, res) {
   .catch(a=>res.status(403).send(a))
 })
 function main(noOpn){
+  natClient = natUpnp.createClient();
+  natClient.timeout=10*1000;
   return Promise.resolve()
   .then(()=>hints.init(1))
   .catch(a=>console.error('hints failed'))
@@ -527,7 +513,19 @@ function main(noOpn){
         done(url);
       });
   }))
-  .then(url=>(!noOpn&&opn(url),url));
+  .then(url=>(!noOpn&&opn(url),url))
+  .then(()=>getPort(httpsPort))
+  .then(port =>new Promise((done,fail)=>{
+      camServer.on('error',function(e){
+        fail(e)
+      })
+      camServer.listen(port, function () {
+        httpsPort=port;
+        var url='https://localhost:'+port+'/';
+        console.log('Marlin cam started on '+url);
+        done(url);
+      });
+  }))
 }
 module.exports.main=main;
 require.main===module && main();

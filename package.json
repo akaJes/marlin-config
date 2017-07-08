@@ -1,6 +1,6 @@
 {
   "name": "marlin-conf",
-  "version": "2.7.5",
+  "version": "2.7.6",
   "description": "configuration tool for Marlin project",
   "main": "./index.js",
   "scripts": {
