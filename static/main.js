@@ -525,7 +525,7 @@ $(function(){
       var row = t.find('.table-success');
       if(row.length){
         var path=btoa(row.find('td').text());
-        cmdReload($.ajax('/set-base/'+path),ui);
+        cmdReload($.ajax('/set-base/'+encodeURI(path)),ui);
       }
     });
     ui.find('table tbody').on('click',function(ev){
@@ -629,16 +629,22 @@ $(function(){
             ui.find('input[type=text]').val(dv);
           }
           setProp(data.name,data.prop,val);
-          _add($('template._info'))
-          .find('p').html('changed option '+data.name+' '+data.prop+'='+data.value);
+          var p=$('#mct-log-modal .modal-body p');
+          var badge=$('.mct-info span')
+          badge.text(parseInt(badge.text())+1).removeAttr('hidden')
+          p.append('<br>'+(new Date()).toLocaleString()+': '+data.name+' '+data.prop+'='+data.value);
         }
         lastChanged='';
       });
   }());
   (function(btn){
+    var base=$('#mct-log-modal');
+    var p=base.find('.modal-body p');
+    p.append(`Current directory is: <strong>${config.root}</strong><br>Current base files choosen from: <strong>${config.base}</strong><br>changed options:`)
     btn.on('click',function(){
-      _add($('template._info'))
-      .find('p').html(`Current directory is: ${config.root}<br>Current base files choosen from: ${config.base}`)
+      var badge=$('.mct-info span')
+      badge.text(0).attr('hidden','');
+      base.modal();
     })
   }($('.mct-info')));
   (function(){
@@ -662,7 +668,7 @@ $(function(){
         cmd=stream_cmd('/pio',proc)()
     }).end()
     .eq(1).on('click',function(){
-        cmd=stream_cmd('/pio-flash/'+btoa($('.mct-ports a.btn').text().trim()),proc)()
+        cmd=stream_cmd('/pio-flash/'+encodeURI(btoa($('.mct-ports a.btn').text().trim())),proc)()
     }).end()
     r.on('hide.bs.modal',function(){
       cmd.abort();

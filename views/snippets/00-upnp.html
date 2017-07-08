@@ -1,7 +1,11 @@
 <title>External access (UPnP)</title>
 <div style="text-align:center" class="upnp-access">
-  <p>You can connect to this host from local network <a></a></p>
-  <p>Current state of public access is: <span>unknown</span> at: <a></a></p>
+  <p>You can connect to this host from local network <a></a>
+    <button type="button" class="btn btn-warning btn-sm" title="Show explanation">QR</button>
+  </p>
+  <p>Current state of public access is: <span>unknown</span> at: <a></a>
+    <button type="button" class="btn btn-warning btn-sm" title="Show explanation">QR</button>
+  </p>
   <button type="button" class="btn btn-secondary upnp-open disabled" data-toggle="toggle" title="Open external public port">Open</button>
   <button type="button" class="btn btn-secondary upnp-close disabled" data-toggle="toggle" title="Close external public port">Close</button>
 <script>
@@ -43,5 +47,11 @@ $(function(){
       setState(data);
     });
   })
+  base.find('.btn-warning').on('click',function(){
+    var url=$(this).siblings('a').attr('href');
+    var m=$('#mct-qr-modal');
+    m.find('.modal-body img').attr('src','/qr/'+encodeURI(btoa(url)))
+    m.modal();
+  });
 });
 </script>

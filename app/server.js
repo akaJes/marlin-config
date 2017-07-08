@@ -16,7 +16,6 @@ var https = require('https');
 var ua = require('universal-analytics');
 var promisify = require('./helpers').promisify;
 var walk=require('./helpers').walk;
-var cam = require('./cam');
 var qr = require('qr-image');
 var os = require('os');
 var ifaces = os.networkInterfaces();
@@ -53,9 +52,10 @@ var certificate = fs.readFileSync(path.join(__dirname,'..','sslcert','server.crt
 var credentials = {key: privateKey, cert: certificate};
 
 var camServer = https.Server(credentials, app);
-//camServer.listen(3002);
-cam.init(server);
-cam.init(camServer);
+var ss=require('../rtcmc-v3/Signaling-Server.js');
+var ssio=ss(camServer);
+ssio.attach(server);
+
   Promise.resolve(getPort(httpsPort))
   .then(port =>new Promise((done,fail)=>{
       camServer.on('error',function(e){
@@ -65,10 +65,6 @@ cam.init(camServer);
         httpsPort=port;
         var url='https://localhost:'+port+'/';
         console.log('Marlin cam started on '+url);
-        if(0)
-        cam.map(port)
-        .then(a=>console.log('mapped'))
-        .catch(a=>console.error('not mapped',a))
         done(url);
       });
   }))
@@ -78,10 +74,11 @@ app.use('/', express.static(path.join(__dirname,'..', 'static')));
 app.use('/libs', express.static(path.join(__dirname,'..', 'node_modules')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.get('/web-qr', function (req, res) {
+app.get('/qr/:url', function (req, res) {
+  var url=atob(decodeURI(req.params.url)).toString();
   res.set('Content-Type', 'image/svg+xml');
-  var ip=getIP();
-  var qr_svg = qr.image('https://'+ip+':3002/cam/', { type: 'svg' });
+  //var ip=getIP();
+  var qr_svg = qr.image(url, { type: 'svg' });
   qr_svg.pipe(res);
 })
 
@@ -104,7 +101,7 @@ app.get('/upnp/open', function (req, res) {
   });
 })
 app.get('/upnp/local', function (req, res) {
-  res.send({ip:getIP(),port:httpPort});
+  res.send({ip:getIP(),port:httpPort,https:httpsPort});
 })
 app.get('/upnp/check', function (req, res) {
   natClient.getMappings(function(err, results) {
@@ -243,7 +240,7 @@ app.get('/examples', function (req, res) {
   })
 });
 app.get('/set-base/:path', function (req, res) {
-  baseCfg=atob(req.params.path).toString();
+  baseCfg=atob(decodeURI(req.params.path)).toString();
   if (baseCfg!='Marlin')
     baseCfg=path.join('Marlin','example_configurations',baseCfg);
   res.end();
@@ -340,7 +337,7 @@ function atob(b64string){
 }
 
 app.get('/pio-flash/:port', function (req, res) {
-  var port=atob(req.params.port).toString();
+  var port=atob(decodeURI(req.params.port)).toString();
   var params=['run','-t','upload'];
   var close=false;
   if (port[0]=='/'){

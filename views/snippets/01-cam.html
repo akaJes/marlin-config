@@ -1,16 +1,25 @@
-<title>Scan QR code with your mobile phone</title>
-<div style="text-align:center" class="bs-default">
-  <p>This is default boot screen with size <span></span></p>
-  <img src="web-qr" style="width:50%"></img>
-<script>
-$(function(){
-  return
-  var base=$('.bs-default');
-  $.ajax('/web-qr')
-  .then(function(screen){
-    base.find('p span').text(screen.width+'x'+screen.height);
-    screen.data=eval('['+screen.data+']');
-    drawBootscreen(base.find('canvas')[0],screen,10);
-  })
-});
-</script>
+<title>Remote camera preview</title>
+<div style="text-align:center" class="cam-preview">
+  <div class="row form-group">
+    <div class="col-8 my-auto">
+      Scan QR code with your mobile phone <a></a>
+      <button type="button" class="btn btn-warning btn-sm" title="Show explanation">QR</button>
+    </div>
+    <div class="col-4 float-right">
+      Voice:
+      <div class="onoffswitch mct-changed" title="Mute">
+        <label class="onoffswitch-label">
+          <input type="checkbox" class="onoffswitch-checkbox" checked>
+          <span class="onoffswitch-inner" data-content-on="Muted" data-content-off="On"></span>
+          <span class="onoffswitch-switch"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+  <script src="/libs/rtcmulticonnection-v3/dist/RTCMultiConnection.js"></script>
+  <link rel="stylesheet" href="cam/main.css" />
+  <script src="cam/main0.js"></script>
+  <div id="container">
+    <video muted autoplay></video>
+  </div>
+</div>

@@ -1,4 +1,5 @@
 $(function(){
+  var streamID='uofgi4qqdvd';
   var selects={
       audioinput: {ui:$('select').eq(0),name:'microphone',num:0},
       videoinput: {ui:$('select').eq(1),name:'camera',num:0},
@@ -48,11 +49,13 @@ $(function(){
       sourceId: selects.audioinput.ui.val()
     }];
     connection.captureUserMedia();
+  //  connection.renegotiate();
   }
 
   var connection = new RTCMultiConnection();
+  connection.enableLogs=false;
   connection.socketURL = '/';
-  connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+//  connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
   connection.socketMessageEvent = 'marlin-conf-cam';
   connection.session = {
     audio: true,
@@ -63,12 +66,25 @@ $(function(){
     OfferToReceiveAudio: false,
     OfferToReceiveVideo: false
   };
+  function reconnect(){
+    connection.connectSocket(function(socket) {
+      connection.getAllParticipants().forEach(function(participantId) {
+        socket.emit(connection.socketCustomEvent, {
+          remoteUserId: participantId,
+          reloadVideo: true,
+          userid: connection.userid,
+          streamid: streamID,
+        });
+      });
+    });
+  }
   connection.onstream = function(event) {
     $('video')[0].src = event.mediaElement.src;
     connection.renegotiate();
+    reconnect();
   };
   connection.onstreamended = function(event) {
   };
-  connection.open('uofgi4qqdvd', function() {
+  connection.open(streamID, function() {
   });
 })

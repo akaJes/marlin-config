@@ -3,7 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link type="image/x-icon" rel="shortcut icon" href="css/favicon.ico">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <title>Marlin configurator</title>
@@ -172,6 +173,42 @@ if (typeof require === 'function') { //commonJS from electron
             </div>
           </div>
         </div>
+        <div class="modal fade" id="mct-qr-modal" tabindex="-1" role="dialog" aria-labelledby="qrModalLabel" aria-hidden="true" >
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title" id="qrModalLabel">Scan this QRcode to open url</h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="modal-body">
+                <img style="width:100%"></img>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal fade" id="mct-log-modal" tabindex="-1" role="dialog" aria-labelledby="logModalLabel" aria-hidden="true" >
+          <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title" id="logModalLabel">Information about changes</h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="modal-body">
+                <p></p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="modal fade" id="mct-examples-modal" tabindex="-1" role="dialog" aria-labelledby="examplesModalLabel" aria-hidden="true" >
           <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -261,7 +298,7 @@ if (typeof require === 'function') { //commonJS from electron
       </div>
       </li>
       <li class="nav-item mr-sm-2 my-auto p-1">
-        <button type="button" class="btn btn-warning mct-info" title="Show information">?</button>
+        <button type="button" class="btn btn-warning mct-info" title="Show information">? <span class="badge badge-danger" hidden>0</span></button>
       </li>
       <li class="nav-item mr-sm-2 my-auto p-1">
 <div class="onoffswitch mct-changed"  title="Toggle only changed options">
@@ -354,7 +391,7 @@ if (typeof require === 'function') { //commonJS from electron
 </nav>
 </div>
   <div class="row">
-    <div class="col-md-12 col-lg-7">
+    <div class="col-12 col-md-12 col-lg-7">
       <div class="tabbable config-files">
         <ul class="nav nav-tabs" role="tablist">
           <template class="_tab_item">
@@ -369,7 +406,7 @@ if (typeof require === 'function') { //commonJS from electron
               <template class="_section">
               <div class="card">
                 <div class="card-header h5">
-                    <label class="form-control-label col-sm-2 text-right" >Section:</label><strong><span></span></strong>
+                    <label class="form-control-label col-sm-2 col-4 text-right" >Section:</label><strong><span></span></strong>
                     <button type="button" class="btn btn btn-sm float-right" title="show all">All <span class="badge badge-default"></span></button>
                     <span class="float-right">&nbsp;</span>
                     <button type="button" class="btn btn-info btn-sm float-right" title="show only changed">Changed <span class="badge badge-default"></span></button>
@@ -378,8 +415,8 @@ if (typeof require === 'function') { //commonJS from electron
                   <div class="form-horizontal" role="form">
                   <template class="_define">
                     <div class="form-group row">
-                      <label class="col-sm-5 col-form-label col-form-label-sm my-auto" data-toggle="tooltip" data-animation="false"></label>
-                      <div class="col-sm-6 my-auto" data-toggle="tooltip"  data-animation="false">
+                      <label class="col-sm-5 col-5 col-form-label col-form-label-sm my-auto" data-toggle="tooltip" data-animation="false"></label>
+                      <div class="col-sm-6 col-6 my-auto" data-toggle="tooltip"  data-animation="false">
 <div class="onoffswitch">
     <label class="onoffswitch-label" >
         <input type="checkbox" class="onoffswitch-checkbox">
@@ -394,7 +431,7 @@ if (typeof require === 'function') { //commonJS from electron
     <option value="false">False</option>
   </select>
                       </div>
-                      <div class="col-sm-1 my-auto">
+                      <div class="col-sm-1 col-1 my-auto">
                         <button type="button" class="btn btn-warning btn-sm" title="Show explanation">?</button>
                       </div>
                     </div>
