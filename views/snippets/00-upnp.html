@@ -1,13 +1,13 @@
 <title>External access (UPnP)</title>
 <div style="text-align:center" class="upnp-access">
-  <p>You can connect to this host from local network <a></a>
+  <p>You can connect to this host from local network <a target="_blank"></a>
     <button type="button" class="btn btn-warning btn-sm" title="Show explanation">QR</button>
   </p>
-  <p>Current state of public access is: <span>unknown</span> at: <a></a>
+  <p>Current state of public access is: <strong><span>Unknown</span></strong> at: <a target="_blank"></a>
     <button type="button" class="btn btn-warning btn-sm" title="Show explanation">QR</button>
   </p>
-  <button type="button" class="btn btn-secondary upnp-open disabled" data-toggle="toggle" title="Open external public port">Open</button>
-  <button type="button" class="btn btn-secondary upnp-close disabled" data-toggle="toggle" title="Close external public port">Close</button>
+  <button type="button" class="btn btn-secondary upnp-open disabled" data-toggle="toggle" mode="open" title="Open external public port">Open</button>
+  <button type="button" class="btn btn-secondary upnp-close disabled" data-toggle="toggle" mode="close" title="Close external public port">Close</button>
 <script>
 $(function(){
   var base=$('.upnp-access');
@@ -27,22 +27,12 @@ $(function(){
   }
   $.ajax('/upnp/check')
   .then(function(data){
-    if (data.length){
-      setState(data[0])
-      base.find('button').removeClass('disabled')
-    }else
-      setState();
+    base.find('button').removeClass('disabled')
+    setState(data&&data.length&&data[0])
   });
-  base.find('.upnp-close').on('click',function(){
+  base.find('.upnp-close,.upnp-open').on('click',function(){
     if ($(this).hasClass('disabled')) return;
-    $.ajax('/upnp/close')
-    .then(function(data){
-      setState();
-    });
-  })
-  base.find('.upnp-open').on('click',function(){
-    if ($(this).hasClass('disabled')) return;
-    $.ajax('/upnp/open')
+    $.ajax('/upnp/'+$(this).attr('mode'))
     .then(function(data){
       setState(data);
     });
