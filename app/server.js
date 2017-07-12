@@ -20,8 +20,9 @@ var qr = require('qr-image');
 var os = require('os');
 var ifaces = os.networkInterfaces();
 var natUpnp = require('nat-upnp');
-var natClient;
+var moment = require('moment');
 
+var natClient;
 
 function getIP(){
   return Object.keys(ifaces).map(function (ifname) {
@@ -251,6 +252,38 @@ app.get('/fetch', function (req, res) {
   git.Fetch()
   .then(a=>res.end(JSON.stringify(a)))
   .catch(e=>res.status(403).send(e))
+});
+
+/* SAVE */
+
+app.get('/save', function (req, res) {
+var store='.mctstore';
+var dt=moment().format('YYYY-MM-DD kk-mm-ss');
+    git.root()
+    .then(root=>path.join(root,store))
+    .then(dir=>promisify(fs.stat)(dir).catch(a=>promisify(fs.mkdir)(dir)).then(a=>dir))
+    .then(dir=>git.Tag().then(tag=>path.join(dir,tag)))
+    .then(dir=>promisify(fs.stat)(dir).catch(a=>promisify(fs.mkdir)(dir)).then(a=>dir))
+    .then(dir=>path.join(dir,dt))
+    .then(dir=>promisify(fs.stat)(dir).catch(a=>promisify(fs.mkdir)(dir)).then(a=>dir))
+    .then(dir=>git.root().then(root=>({dir:dir,root:root})))
+    .then(dirs=>Promise.all(
+        ['Configuration.h','Configuration_adv.h','_Bootscreen.h']
+        .map(file=>promisify(fs.stat)(path.join(dirs.root,'Marlin',file)).then(()=>file).catch(()=>null))
+      )
+      .then(files=>({root:dirs.root,files:files.filter(a=>a),to:dirs.dir}))
+    )
+    .then(a=>(console.log('stat',a),a))
+    .then(dirs=>Promise.all(
+      dirs.files.map(f=>new Promise((done,fail)=>
+          fs.createReadStream(path.join(dirs.root,'Marlin',f)).on('error',fail)
+          .pipe(fs.createWriteStream(path.join(dirs.to,f)).on('finish',done))
+        )
+      ))
+      .then(()=>dirs)
+    )
+    .then(a=>(console.log('stat',a),a))
+    .then(dirs=>res.send(dirs))
 });
 
 /* VERSION */
