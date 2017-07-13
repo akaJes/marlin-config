@@ -492,6 +492,7 @@ $(function(){
         $(sec).find('.form-horizontal').html(snip.data);
       })
     });
+  // tag menu - change
   (function(btn,ui){
     var t=ui.find('table tbody');
     ui.find('button.btn-primary').on('click',function(ev){
@@ -518,6 +519,7 @@ $(function(){
       })
     })
   }($('.mct-change'),$('#mct-tags-modal')));
+  // tag menu - examples
   (function(btn,ui){
     var t=ui.find('table tbody');
     var hdr=ui.find('.modal-body>p span');
@@ -546,6 +548,7 @@ $(function(){
       })
     })
   }($('.mct-examples'),$('#mct-examples-modal')));
+  // tag menu - reset
   (function(btn,ui){
     var p=ui.find('p');
     btn.on('click',function(){
@@ -563,6 +566,7 @@ $(function(){
         cmdReload($.ajax('/checkout-force'),ui);
     })
   }($('.mct-reset'),$('#mct-reset-modal')));
+  // tag menu - update
   (function(btn){
     btn.on('click',function(){
       progress(0)(true)('50%');
@@ -571,7 +575,20 @@ $(function(){
       .then(function(a){ progress('100%')(false); return a})
     })
   }($('.mct-update')));
+  //tag menu - save
+  (function(m){
+    m.find('.btn-primary').on('click',function(){
+      m.modal('hide');
+      $.ajax('/save?message='+encodeURI(m.find('textarea').val()))
+      .then(function(data){
+        _add($('template._info'))
+        .find('p').text('files: '+data.files.join(', ')+' stored to: '+data.to);
+      })
+    });
+  }($('#mct-prompt')));
+  // consoles menu
   $('.mct-consoles').on('click',function(){ window.open('consoles.html','_blank') });
+  // ports dropdown menu management
   (function(){
     var ports=$('.mct-ports')
     var title=ports.find('a.btn')
@@ -637,6 +654,7 @@ $(function(){
         lastChanged='';
       });
   }());
+  // info menu
   (function(btn){
     var base=$('#mct-log-modal');
     var p=base.find('.modal-body p');
@@ -647,6 +665,7 @@ $(function(){
       base.modal();
     })
   }($('.mct-info')));
+  // compile and flash buttons
   (function(){
     var r=$('#mct-pio-modal');
     var p=r.find('.form-group pre');
@@ -677,6 +696,7 @@ $(function(){
       cmd.abort();
     })
   }());
+  // issue menu
   (function(){
     $('.mct-issue').on('click',function(){
       defs.then(function(data){
@@ -710,6 +730,7 @@ $(function(){
       })
     })
   }());
+  // init conditions
   (function(){
     gcodes.then(function(gcodes){
       defs.then(function(data){

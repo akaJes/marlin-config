@@ -271,9 +271,8 @@ var dt=moment().format('YYYY-MM-DD kk-mm-ss');
         ['Configuration.h','Configuration_adv.h','_Bootscreen.h']
         .map(file=>promisify(fs.stat)(path.join(dirs.root,'Marlin',file)).then(()=>file).catch(()=>null))
       )
-      .then(files=>({root:dirs.root,files:files.filter(a=>a),to:dirs.dir}))
+      .then(files=>({root:dirs.root,files:files.filter(a=>a),to:dirs.dir,message:req.query.message}))
     )
-    .then(a=>(console.log('stat',a),a))
     .then(dirs=>Promise.all(
       dirs.files.map(f=>new Promise((done,fail)=>
           fs.createReadStream(path.join(dirs.root,'Marlin',f)).on('error',fail)
@@ -282,6 +281,7 @@ var dt=moment().format('YYYY-MM-DD kk-mm-ss');
       ))
       .then(()=>dirs)
     )
+    .then(dirs=>promisify(fs.writeFile)(path.join(dirs.to,'contents.json'),JSON.stringify(dirs,null,2)).then(()=>dirs))
     .then(a=>(console.log('stat',a),a))
     .then(dirs=>res.send(dirs))
 });
