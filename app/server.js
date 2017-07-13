@@ -285,6 +285,44 @@ var dt=moment().format('YYYY-MM-DD kk-mm-ss');
     .then(a=>(console.log('stat',a),a))
     .then(dirs=>res.send(dirs))
 });
+var recurseObj=obj=>{
+  var arr=[];
+  Object.keys(obj).forEach(function(key) {
+    var ob={text:key},nodes=recurseObj(obj[key]);
+    if (nodes.length){
+      ob.nodes=nodes;
+      ob.state={expanded:false};
+    }
+    arr.push(ob);
+  });
+  return arr;
+}
+app.get('/saved', function (req, res) {
+  git.root()
+  .then(root=>{
+    var ex=path.join(root,'.mctstore')
+    return walk(ex)
+    .then(a=>a.filter(i=>/Configuration(_adv)?\.h/.test(i)))
+    .then(a=>a.map(i=>path.parse(path.relative(ex,i)).dir))
+    .then(unique)
+    .then(a=>
+      Promise.all(
+        a.map(dir=>
+          promisify(fs.stat)(path.join(ex,dir,'contents.json'))
+          .then(a=>promisify(fs.readFile)(path.join(ex,dir,'contents.json'),'utf8'))
+          .then(text=>({dir:dir,content:JSON.parse(text)}))
+          .catch(()=>({dir:dir}))
+        )
+      )
+    )
+    .then(a=>{
+      var obj={};
+      a.forEach(ia=>ia.dir.split(path.sep).reduce((p,a)=>(p[a]=p[a]||{},p[a]),obj))
+      return {tree:recurseObj(obj),a:a};
+    })
+    .then(a=>res.send(a))
+  })
+});
 
 /* VERSION */
 

@@ -585,7 +585,26 @@ $(function(){
         .find('p').text('files: '+data.files.join(', ')+' stored to: '+data.to);
       })
     });
-  }($('#mct-prompt')));
+  }($('#mct-promptModal')));
+  // upload menu - restore
+  (function(btn,m){
+    var p=m.find('.modal-body p')
+    var t=m.find('.modal-body textarea')
+    btn.on('click',function(){
+      $.ajax('/saved')
+      .then(function(data){
+        p.treeview({
+          data:data.tree,
+          expandIcon:'fa fa-plus',
+          collapseIcon:'fa fa-minus',
+        })
+        .on('nodeSelected',function(ev,node){
+//          t.val(node.content.message||'');
+        })
+      m.modal();
+      })
+    })
+  }($('.mct-restore'),$('#mct-restoreModal')));
   // consoles menu
   $('.mct-consoles').on('click',function(){ window.open('consoles.html','_blank') });
   // ports dropdown menu management
@@ -658,7 +677,7 @@ $(function(){
   (function(btn){
     var base=$('#mct-log-modal');
     var p=base.find('.modal-body p');
-    p.append(`Current directory is: <strong>${config.root}</strong><br>Current base files choosen from: <strong>${config.base}</strong><br>changed options:`)
+    p.append(`Current directory is: <strong>${config.root}</strong><br>Current base files choosen from: <strong>${config.base}</strong><br>changed options from other hosts:`)
     btn.on('click',function(){
       var badge=$('.mct-info span')
       badge.text(0).attr('hidden','');

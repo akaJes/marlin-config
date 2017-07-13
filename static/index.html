@@ -18,6 +18,7 @@
     <script src="libs/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="libs/socket.io-client/dist/socket.io.js"></script>
     <script src="js/jquery.ba-throttle-debounce.js"></script>
+    <script src="libs/bootstrap-treeview/dist/bootstrap-treeview.min.js"></script>
     <link  href="libs/cropper/dist/cropper.css" rel="stylesheet">
     <script src="libs/cropper/dist/cropper.js"></script>
     <link href="css/toggle.css" rel="stylesheet">
@@ -275,11 +276,11 @@ if (typeof require === 'function') { //commonJS from electron
             </div>
           </div>
         </div>
-<div class="modal fade" id="mct-prompt" tabindex="-1" role="dialog" aria-labelledby="mct-promptLabel" aria-hidden="true">
+<div class="modal fade" id="mct-promptModal" tabindex="-1" role="dialog" aria-labelledby="mct-promptModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="mct-promptLabel">Type some description</h5>
+        <h5 class="modal-title" id="mct-promptModalLabel">Type some description</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -295,6 +296,29 @@ if (typeof require === 'function') { //commonJS from electron
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="mct-restoreModal" tabindex="-1" role="dialog" aria-labelledby="mct-restoreModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="mct-restoreModalLabel">Choose desired configuration from storage</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p></p>
+          <div class="form-group">
+            <label for="message-text" class="form-control-label">Message:</label>
+            <textarea class="form-control" rows="8" id="message-text" disabled></textarea>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Upload</button>
       </div>
     </div>
   </div>
@@ -319,7 +343,7 @@ if (typeof require === 'function') { //commonJS from electron
           <button class="dropdown-item mct-update" title="Update version list from GitHub (git fetch)">Update</button>
           <button class="dropdown-item bg-danger text-white mct-reset" title="Reset all changes (git checkout -f) or copy from examples if choosen">Reset</button>
           <button class="dropdown-item mct-examples" title="Choose base file from examples">Examples</button>
-          <button class="dropdown-item mct-save" data-toggle="modal" data-target="#mct-prompt" title="Place current configuration in the safe place">Save</button>
+          <button class="dropdown-item mct-save" data-toggle="modal" data-target="#mct-promptModal" title="Place current configuration in the safe place">Save</button>
         </div>
       </div>
       </li>
@@ -334,7 +358,13 @@ if (typeof require === 'function') { //commonJS from electron
         <span class="onoffswitch-switch"></span>
     </label>
 </div>
-          <button type="button" class="btn btn-warning mct-upload" title="Upload your old configuration or drag it in browser">Upload</button>
+        <div class="dropdown d-inline-block">
+          <button class="btn btn-warning dropdown-toggle mct-tags" id="dropdownUploadLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="update current configuration from files or store">Upload</button>
+          <div class="dropdown-menu" aria-labelledby="dropdownUploadLink">
+            <button class="dropdown-item bg-warning mct-upload" title="Upload your old configuration or drag it in browser">Files</button>
+            <button class="dropdown-item mct-restore" title="Get files from storage">Saved</button>
+          </div>
+        </div>
           <input type="file" name="files[]" class="mct-upload" multiple style="display:none;">
       </li>
       <li class="nav-item mr-sm-2 p-1">

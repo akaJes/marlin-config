@@ -53,6 +53,7 @@
   "dependencies": {
     "body-parser": "^1.17.2",
     "bootstrap": "4.0.0-alpha.6",
+    "bootstrap-treeview": "^1.2.0",
     "cropper": "^3.0.0-rc.2",
     "express": "^4.15.2",
     "font-awesome": "^4.7.0",
