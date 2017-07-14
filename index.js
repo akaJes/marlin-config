@@ -66,7 +66,10 @@ app.on('ready', function() {
       mainWindow = new BrowserWindow({
           height: 768,
           width: 1280,
-          icon: path.join(__dirname, 'build/icons/icon_64x64.png')
+          icon: path.join(__dirname, 'build/icons/icon_64x64.png'),
+          webPreferences: {
+            experimentalFeatures: true,
+          },
       });
       mainWindow.loadURL(url);
     })

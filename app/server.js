@@ -321,12 +321,12 @@ app.get('/restore/:path', function (req, res) {
     .map(f=>git.root()
       .then(root=>copyFile(f,path.join(root,'Marlin',path.parse(f).base)))
     )
-    console.log(up);
-    return (uploadFiles(up));
-    return Promise.all(uploadFiles(up).concat(up));
+    console.log(cp);
+    //return (uploadFiles(up));
+    return uploadFiles(up).then(up=>Promise.all([...up,...cp]));
   })
-  .then(e=>res.status(403).send(e))
-//  .then(a=>res.send(a))
+//  .then(e=>res.status(403).send(e))
+  .then(a=>res.send(a))
   .catch(e=>res.status(403).send(e))
 });
 app.get('/saved', function (req, res) {
@@ -605,6 +605,18 @@ function main(noOpn){
   })
   .then(serial_enabled?serial_init:a=>a)
 //  .catch(a=>console.error('serial failed'))
+  .then(()=>getPort(httpsPort))
+  .then(port =>new Promise((done,fail)=>{
+      camServer.on('error',function(e){
+        fail(e)
+      })
+      camServer.listen(port, function () {
+        httpsPort=port;
+        var url='https://localhost:'+port+'/';
+        console.log('Marlin cam started on '+url);
+        done(url);
+      });
+  }))
   .then(()=>getPort(httpPort))
   .then(port =>new Promise((done,fail)=>{
       httpPort=port;
@@ -618,18 +630,6 @@ function main(noOpn){
       });
   }))
   .then(url=>(!noOpn&&opn(url),url))
-  .then(()=>getPort(httpsPort))
-  .then(port =>new Promise((done,fail)=>{
-      camServer.on('error',function(e){
-        fail(e)
-      })
-      camServer.listen(port, function () {
-        httpsPort=port;
-        var url='https://localhost:'+port+'/';
-        console.log('Marlin cam started on '+url);
-        done(url);
-      });
-  }))
 }
 module.exports.main=main;
 require.main===module && main();
