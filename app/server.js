@@ -34,6 +34,7 @@ function getIP(){
   }).filter(a=>a);
 }
 
+var store='.mct.bak';
 var httpPort = 3000;
 var httpsPort = 3002;
 var server = http.Server(app);
@@ -255,10 +256,18 @@ app.get('/fetch', function (req, res) {
 });
 
 /* SAVE */
-
+var copyFile=(from,to)=>
+  new Promise((done,fail)=>
+    fs.createReadStream(from)
+    .on('error',fail)
+    .pipe(
+      fs.createWriteStream(to)
+      .on('finish',()=>done(to))
+      .on('error',fail)
+    )
+  );
 app.get('/save', function (req, res) {
-var store='.mctstore';
-var dt=moment().format('YYYY-MM-DD kk-mm-ss');
+  var dt=moment().format('YYYY-MM-DD kk-mm-ss');
     git.root()
     .then(root=>path.join(root,store))
     .then(dir=>promisify(fs.stat)(dir).catch(a=>promisify(fs.mkdir)(dir)).then(a=>dir))
@@ -273,22 +282,23 @@ var dt=moment().format('YYYY-MM-DD kk-mm-ss');
       )
       .then(files=>({root:dirs.root,files:files.filter(a=>a),to:dirs.dir,message:req.query.message}))
     )
-    .then(dirs=>Promise.all(
-      dirs.files.map(f=>new Promise((done,fail)=>
-          fs.createReadStream(path.join(dirs.root,'Marlin',f)).on('error',fail)
-          .pipe(fs.createWriteStream(path.join(dirs.to,f)).on('finish',done))
+    .then(dirs=>
+      Promise.all(
+        dirs.files.map(f=>
+          copyFile(path.join(dirs.root,'Marlin',f), path.join(dirs.to,f) )
         )
-      ))
+      )
       .then(()=>dirs)
     )
     .then(dirs=>promisify(fs.writeFile)(path.join(dirs.to,'contents.json'),JSON.stringify(dirs,null,2)).then(()=>dirs))
     .then(a=>(console.log('stat',a),a))
     .then(dirs=>res.send(dirs))
 });
-var recurseObj=obj=>{
+var recurseObj=(obj,p)=>{
+  p=p||'';
   var arr=[];
   Object.keys(obj).forEach(function(key) {
-    var ob={text:key},nodes=recurseObj(obj[key]);
+    var ob={text:key,path:path.join(p,key)},nodes=recurseObj(obj[key],ob.path);
     if (nodes.length){
       ob.nodes=nodes;
       ob.state={expanded:false};
@@ -297,10 +307,32 @@ var recurseObj=obj=>{
   });
   return arr;
 }
+app.get('/restore/:path', function (req, res) {
+  var p=atob(decodeURI(req.params.path)).toString();
+  git.root()
+  .then(root=>path.join(root,store,p))
+  .then(walk)
+  .then(files=>{
+    var up=files
+    .filter(i=>/Configuration(_adv)?\.h/.test(i))
+    .map(f=>({path:f,name:path.parse(f).base}))
+    var cp=files
+    .filter(i=>/_Bootscreen\.h/.test(i))
+    .map(f=>git.root()
+      .then(root=>copyFile(f,path.join(root,'Marlin',path.parse(f).base)))
+    )
+    console.log(up);
+    return (uploadFiles(up));
+    return Promise.all(uploadFiles(up).concat(up));
+  })
+  .then(e=>res.status(403).send(e))
+//  .then(a=>res.send(a))
+  .catch(e=>res.status(403).send(e))
+});
 app.get('/saved', function (req, res) {
   git.root()
   .then(root=>{
-    var ex=path.join(root,'.mctstore')
+    var ex=path.join(root,store)
     return walk(ex)
     .then(a=>a.filter(i=>/Configuration(_adv)?\.h/.test(i)))
     .then(a=>a.map(i=>path.parse(path.relative(ex,i)).dir))
@@ -316,9 +348,10 @@ app.get('/saved', function (req, res) {
       )
     )
     .then(a=>{
-      var obj={};
+      var obj={},info={};
       a.forEach(ia=>ia.dir.split(path.sep).reduce((p,a)=>(p[a]=p[a]||{},p[a]),obj))
-      return {tree:recurseObj(obj),a:a};
+      a.forEach(ia=>(info[ia.dir]={message:ia.content.message}))
+      return {tree:recurseObj(obj),info:info};
     })
     .then(a=>res.send(a))
   })
@@ -500,6 +533,23 @@ app.get('/json/', function (req, res) {
   res.set('Content-Type', 'application/json');
   get_cfg().then(a=>res.send(a))
 });
+//files=[{path:path&name,name:name}]
+var uploadFiles=files=>
+  Promise.all(files.map(file=>
+    git.root()
+    .then(root=>{
+      try{
+        return mctool
+          .makeCfg(file.path)
+          .then(mctool.makeHfile(root,file.name,baseCfg))
+          .then(a=>file.name)
+      }catch(e){
+        console.log(e);
+        throw e;
+      }
+    })
+  ))
+
 app.post('/upload', function(req, res){
   //var uploadDir = path.join(__dirname, '/uploads');
   new Promise((done,fail)=>{
@@ -522,26 +572,9 @@ app.post('/upload', function(req, res){
   })
 //  .then(a=>(console.log(a),a))
 //process
-  .then(files=>{
-    return Promise.all(files.map(file=>git.root().then(root=>{
-try{
-        return mctool
-          .makeCfg(file.path)
-          .then(mctool.makeHfile(root,file.name,baseCfg))
-}catch(e) { console.log(e); throw e; }
-      })
-//        return new Promise((done,fail)=>
-//        fs.rename(file.path, path.join(uploadDir, file.name),(err,ok)=>(err&&fail(err)||done(ok))))
-    ))
-  })
+  .then(uploadFiles)
   .then(a=>res.send(a))
-//  .then(a=>res.end('success'))
   .catch(e=>res.status(403).send(e))
-/*
-      res.writeHead(200, {'content-type': 'text/plain'});
-      res.write('received upload:\n\n');
-      res.end('success');
-*/
 });
 app.post('/set/:file/:name/:prop/:value', function (req, res) {
   git.root()

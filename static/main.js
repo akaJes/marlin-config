@@ -526,8 +526,6 @@ $(function(){
     ui.find('button.btn-primary').on('click',function(ev){
       var row = t.find('.table-success');
       if(row.length){
-        var path=btoa(row.find('td').text());
-        cmdReload($.ajax('/set-base/'+encodeURI(path)),ui);
       }
     });
     ui.find('table tbody').on('click',function(ev){
@@ -588,8 +586,16 @@ $(function(){
   }($('#mct-promptModal')));
   // upload menu - restore
   (function(btn,m){
-    var p=m.find('.modal-body p')
-    var t=m.find('.modal-body textarea')
+    var p=m.find('.modal-body p');
+    var t=m.find('.modal-body textarea');
+    var selected;
+    m.find('.btn-primary')
+    .on('click',function(){
+      if (selected){
+        var path=btoa(selected);
+        cmdReload($.ajax('/restore/'+encodeURI(path)),m);
+      }
+    });
     btn.on('click',function(){
       $.ajax('/saved')
       .then(function(data){
@@ -599,9 +605,15 @@ $(function(){
           collapseIcon:'fa fa-minus',
         })
         .on('nodeSelected',function(ev,node){
-//          t.val(node.content.message||'');
+          var msg='';
+          selected='';
+          if (data.info[node.path]){
+            selected=node.path;
+            msg=data.info[node.path].message
+          }
+          t.val(msg);
         })
-      m.modal();
+        m.modal();
       })
     })
   }($('.mct-restore'),$('#mct-restoreModal')));
