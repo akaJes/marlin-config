@@ -369,7 +369,7 @@ app.get('/cert', function (req, res) { //??
 app.get('/version', function (req, res) {
   res.set('Content-Type', 'image/svg+xml');
   var badge={
-    text:       { name:"marlin-conf", version:pjson.version },
+    text:       { name:pjson.name, version:pjson.version },
     width:      { text:83, version:39, total:122 },
     position:   { version:88 }
   };
@@ -384,7 +384,7 @@ app.get('/version/:screen', function (req, res) {
   res.set('Content-Type', 'text/plain');
     visitor.screenview({
       cd:req.params.screen,
-      an:pjson.name,
+      an:pjson.name+(isElectron&&"-electron"||''),
       av:pjson.version,
       ua:req.headers['user-agent'],
       ul:req.headers['accept-language'].split(',')[0],

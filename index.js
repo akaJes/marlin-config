@@ -1,5 +1,6 @@
 'use strict';
 const {app, BrowserWindow, Menu, dialog} = require('electron');
+//require('electron-debug')({showDevTools: true, enabled: true}); //runtime debug
 console.log('Node',process.version);
 const notifier = require('node-notifier');
 

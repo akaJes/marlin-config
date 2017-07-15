@@ -120,7 +120,7 @@ function addWidgets(scene,defaults){
 function createScene(domElement){
   var loader = new THREE.FontLoader();
   var font;
-  loader.load( 'libs/three/examples/'+'fonts/helvetiker_regular.typeface.json', function ( _font ) {
+  loader.load( 'git/three/examples/'+'fonts/helvetiker_regular.typeface.json', function ( _font ) {
     font=_font;
   });
   var renderer = webglAvailable() ? new THREE.WebGLRenderer() : new THREE.CanvasRenderer();
