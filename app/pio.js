@@ -2,6 +2,7 @@ var fs = require('fs');
 var which = require('which');
 var exec  = require('child_process').exec;
 var spawn  = require('child_process').spawn;
+require('fix-path')();
 
 exports.isPIO=()=>new Promise((done,fail)=>which('platformio',(err, resolvedPath)=>err?fail(err):done(resolvedPath)));
 

@@ -43,7 +43,7 @@ var isElectron=module.parent&&module.parent.filename.indexOf('index.js')>=0;
 
 var baseCfg='Marlin';
 var serial;
-var serial_enabled = !(isElectron&&process.platform=='darwin');
+var serial_enabled = true; //!(isElectron&&process.platform=='darwin');
 if (serial_enabled)
   serial = require('./console');
 

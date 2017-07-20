@@ -83,7 +83,7 @@ module.exports.init=(http,p,speed)=>{
 exports.list=()=>new Promise((done,fail)=>{
   SerialPort.list(function (err, ps){
     if (err) return fail(err);
-    done(ps.filter(i=>i.manufacturer).map(i=>{
+    done(ps.filter(i=>i.manufacturer||/cu\.serial/.test(i.comName)).map(i=>{
       var m;
       i.status='closed';
       if (m=i.comName.match(/(\w+)$/)){
@@ -94,7 +94,7 @@ exports.list=()=>new Promise((done,fail)=>{
         }
       }
       return i;
-    }));
+    })||[]);
   });
 });
 exports.changes=()=>new Promise((done,fail)=>{
