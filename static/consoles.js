@@ -30,22 +30,24 @@ function changePort(p){
   .eq(2).find('a.btn').text(p.speed)
 }
 function removeTab(name){
-  $('#'+name).remove();
-  $('a[href$='+name+']').remove();
+  var id=name.replace(/\./g,'-')
+  $('#'+id).remove();
+  $('a[href$='+id+']').remove();
 }
 function createTab(name,url){
+    var id=name.replace(/\./g,'-')
     var tab,tmpl;
     if(!$('#'+name).length){
       _add($('template.port-body'))
-      .attr('id',name);
+      .attr('id',id);
       tmpl=_add($('template._port-tab'));
-      tab=tmpl.find('a').attr('href','#'+name)
+      tab=tmpl.find('a').attr('href','#'+id)
       tab.find('>span').text(name)
-      tmpl.find('a button').on('click',function(){ removeConsole(name); })
+      tmpl.find('a button').on('click',function(){ removeConsole(id); })
     }else
-      tab=$('a[href$='+name+']');
+      tab=$('a[href$='+id+']');
     tab.tab('show')
-    return tmpl&&$('#'+name);
+    return tmpl&&$('#'+id);
 }
 
 function removeConsole(port,force){

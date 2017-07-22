@@ -1,12 +1,12 @@
 {
   "name": "marlin-conf",
-  "version": "2.7.8",
+  "version": "2.7.9",
   "description": "configuration tool for Marlin project",
   "main": "./index.js",
   "scripts": {
     "start": "electron . -G ~/TEST",
     "build": "build --dir",
-    "build-dev": "build -l --x64",
+    "build-dev": "build -m --x64",
     "dist": "node builder.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint .",
@@ -58,6 +58,7 @@
     "cropper": "^3.0.0-rc.2",
     "electron-debug": "^1.2.0",
     "express": "^4.15.2",
+    "fix-path": "^2.1.0",
     "font-awesome": "^4.7.0",
     "formidable": "^1.1.1",
     "get-port": "^3.1.0",
