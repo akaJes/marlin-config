@@ -3,6 +3,9 @@ var sio = require('socket.io');
 var fs = require('fs');
 var path = require('path');
 var SerialPort = require('serialport-v4');
+var linuxList = require('./linux-list');
+var promisify = require('./helpers').promisify;
+
 var ports={};
 var monitor = new EventEmitter();
 exports.monitor=monitor;
@@ -83,6 +86,7 @@ module.exports.init=(http,p,speed)=>{
 exports.list=()=>new Promise((done,fail)=>{
   SerialPort.list(function (err, ps){
     if (err) return fail(err);
+//console.log(ps);
     done(ps.filter(i=>i.manufacturer).map(i=>{
       var m;
       i.status='closed';
@@ -122,3 +126,23 @@ exports.changes=()=>new Promise((done,fail)=>{
     }
   })
 })
+var portsList=[];
+exports.changesPoll=()=>{
+  var poller=begin=>{
+    return (process.platform=='linux'?linuxList:promisify(SerialPort.list))()
+    .catch(a=>a)
+    .then(ports=>{
+      var aPorts=ports.map(p=>p.comName);
+      var sub=(a,b)=>a.filter(i=>b.indexOf(i)<0)
+      if (!begin){
+        sub(aPorts,portsList)
+        .map(i=>monitor.emit('created',{comName:i,status:'connected'}));
+        sub(portsList,aPorts)
+        .map(i=>monitor.emit('deleted',{comName:i}));
+      }
+      portsList=aPorts;
+    })
+    .then(a=>setTimeout(poller,1000))
+  }
+  return poller(1).then(a=>monitor);
+}

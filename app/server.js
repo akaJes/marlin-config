@@ -117,7 +117,7 @@ function SSEsend(event,data){
   });
 }
 function serial_init(){
-  return serial.changes().then(monitor=>{
+  return serial.changesPoll().then(monitor=>{
     monitor.on("created", function (f, stat) {
       SSEsend('created',f)
 //      serial.list().then(a=>SSEsend('list',a));
