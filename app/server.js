@@ -416,7 +416,7 @@ function pioRoot(){
 app.get('/pio/:env', function (req, res) {
   params=['run'];
   if (req.params.env!='Default')
-    params.push('-e'+req.params.env);
+    params.push('-e',req.params.env);
   pioRoot()
   .then(root=>
     pio.run(params,res)
@@ -431,15 +431,14 @@ function atob(b64string){
     return new Buffer(b64string, 'base64');
 }
 
-app.get('/pio-flash/:port', function (req, res) {
+app.get('/pio/:env/:port', function (req, res) {
   var port=atob(decodeURI(req.params.port)).toString();
   var params=['run','-t','upload'];
-  var close=false;
-  if (port[0]=='/'){
-    params.push('--upload-port')
-    params.push(port)
-    close=true;
-  }
+  var close=port!='Default';
+  if (req.params.env!='Default')
+    params.push('-e',req.params.env);
+  if (close)
+    params.push('--upload-port',port)
   (close&&serial_enabled?serial.close(port):Promise.resolve(true))
   .then(pioRoot)
   .then(root=>{

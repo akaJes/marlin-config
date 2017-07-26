@@ -371,7 +371,7 @@ if (typeof require === 'function') { //commonJS from electron
       <li class="nav-item mr-sm-2 p-1">
 <div class="btn-group">
   <button type="button" class="btn btn-secondary mct-pio-compile disabled" title="Compile Marlin with PlatformIO">Compile</button>
-  <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" title="select enviroment for compilation" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+  <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" title="Select enviroment for compilation" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     <span class="sr-only">Toggle Dropdown</span>
   </button>
   <div class="dropdown-menu mct-pio-env">
@@ -379,17 +379,17 @@ if (typeof require === 'function') { //commonJS from electron
     <div class="dropdown-divider"></div>
   </div>
 </div>
-        <button type="button" class="btn btn-secondary mct-pio-flash disabled" data-toggle="toggle" title="Upload firmware with PlatformIO to selected port">Flash</button>
-      <div class="dropdown d-inline-block mct-ports" title="Select port for PlatformIO">
-  <a class="btn btn-secondary dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    Auto port
-  </a>
-  <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-    <template class="_ports">
-    <a class="dropdown-item" href="#"></a>
-    </template>
+
+<div class="btn-group">
+  <button type="button" class="btn btn-secondary mct-pio-flash disabled" title="Upload firmware with PlatformIO to selected port">Flash</button>
+  <button type="button" class="btn btn-secondary mct-pio-ports dropdown-toggle dropdown-toggle-split" title="Select port for your PlatformIO device" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <span class="sr-only">Toggle Dropdown</span>
+  </button>
+  <div class="dropdown-menu mct-ports">
+    <a class="dropdown-item bg-info" href="#">Default</a>
+    <div class="dropdown-divider"></div>
   </div>
-      </div>
+</div>
       </li>
       <li class="nav-item mr-sm-2 p-1">
         <button type="button" class="btn btn-secondary mct-consoles" data-toggle="toggle" title="Manager of serial consoles">Consoles</button>

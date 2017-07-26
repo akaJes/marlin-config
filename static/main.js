@@ -620,21 +620,14 @@ $(function(){
   // consoles menu
   $('.mct-consoles').on('click',function(){ window.open('consoles.html','_blank') });
   // ports dropdown menu management
-  (function(){
-    var ports=$('.mct-ports')
-    var title=ports.find('a.btn')
-    ports.find('.dropdown-menu').on('click',function(ev){
-      title.text($(ev.target).text());
-    })
-
+  (function(ports){
     function createPort(p){
-      _add($('template._ports'))
-      .text(p.comName)
+      ports.append(`<a class="dropdown-item" href="#">${p.comName}</a>`)
     }
     function removePort(p){
-      ports.find('.dropdown-item').filter(function(i,el){ return $(el).text()==p.comName}).remove()
-      if(title.text()==p.comName)
-        title.text('Auto port');
+      ports.find('a').filter(function(i,el){ return $(el).text()==p.comName}).remove()
+      if (!ports.find('.bg-info').length)
+        ports.find('a').eq(0).addClass('bg-info')
     }
       var source = new EventSource("/ports");
       source.addEventListener('list', function(event) {
@@ -645,12 +638,10 @@ $(function(){
         });
       });
       source.addEventListener('error', function(event) {
-        $('.mct-consoles').attr('disabled','')
-        $('.mct-ports a').addClass('disabled')
+        $('.mct-consoles,.mct-pio-ports').attr('disabled','')
       });
       source.addEventListener('open', function(event) {
-        $('.mct-consoles').removeAttr('disabled')
-        $('.mct-ports a').removeClass('disabled')
+        $('.mct-consoles,.mct-pio-ports').removeAttr('disabled')
       });
       source.addEventListener('created', function(event) {
         var port= JSON.parse(event.data);
@@ -684,7 +675,7 @@ $(function(){
         }
         lastChanged='';
       });
-  }());
+  }($('.mct-ports')));
   // info menu
   (function(btn){
     var base=$('#mct-log-modal');
@@ -711,14 +702,14 @@ $(function(){
     }
     proc.log=function(text){ p.append(text); p.prop('scrollTop',p.prop('scrollHeight')); }
     var cmd;
-    $('.mct-pio-compile, .mct-pio-flash, .mct-ports a')
+    $('.mct-pio-compile, .mct-pio-flash, .mct-pio-ports')
     .toggleClass('disabled',!config.pio)
     .attr(!config.pio?'title':'null','PlatformIO not installed')
     .eq(0).on('click',function(){
-        cmd=stream_cmd('/pio/'+$('.mct-pio-env .bg-info').text(),proc)()
+        cmd=stream_cmd('/pio/'+$('.mct-pio-env .bg-info').text().trim(),proc)()
     }).end()
     .eq(1).on('click',function(){
-        cmd=stream_cmd('/pio-flash/'+encodeURI(btoa($('.mct-ports a.btn').text().trim())),proc)()
+        cmd=stream_cmd('/pio/'+$('.mct-pio-env .bg-info').text().trim()+'/'+encodeURI(btoa($('.mct-ports .bg-info').text().trim())),proc)()
     }).end()
     r.on('hide.bs.modal',function(){
       cmd.abort();
@@ -729,8 +720,9 @@ $(function(){
     $.each(config.env||[],function(i,name){
       $('.mct-pio-env').append(`<a class="dropdown-item" href="#">${name}</a>`)
     })
-    $('.mct-pio-env').on('click',function(ev){
-      $(ev.target).addClass('bg-info').siblings().removeClass('bg-info')
+    $('.mct-pio-env,.mct-ports').on('click',function(ev){
+      if ($(ev.target).hasClass('dropdown-item'))
+        $(ev.target).addClass('bg-info').siblings().removeClass('bg-info')
     })
   }());
   // issue menu
