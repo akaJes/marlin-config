@@ -380,6 +380,10 @@ app.get('/version', function (req, res) {
     res.end(v.replace(/{{([\w.]+)}}/g,(m,r)=>r.split('.').reduce((p,o)=>(p=p&&p[o],p),badge)));
   });
 });
+var pioEnv=(dir)=>
+  promisify(fs.readFile)(path.join(dir,'platformio.ini'),'utf8')
+  .then(a=>a.split(/\r\n?|\n/))
+  .then(a=>a.map(i=>i.match(/\[env\:(.*)\]/)).filter(i=>i).map(i=>i[1]))
 app.get('/version/:screen', function (req, res) {
   res.set('Content-Type', 'text/plain');
     visitor.screenview({
@@ -389,10 +393,10 @@ app.get('/version/:screen', function (req, res) {
       ua:req.headers['user-agent'],
       ul:req.headers['accept-language'].split(',')[0],
     }).send()
-  Promise.all([pio.isPIO().catch(()=>false),git.root()])
+  Promise.all([pio.isPIO().catch(()=>false),git.root(),git.root().then(pioEnv)])
   .then(pp=>{
     //console.log(a)
-    var cfg={pio:pp[0],version:pjson.version,root:pp[1],base:baseCfg};
+    var cfg={pio:pp[0],version:pjson.version,root:pp[1],base:baseCfg,env:pp[2]};
     res.write("var config="+JSON.stringify(cfg));
     res.end();
   })
@@ -409,10 +413,13 @@ function pioRoot(){
     .then(root=>(process.chdir(root),root))
   );
 }
-app.get('/pio', function (req, res) {
+app.get('/pio/:env', function (req, res) {
+  params=['run'];
+  if (req.params.env!='Default')
+    params.push('-e'+req.params.env);
   pioRoot()
   .then(root=>
-    pio.run(['run'],res)
+    pio.run(params,res)
   );
 });
 function atob(b64string){

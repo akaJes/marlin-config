@@ -715,7 +715,7 @@ $(function(){
     .toggleClass('disabled',!config.pio)
     .attr(!config.pio?'title':'null','PlatformIO not installed')
     .eq(0).on('click',function(){
-        cmd=stream_cmd('/pio',proc)()
+        cmd=stream_cmd('/pio/'+$('.mct-pio-env .bg-info').text(),proc)()
     }).end()
     .eq(1).on('click',function(){
         cmd=stream_cmd('/pio-flash/'+encodeURI(btoa($('.mct-ports a.btn').text().trim())),proc)()
@@ -725,6 +725,12 @@ $(function(){
     })
     b.on('click',function(){
       cmd.abort();
+    })
+    $.each(config.env||[],function(i,name){
+      $('.mct-pio-env').append(`<a class="dropdown-item" href="#">${name}</a>`)
+    })
+    $('.mct-pio-env').on('click',function(ev){
+      $(ev.target).addClass('bg-info').siblings().removeClass('bg-info')
     })
   }());
   // issue menu

@@ -152,7 +152,7 @@ if (typeof require === 'function') { //commonJS from electron
           </div>
         </div>
         <div class="modal fade" id="mct-tags-modal" tabindex="-1" role="dialog" aria-labelledby="tagsModalLabel" aria-hidden="true" >
-          <div class="modal-dialog" role="document">
+          <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
               <div class="modal-header">
                 <h4 class="modal-title" id="tagsModalLabel">Available releases</h4>
@@ -369,7 +369,16 @@ if (typeof require === 'function') { //commonJS from electron
           <input type="file" name="files[]" class="mct-upload" multiple style="display:none;">
       </li>
       <li class="nav-item mr-sm-2 p-1">
-        <button type="button" class="btn btn-secondary mct-pio-compile disabled" data-toggle="toggle" title="Compile Marlin with PlatformIO">Compile</button>
+<div class="btn-group">
+  <button type="button" class="btn btn-secondary mct-pio-compile disabled" title="Compile Marlin with PlatformIO">Compile</button>
+  <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" title="select enviroment for compilation" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <span class="sr-only">Toggle Dropdown</span>
+  </button>
+  <div class="dropdown-menu mct-pio-env">
+    <a class="dropdown-item bg-info" href="#">Default</a>
+    <div class="dropdown-divider"></div>
+  </div>
+</div>
         <button type="button" class="btn btn-secondary mct-pio-flash disabled" data-toggle="toggle" title="Upload firmware with PlatformIO to selected port">Flash</button>
       <div class="dropdown d-inline-block mct-ports" title="Select port for PlatformIO">
   <a class="btn btn-secondary dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
