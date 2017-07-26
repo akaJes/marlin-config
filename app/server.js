@@ -87,7 +87,7 @@ app.get('/upnp/open', function (req, res) {
   });
 })
 app.get('/upnp/local', function (req, res) {
-  res.send({ip:getIP(),port:httpPort,https:httpsPort});
+  res.send({ip:getIP()[0],port:httpPort,https:httpsPort});
 })
 app.get('/upnp/check', function (req, res) {
   natClient.getMappings(function(err, results) {
@@ -311,6 +311,7 @@ app.get('/restore/:path', function (req, res) {
   var p=atob(decodeURI(req.params.path)).toString();
   git.root()
   .then(root=>path.join(root,store,p))
+  .then(dir=>promisify(fs.stat)(dir).catch(a=>{throw 'no files';}).then(a=>dir))
   .then(walk)
   .then(files=>{
     var up=files
@@ -325,15 +326,16 @@ app.get('/restore/:path', function (req, res) {
     //return (uploadFiles(up));
     return uploadFiles(up).then(up=>Promise.all([...up,...cp]));
   })
-//  .then(e=>res.status(403).send(e))
   .then(a=>res.send(a))
   .catch(e=>res.status(403).send(e))
 });
 app.get('/saved', function (req, res) {
   git.root()
   .then(root=>{
-    var ex=path.join(root,store)
-    return walk(ex)
+    var ex=path.join(root,store);
+    return Promise.resolve(ex)
+    .then(dir=>promisify(fs.stat)(dir).catch(a=>{throw 'no files';}).then(a=>dir))
+    .then(walk)
     .then(a=>a.filter(i=>/Configuration(_adv)?\.h/.test(i)))
     .then(a=>a.map(i=>path.parse(path.relative(ex,i)).dir))
     .then(unique)
@@ -354,6 +356,7 @@ app.get('/saved', function (req, res) {
       return {tree:recurseObj(obj),info:info};
     })
     .then(a=>res.send(a))
+    .catch(e=>res.status(403).send(e))
   })
 });
 
@@ -439,6 +442,7 @@ app.get('/pio/:env/:port', function (req, res) {
     params.push('-e',req.params.env);
   if (close)
     params.push('--upload-port',port)
+  console.log(params); //if removed - process hangs :)
   (close&&serial_enabled?serial.close(port):Promise.resolve(true))
   .then(pioRoot)
   .then(root=>{

@@ -18,8 +18,8 @@ var config=Object.assign({},pjson.build);
 
 //prebuild serialport
 config.beforeBuild=(args)=>new Promise((done,fail)=>{
-  if (args.platform.nodeName=='darwin')//skip it
-    return done();
+//  if (args.platform.nodeName=='darwin')//skip it
+//    return done();
   var cmd = 'npm rebuild serialport-v4 --update-binary'
     + ' --target_platform='+args.platform.nodeName+' --target_arch='+args.arch
     + ' --runtime=electron --target='+electron_version

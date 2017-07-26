@@ -526,6 +526,8 @@ $(function(){
     ui.find('button.btn-primary').on('click',function(ev){
       var row = t.find('.table-success');
       if(row.length){
+        var path=btoa(row.find('td').text());
+        cmdReload($.ajax('/set-base/'+encodeURI(path)),ui);
       }
     });
     ui.find('table tbody').on('click',function(ev){

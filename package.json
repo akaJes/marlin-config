@@ -1,6 +1,6 @@
 {
   "name": "marlin-conf",
-  "version": "2.7.9",
+  "version": "2.7.10",
   "description": "configuration tool for Marlin project",
   "main": "./index.js",
   "scripts": {
@@ -78,7 +78,6 @@
     "socket.io": "^2.0.1",
     "swig-templates": "^2.0.2",
     "tether": "^1.4.0",
-    "three": "^0.85.2",
     "tty2html": "^1.0.0",
     "universal-analytics": "^0.4.13",
     "which": "^1.2.14"
@@ -86,8 +85,8 @@
   "devDependencies": {
     "devtron": "^1.4.0",
     "electron": "^1.6.10",
-    "electron-builder": "^18.1.0",
-    "eslint": "^3.19.0",
+    "electron-builder": "*",
+    "eslint": "^4.3.0",
     "json": "^9.0.6",
     "nodemon": "^1.11.0"
   }
