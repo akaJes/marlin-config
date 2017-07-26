@@ -4,12 +4,13 @@ var promisify = require('./helpers').promisify;
 var root;
 
 
-var gitRoot=(root)=>
-new Promise((done,fail)=>git(root).revparse(['--show-toplevel'],(e,a)=>e?fail(e):done(a.replace(/\r|\n/,''))))
-.then(root=>(console.log('[gitRoot]',root),root))
-.catch(mst=>{ console.log('no root'); throw mst})
+var gitRoot=(dir)=>
+  promisify('revparse',git(dir))(['--show-toplevel'])
+  .then(str=>str.replace(/\r|\n/,''))
+  .then(str=>(console.log('[gitRoot]',str),root=str))
+  .catch(mst=>{ console.log('no root'); throw mst});
 
-var gitroot=gitRoot();
+gitRoot().catch(a=>a);
 
 var gitTag=()=>
 new Promise((done,fail)=>git(root).raw(['describe','--tags'],(e,a)=>e?fail(e):done(a.replace(/\r|\n/,''))))
@@ -30,18 +31,11 @@ new Promise((done,fail)=>git(root).log(['--tags','--simplify-by-decoration'],(e,
 exports.Checkout=(branch)=>promisify('checkout',git(root))(branch);
 exports.Status=()=>promisify('status',git(root))();
 exports.Fetch=()=>promisify('fetch',git(root))(['--all']);
-exports.Root=gitRoot;
 exports.Tag=gitTag;
 exports.Tags=gitTags;
 exports.Show=(branch,file)=>promisify('show',git(root))([branch+':'+file]);
 exports.git=git;
-exports.root=a=>{
-  if (a){
-    gitroot=gitRoot(a);
-    return gitroot.then(_root=>root=_root);
-  }
-  return gitroot;
-}
+exports.root=a=>a?gitRoot(a):root?Promise.resolve(root):Promise.reject();
 
 exports.clone=name=>new Promise((done,fail)=>{
   var cmd = exec('git clone https://github.com/MarlinFirmware/Marlin.git '+(name||''));

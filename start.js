@@ -91,7 +91,7 @@ function marlin(){
       });
     }
     function startWeb(){
-      git.root()
+      return git.root()
       .then(root=>new Promise((done,fail)=>{
         console.log('type: mct help if you need more information');
           if(root){
@@ -101,16 +101,14 @@ function marlin(){
             server.main().then(done).catch(fail)
           });
         }
-      })).catch(a=>a)
+      }))
     }
     function tryRun(){
       process.chdir('Marlin')
-console.log(process.cwd())
-      git.root('Marlin')
+      return git.root('Marlin')
       .then(a=>server.main());
     }
-    git.root()
-    .then(startWeb)
+    startWeb()
     .catch(a=>{
         var rl = getConsole();
         rl.question('press Enter to clone it from web or ^C to exit', (answer) => {
@@ -118,6 +116,7 @@ console.log(process.cwd())
           git.clone()
           .then(tryRun)
           .catch(tryRun)
+          .catch(a=>console.log('no Marlin folder found'))
         });
     })
   }
