@@ -73,7 +73,7 @@
     "opn": "^5.0.0",
     "qr-image": "^3.2.0",
     "rtcmulticonnection-v3": "^3.4.4",
-    "serialport-v4": "^4.0.7",
+    "serialport-v5": "*",
     "simple-git": "^1.72.0",
     "socket.io": "^2.0.1",
     "swig-templates": "^2.0.2",

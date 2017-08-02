@@ -2,7 +2,7 @@ var EventEmitter = require('events');
 var sio = require('socket.io');
 var fs = require('fs');
 var path = require('path');
-var SerialPort = require('serialport-v4');
+var SerialPort = require('serialport-v5');
 var linuxList = require('./linux-list');
 var promisify = require('./helpers').promisify;
 
