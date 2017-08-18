@@ -2,6 +2,9 @@
 This is a help tool, intended for easy configuration of [Marlin firmware](https://github.com/MarlinFirmware/Marlin)
 
 supported OS: Linux,Mac,Windows
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/AKruk508)
+
 # Main features
 * instant changing of Configuration*.h files
 * quick help for Marlin options and Gcodes
