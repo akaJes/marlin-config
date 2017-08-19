@@ -2,7 +2,7 @@ var EventEmitter = require('events');
 var sio = require('socket.io');
 var fs = require('fs');
 var path = require('path');
-var SerialPort = require('serialport-v5');
+var SerialPort = require('serialport');
 var linuxList = require('./linux-list');
 var promisify = require('./helpers').promisify;
 
@@ -15,7 +15,7 @@ var open=(http,p,speed)=>new Promise((done,fail)=>{
       root=p; //root='\\\\.\\'+p;
     var port = new SerialPort(root, {
       autoOpen: false,
-      parser0: SerialPort.parsers.readline('\n'),
+//      parser0: SerialPort.parsers.readline('\n'),
       baudRate: speed,
 //      rtscts: true,
     });

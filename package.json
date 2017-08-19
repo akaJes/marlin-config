@@ -1,13 +1,13 @@
 {
   "name": "marlin-conf",
-  "version": "2.7.10",
+  "version": "2.7.11",
   "description": "configuration tool for Marlin project",
   "main": "./index.js",
   "scripts": {
     "start": "electron . -G ~/TEST",
     "build": "build --dir",
     "build-dev": "build -m --x64",
-    "dist": "node builder.js",
+    "dist": "GH_TOKEN=`./node_modules/.bin/json -f ~/.github.json -c 'console.log(this.OAuth)'` build -mwl --x64 --ia32 -p always",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint .",
     "rebuild": "npm rebuild serialport-v4 --update-binary",
@@ -17,7 +17,11 @@
   },
   "build": {
     "appId": "com.akajes.marlin.conf",
+    "publish": {
+      "provider": "github"
+    },
     "linux": {
+      "category": "Development",
       "target": [
         "deb",
         "AppImage"
@@ -73,7 +77,7 @@
     "opn": "^5.0.0",
     "qr-image": "^3.2.0",
     "rtcmulticonnection-v3": "^3.4.4",
-    "serialport-v5": "*",
+    "serialport": "6.0.0-beta1",
     "simple-git": "^1.72.0",
     "socket.io": "^2.0.1",
     "swig-templates": "^2.0.2",
@@ -84,7 +88,7 @@
   },
   "devDependencies": {
     "devtron": "^1.4.0",
-    "electron": "^1.6.10",
+    "electron": "*",
     "electron-builder": "*",
     "eslint": "^4.3.0",
     "json": "^9.0.6",
