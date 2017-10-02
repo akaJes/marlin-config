@@ -181,10 +181,17 @@ app.get('/tags', function (req, res) {
     res.send(data);
   });
 });
-app.get('/checkout/:branch', function (req, res) {
-  git.Checkout(req.params.branch)
-  .then(data=>{
+app.get('/branches', function (req, res) {
+  git.Branches().then(data=>{
     res.send(data);
+  });
+});
+app.get('/checkout/:branch', function (req, res) {
+  return Promise.resolve(atob(decodeURI(req.params.branch)).toString())
+  .then(a=>(console.log(a),a))
+  .then(git.Checkout)
+  .then(data=>{
+    res.send(data)
   })
   .catch(a=>res.status(403).send(a))
 });
@@ -194,15 +201,16 @@ var get_cfg=()=>{
   .map(f=>{
     return base
       .then(p=>
-          git.Show(p[1],path.join(baseCfg,f))
+          git.Show(p[1], path.join(baseCfg, f)).catch(e => git.Show(p[1], path.join('Marlin', f)))
           .then(file=>mctool.getJson(p[0],file,p[1])(path.join(p[0],'Marlin',f)))
       )
       .then(o=>(o.names.filter(n=>hints.d2i(n.name),1).map(n=>o.defs[n.name].hint=!0),o))
       .then(a=>(a.names=undefined,type='file',a))
       .then(a=>
         (!a.defs['MOTHERBOARD']&&a)||
-        base
-          .then(p=>mctool.getBoards(path.join(p[0],'Marlin','boards.h')))
+        seek4File('boards.h', [ 'Marlin', path.join('Marlin', 'src', 'core')])
+          .then(mctool.getBoards)
+          .catch(e => '' )
           .then(boards=>(Object.assign(a.defs['MOTHERBOARD'],{select:boards,type:"select"}),a))
       )
   });
@@ -213,40 +221,39 @@ app.get('/now/', function (req, res) { //???
   get_cfg().then(a=>res.send(JSON.stringify(a,null,2)))
 });
 var unique=a=>a.filter((elem, index, self)=>index == self.indexOf(elem))
+var ex_dir = (rel) => seek4File('', [path.join('Marlin', 'example_configurations'), path.join('Marlin', 'src', 'config', 'examples')], rel)
 app.get('/examples', function (req, res) {
-  git.root()
-  .then(root=>{
-    var ex=path.join(root,'Marlin','example_configurations')
-    return walk(ex)
+    var ex;
+    return ex_dir()
+    .then(dir => (ex = dir))
+    .then(walk)
     .then(a=>a.filter(i=>/Configuration(_adv)?\.h/.test(i)))
     .then(a=>a.map(i=>path.parse(path.relative(ex,i)).dir))
     .then(unique)
+    .catch(e => [])
     .then(a=>(a.unshift('Marlin'),a))
     .then(a=>res.send({current:baseCfg,list:a}))
-  })
 });
 app.get('/set-base/:path', function (req, res) {
-  baseCfg=atob(decodeURI(req.params.path)).toString();
-  if (baseCfg!='Marlin')
-    baseCfg=path.join('Marlin','example_configurations',baseCfg);
-  res.end();
+  return Promise.resolve(atob(decodeURI(req.params.path)).toString())
+    .then(base => base == 'Marlin' && base || ex_dir(1).then(ex => path.join(ex, base)) )
+    .then(base => res.send(baseCfg = base))
 });
 app.get('/status', function (req, res) {
   git.Status().then(a=>res.send(a))
 });
 app.get('/checkout-force', function (req, res) {
-  var cp=baseCfg=='Marlin'?a=>a:a=>
-    git.root()
-    .then(root=>
-      ['Configuration.h','Configuration_adv.h']
+  var cp = () => git.root()
+    .then(root => Promise.all(
+      ['Configuration.h', 'Configuration_adv.h', '_Bootscreen.h']
       .map(f=>new Promise((done,fail)=>
-          fs.createReadStream(path.join(root,baseCfg,f))
-          .pipe(fs.createWriteStream(path.join(root,'Marlin',f)).on('finish',done))
-        )
+          fs.createReadStream(path.join(root, baseCfg, f)).on('error', fail)
+          .pipe(fs.createWriteStream(path.join(root, 'Marlin', f)).on('finish', done))
+        ).catch(e => 'not found')
       )
-    )
+    ))
   git.Checkout('--force')
-  .then(cp)
+  .then(a => baseCfg == 'Marlin' && a || cp())
   .then(a=>res.send(a));
 });
 app.get('/fetch', function (req, res) {
@@ -373,9 +380,10 @@ app.get('/version', function (req, res) {
   res.set('Content-Type', 'image/svg+xml');
   var badge={
     text:       { name:pjson.name, version:pjson.version },
-    width:      { text:83, version:39, total:122 },
+    width:      { text: 83, version: 45 },
     position:   { version:88 }
   };
+  badge.width.total = badge.width.text + badge.width.version;
 
   var file=path.join(__dirname,'..','views','version.html');
   return promisify(fs.readFile)(file,'utf8')
@@ -383,8 +391,8 @@ app.get('/version', function (req, res) {
     res.end(v.replace(/{{([\w.]+)}}/g,(m,r)=>r.split('.').reduce((p,o)=>(p=p&&p[o],p),badge)));
   });
 });
-var pioEnv=(dir)=>
-  promisify(fs.readFile)(path.join(dir,'platformio.ini'),'utf8')
+var pioEnv = (file) =>
+  promisify(fs.readFile)(file, 'utf8')
   .then(a=>a.split(/\r\n?|\n/))
   .then(a=>a.map(i=>i.match(/\[env\:(.*)\]/)).filter(i=>i).map(i=>i[1]))
 app.get('/version/:screen', function (req, res) {
@@ -396,7 +404,7 @@ app.get('/version/:screen', function (req, res) {
       ua:req.headers['user-agent'],
       ul:req.headers['accept-language'].split(',')[0],
     }).send()
-  Promise.all([pio.isPIO().catch(()=>false),git.root(),git.root().then(pioEnv)])
+  Promise.all([pio.isPIO().catch(() => false), git.root(), pioRoot().then(pioEnv).catch(e => [])])
   .then(pp=>{
     //console.log(a)
     var cfg={pio:pp[0],version:pjson.version,root:pp[1],base:baseCfg,env:pp[2]};
@@ -408,13 +416,7 @@ app.get('/version/:screen', function (req, res) {
 /* PIO */
 
 function pioRoot(){
-  return git.root()
-  .then(root=>
-    promisify(fs.stat)(path.join(root,'Marlin','platformio.ini'))
-    .then(a=>path.join(root,'Marlin'))
-    .catch(a=>root)
-    .then(root=>(process.chdir(root),root))
-  );
+  return seek4File('platformio.ini', ['', 'Marlin'])
 }
 app.get('/pio/:env', function (req, res) {
   params=['run'];
@@ -481,8 +483,7 @@ function getMatch(reg,data,second){
   return m[1];
 }
 app.get('/bs/default', function (req, res) {
-  git.root()
-  .then(f=>path.join(f,'Marlin','dogm_bitmaps.h'))
+  return seek4File('dogm_bitmaps.h', ['Marlin', path.join('Marlin', 'src', 'lcd', 'dogm')])
   .then(file=>promisify(fs.readFile)(file,'utf8'))
   .then(data=>{
     var second=/\/\/\s*#define\s+START_BMPHIGH/g.test(data);
@@ -538,6 +539,18 @@ app.get('/gcodes', function (req, res) {
 })
 
 /* MAIN */
+
+function getFirstFile(paths) {
+  if (!paths || paths.length == 0)
+    return Promise.reject();
+  var filePath = paths.shift();
+  return promisify(fs.access)(filePath, fs.constants.R_OK)
+    .then(a => filePath)
+    .catch(e => getFirstFile(paths) );
+}
+function seek4File(file, paths, rel) {
+  return git.root().then(root => getFirstFile(paths.map(i => path.join(root, i, file))).then(res => rel && path.relative(root, res) || res))
+}
 
 app.get('/json/', function (req, res) {
   res.set('Content-Type', 'application/json');

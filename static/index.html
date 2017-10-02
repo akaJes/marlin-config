@@ -105,6 +105,14 @@
 .form-group {
     margin-bottom: .5rem;
 }
+#mct-examples-modal .modal-body {
+    max-height: 500px;
+    overflow-y: auto;
+}
+#mct-tags-modal .modal-body {
+    max-height: 500px;
+    overflow-y: auto;
+}
 </style>
 <script>
   //open links externally by default
@@ -336,11 +344,12 @@ if (typeof require === 'function') { //commonJS from electron
     <ul class="navbar-nav mr-auto">
       <li class="nav-item mr-sm-2 my-auto p-1">
       <div class="dropdown d-inline-block">
-        <button class="btn btn-info dropdown-toggle mct-tags" title="Current release" id="dropdownTagsLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <button class="btn btn-info dropdown-toggle mct-tag" title="Current release" id="dropdownTagsLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           TAGS
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownTagsLink">
-          <button class="dropdown-item mct-change" title="Change version (git checkout)" >Change</button>
+          <button class="dropdown-item mct-tags" title="Change version (Releases)" >Change</button>
+          <button class="dropdown-item mct-branches" title="Change version (Development verions - these can be unstable!!!)" >Branches</button>
           <button class="dropdown-item mct-update" title="Update version list from GitHub (git fetch)">Update</button>
           <button class="dropdown-item bg-danger text-white mct-reset" title="Reset all changes (git checkout -f) or copy from examples if choosen">Reset</button>
           <button class="dropdown-item mct-examples" title="Choose base file from examples">Examples</button>
@@ -360,7 +369,7 @@ if (typeof require === 'function') { //commonJS from electron
     </label>
 </div>
         <div class="dropdown d-inline-block">
-          <button class="btn btn-warning dropdown-toggle mct-tags" id="dropdownUploadLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="update current configuration from files or store">Upload</button>
+          <button class="btn btn-warning dropdown-toggle" id="dropdownUploadLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="update current configuration from files or store">Upload</button>
           <div class="dropdown-menu" aria-labelledby="dropdownUploadLink">
             <button class="dropdown-item bg-warning mct-upload" title="Upload your old configuration or drag it in browser">Files</button>
             <button class="dropdown-item mct-restore" title="Get files from storage">Saved</button>

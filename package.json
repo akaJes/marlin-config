@@ -1,6 +1,6 @@
 {
   "name": "marlin-conf",
-  "version": "2.7.11",
+  "version": "2.7.12",
   "description": "configuration tool for Marlin project",
   "main": "./index.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "dist": "GH_TOKEN=`./node_modules/.bin/json -f ~/.github.json -c 'console.log(this.OAuth)'` build -mwl --x64 --ia32 -p always",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint .",
-    "rebuild": "npm rebuild serialport-v4 --update-binary",
+    "rebuild": "npm rebuild serialport@6.0.0-beta1 --update-binary",
     "prepublish": "./node_modules/.bin/json -I -f package.json -e 'if(this.devDependencies)this.devDependenciesOff=this.devDependencies;this.devDependencies=undefined'",
     "postpublish": "./node_modules/.bin/json -I -f package.json -e 'if(this.devDependenciesOff)this.devDependencies=this.devDependenciesOff;this.devDependenciesOff=undefined'",
     "prebuild-": "sudo apt install icnsutils graphicsmagick"

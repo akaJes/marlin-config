@@ -307,7 +307,7 @@ $(function(){
             })
           }
         })
-        $('.mct-tags').eq(0).text(file.tag)
+        $('.mct-tag').eq(0).text(file.tag)
         var href='card-'+file.file.name;
         var tab=addNewTab(file.file.name,href)
         $.each(file.sections,function(n,section){
@@ -493,13 +493,14 @@ $(function(){
       })
     });
   // tag menu - change
-  (function(btn,ui){
+  var tags = function(btn, ui, url){
     var t=ui.find('table tbody');
     ui.find('button.btn-primary').on('click',function(ev){
       var row = t.find('.table-success');
       if(row.length){
-        var tag=row.find('td').eq(1).text().split(',');
-        cmdReload($.ajax('/checkout/'+tag[0]),ui);
+        var tag=row.find('td').eq(1).text().split(',')[0];
+        console.log(tag);
+        cmdReload($.ajax('/checkout/' + encodeURI(btoa(tag))),ui);
       }
     });
     ui.find('table tbody').on('click',function(ev){
@@ -507,7 +508,7 @@ $(function(){
       $(ev.target).parents('tr').addClass('table-success')
     });
     btn.on('click',function(){
-      $.ajax('/tags')
+      $.ajax(url)
       .fail(ajaxAlert)
       .then(function(data){
         data=data.sort(function(a,b){ return a.date<b.date?1:a.date>b.date?-1:0;})
@@ -518,7 +519,10 @@ $(function(){
         ui.modal();
       })
     })
-  }($('.mct-change'),$('#mct-tags-modal')));
+    return this;
+  }
+  tags($('.mct-tags'),$('#mct-tags-modal'),'/tags');
+  tags($('.mct-branches'),$('#mct-tags-modal'),'/branches');
   // tag menu - examples
   (function(btn,ui){
     var t=ui.find('table tbody');

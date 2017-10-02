@@ -6,6 +6,7 @@ const notifier = require('node-notifier');
 
 var which=require('which');
 var path=require('path');
+var fs = require('fs');
 var promisify = require('./app/helpers').promisify;
 var git = require('./app/git-tool');
 var server = require('./app/server');
@@ -16,7 +17,7 @@ var getFolder=()=>new Promise((done,fail)=>
       title:'select folder with Marlin Firmware or empty folder to clone it',
       properties:['openDirectory'],
     },function(folders){
-      console.log();
+      console.log(); //without this - it hangs
       if (!folders)
         return fail({type:'fatal',message:'no folder selected'});
       done(folders[0])
@@ -35,33 +36,28 @@ function showNotify(text){
   });
 }
 app.on('ready', function() {
-    var folder;
     promisify(which)('git')
-    .catch(function(){
-      dialog.showErrorBox('Dependecies','Application needs GIT to be installed!')
-      throw {type:'fatal',message:'no Git installed'};
-    })
     .then(function(){
       var is={'-G':0}
       .filter((v,key,o,p,i)=>(p=process.argv,i=p.indexOf(key),!v&&i>=0&&i+1<p.length&&(o[key]=p[i+1]),i>=0));
-      if (!is['-G'])
-        return getFolder();
-      return is['-G'];
+      var chain = () => getFolder().then(dir =>
+          promisify(fs.access)(dir, fs.constants.W_OK)
+          .then(a => dir)
+          .catch(e => (dialog.showErrorBox('Access','The application hasn\'t access to this folder,\nselect a folder from my Documents or Desktop'),chain()))
+        );
+      return is['-G'] || chain();
     })
-    .then(f=>folder=f)
-    .then(git.root)
-    .catch(function(e){
-      if (e&&e.type=="fatal")
-        throw e;
-      console.log('no repository found in this folder');
-      showNotify('Wait while Marlin Firmware repo cloning');
-      return git.clone(path.join(folder,'Marlin')).then(git.root).then(a=>(showNotify('Well done!'),a));
-    })
-    .catch(function(e){
-      if (e&&e.type=="fatal")
-        throw e;
-      return git.root(path.join(folder,'Marlin'));
-    })
+    .then(dir => git.root(dir)
+        .catch(e => {
+          console.log('no repository found in this folder');
+          showNotify('Wait while Marlin Firmware repo cloning');
+          dir = path.join(dir, 'Marlin')
+          return git.clone(dir)
+            .then(git.root)
+            .then(a => showNotify('Well done!'))
+            .catch(e => git.root(dir));
+        })
+    )
     .then(()=>server.main(1))
     .then(function(url){
       mainWindow = new BrowserWindow({
@@ -74,8 +70,12 @@ app.on('ready', function() {
       });
       mainWindow.loadURL(url);
     })
-    .catch(function(e){
-      console.error(e.message)
+    .catch(e => {
+      console.error(e.message);
+      if (e.message == 'not found: git')
+        dialog.showErrorBox('Dependecies','The application needs a GIT tool to be installed!\nhttps://git-scm.com/downloads')
+      else
+        dialog.showErrorBox('Error', e.message);
       app.quit();
     })
 });

@@ -13,7 +13,8 @@ var gitRoot=(dir)=>
 gitRoot().catch(a=>a);
 
 var gitTag=()=>
-new Promise((done,fail)=>git(root).raw(['describe','--tags'],(e,a)=>e?fail(e):done(a.replace(/\r|\n/,''))))
+new Promise((done,fail)=>git(root).raw(['describe','--all'],(e,a)=>e?fail(e):done(a.replace(/\r|\n/,''))))
+.then(root=>root.replace(/remotes\//,""))
 .then(root=>(console.log('[gitTag]',root),root))
 .catch(mst=>console.log('no tag'))
 
@@ -28,6 +29,13 @@ new Promise((done,fail)=>git(root).log(['--tags','--simplify-by-decoration'],(e,
 .then(root=>(verbose&&console.log('[gitTags]',root),root))
 .catch(mst=>console.log('no tags'))
 
+var branch_f='{"hash":"%(objectname:short)","date":"%(committerdate:iso)","ref":"%(refname)"},';
+exports.Branches = () => {
+  return promisify('raw',git(root))(['for-each-ref','refs/remotes','--sort=-committerdate',"--format=" + branch_f])
+  .then(txt => JSON.parse('[' + txt.slice(0, -2) + ']')) //TODO:check windows
+  .then(list => list.map(i => (i.tag=i.ref.replace(/refs\/remotes\/(.*)/,"$1"),i)))
+  .catch(e => [])
+}
 exports.Checkout=(branch)=>promisify('checkout',git(root))(branch);
 exports.Status=()=>promisify('status',git(root))();
 exports.Fetch=()=>promisify('fetch',git(root))(['--all']);
@@ -38,7 +46,8 @@ exports.git=git;
 exports.root=a=>a?gitRoot(a):root?Promise.resolve(root):Promise.reject();
 
 exports.clone=name=>new Promise((done,fail)=>{
-  var cmd = exec('git clone https://github.com/MarlinFirmware/Marlin.git '+(name||''));
+  name = name && ('"' + name + '"') || '';
+  var cmd = exec('git clone https://github.com/MarlinFirmware/Marlin.git ' + name);
   var timer = setInterval(a=>process.stdout.write("."), 500)
   cmd.stdout.on('data', (data) => {
     console.log(data.toString());
