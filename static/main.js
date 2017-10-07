@@ -638,7 +638,7 @@ $(function(){
       var source = new EventSource("/ports");
       source.addEventListener('list', function(event) {
         var list= JSON.parse(event.data);
-        $('template._ports').siblings().remove();
+        ports.find('.dropdown-divider').nextAll().remove();
         list.forEach(function(p){
           createPort(p)
         });
@@ -704,7 +704,7 @@ $(function(){
       _add($('template._alert'))
       .find('p').html(`to install PlatformIO use guide from 
 <strong><a target="_blank" href="http://docs.platformio.org/en/latest/installation.html">Official site</a></strong>
-<br>Linux/Mac hint:  <code>sudo pip install -U platformio</code>`)
+<br>Linux/Mac hint:  <code>sudo apt install python-pip</code> <code>sudo pip install -U platformio</code>`)
     }
     proc.log=function(text){ p.append(text); p.prop('scrollTop',p.prop('scrollHeight')); }
     var cmd;

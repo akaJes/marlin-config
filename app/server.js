@@ -395,6 +395,7 @@ var pioEnv = (file) =>
   promisify(fs.readFile)(file, 'utf8')
   .then(a=>a.split(/\r\n?|\n/))
   .then(a=>a.map(i=>i.match(/\[env\:(.*)\]/)).filter(i=>i).map(i=>i[1]))
+
 app.get('/version/:screen', function (req, res) {
   res.set('Content-Type', 'text/plain');
     visitor.screenview({
@@ -419,20 +420,15 @@ function pioRoot(){
   return seek4File('platformio.ini', ['', 'Marlin'])
 }
 app.get('/pio/:env', function (req, res) {
-  params=['run'];
-  if (req.params.env!='Default')
-    params.push('-e',req.params.env);
-  pioRoot()
-  .then(root=>
-    pio.run(params,res)
-  );
+  var params = ['run'];
+  if (req.params.env != 'Default')
+    params.push('-e', req.params.env);
+  pioRoot().then(file => pio.run(params, res, path.dirname(file)));
 });
-function atob(b64string){
+function atob(b64string) {
   if ( process.version<"v6.0.0" )
-    // Node 5.10+
     return Buffer.from(b64string, 'base64');
   else
-    // older Node versions
     return new Buffer(b64string, 'base64');
 }
 
@@ -444,22 +440,15 @@ app.get('/pio/:env/:port', function (req, res) {
     params.push('-e',req.params.env);
   if (close)
     params.push('--upload-port',port)
-  console.log(params); //if removed - process hangs :)
+  console.log(); //if removed - process hangs :)
   (close&&serial_enabled?serial.close(port):Promise.resolve(true))
   .then(pioRoot)
-  .then(root=>{
-    var cmd=pio.run(params,res);
+  .then(file => {
+    var cmd = pio.run(params, res, path.dirname(file));
     req.on('close',function(){
       cmd.kill('SIGINT');
       console.error('flash killed')
     })
-  });
-});
-app.get('/pio-flash', function (req, res) {
-  git.root()
-  .then(root=>{
-    process.chdir(path.join(root,'Marlin'))
-    pio.run(['run','-t','upload'],res);
   });
 });
 

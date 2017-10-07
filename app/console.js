@@ -3,7 +3,6 @@ var sio = require('socket.io');
 var fs = require('fs');
 var path = require('path');
 var SerialPort = require('serialport');
-var linuxList = require('./linux-list');
 var promisify = require('./helpers').promisify;
 
 var ports={};
@@ -128,7 +127,7 @@ exports.changes=()=>new Promise((done,fail)=>{
 var portsList=[];
 exports.changesPoll=()=>{
   var poller=begin=>{
-    return (process.platform=='linux'?linuxList:promisify(SerialPort.list))()
+    return ((SerialPort.list))()
     .catch(a=>a)
     .then(ports=>{
       var aPorts=ports.map(p=>p.comName);

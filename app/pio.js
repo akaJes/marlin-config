@@ -22,13 +22,11 @@ exports.list=name=>new Promise((done,fail)=>{
 })
 var tty2html = require('tty2html');
 
-var env = Object.create( process.env );
-env.PLATFORMIO_FORCE_COLOR = true;
-
-var compile=(commands,res)=>{
+var compile=(commands, res, cwd)=>{
+  var env = Object.assign({}, process.env, { PLATFORMIO_FORCE_COLOR: true});
   var verbose=0;
   res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-control": "no-cache" });
-  var cmd = spawn('platformio',commands,  { env:env });
+  var cmd = spawn('platformio', commands, {env: env, cwd: cwd || process.cwd() });
   var mw=tty2html()
   mw.pipe(res);
   cmd.stdout.pipe(mw);

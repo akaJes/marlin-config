@@ -39,3 +39,4 @@ bower_components
 .node_repl_history
 
 **/test
+package-lock.json

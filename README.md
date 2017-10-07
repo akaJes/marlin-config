@@ -53,7 +53,10 @@ some hints for [Windows-Installation](https://github.com/akaJes/marlin-config/wi
 * [git](https://git-scm.com/downloads)
 * [node.js](https://nodejs.org/en/download/)
 * [PlatformIO](http://docs.platformio.org/en/latest/installation.html) (optional)
-
+## Hints
+### Linux users issue about access to USB serial ports
+Warning! Please install `99-platformio-udev.rules` and check that your board's PID and VID are listed in the rules.
+https://raw.githubusercontent.com/platformio/platformio/develop/scripts/99-platformio-udev.rules
 ## Using
 open terminal in an empty folder or in a folder with Marlin repository and type
 
