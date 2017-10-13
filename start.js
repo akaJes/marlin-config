@@ -152,5 +152,5 @@ commands:
   `);
 }
 module.exports.main=main;
-console.log('Node',process.version);
+console.log('Node', process.version, pjson.name, 'v', pjson.version);
 require.main===module && main();

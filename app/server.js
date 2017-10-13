@@ -21,6 +21,7 @@ var os = require('os');
 var ifaces = os.networkInterfaces();
 var natUpnp = require('nat-upnp');
 var moment = require('moment');
+var mkdirp = require('mkdirp');
 
 var natClient;
 
@@ -252,8 +253,13 @@ app.get('/checkout-force', function (req, res) {
         ).catch(e => 'not found')
       )
     ))
+  var rm = () =>
+    seek4File('_Bootscreen.h', [path.join('Marlin', 'src', 'config'), 'Marlin'])
+    .then(file => file && promisify(fs.unlink)(file));
+
   git.Checkout('--force')
-  .then(a => baseCfg == 'Marlin' && a || cp())
+  .then(rm)
+  .then(a => baseCfg == 'Marlin' ? a : cp())
   .then(a=>res.send(a));
 });
 app.get('/fetch', function (req, res) {
@@ -275,26 +281,19 @@ var copyFile=(from,to)=>
   );
 app.get('/save', function (req, res) {
   var dt=moment().format('YYYY-MM-DD kk-mm-ss');
-    git.root()
-    .then(root=>path.join(root,store))
-    .then(dir=>promisify(fs.stat)(dir).catch(a=>promisify(fs.mkdir)(dir)).then(a=>dir))
-    .then(dir=>git.Tag().then(tag=>path.join(dir,tag)))
-    .then(dir=>promisify(fs.stat)(dir).catch(a=>promisify(fs.mkdir)(dir)).then(a=>dir))
-    .then(dir=>path.join(dir,dt))
-    .then(dir=>promisify(fs.stat)(dir).catch(a=>promisify(fs.mkdir)(dir)).then(a=>dir))
-    .then(dir=>git.root().then(root=>({dir:dir,root:root})))
+    Promise.all([git.root(), git.Tag()])
+    .then(p => {
+      var dir = path.join(p[0], store, p[1].replace('/', path.sep), dt);
+      return promisify(mkdirp)(dir).then(a => ({to: dir, root: p[0]}));
+    })
     .then(dirs=>Promise.all(
         ['Configuration.h','Configuration_adv.h','_Bootscreen.h']
-        .map(file=>promisify(fs.stat)(path.join(dirs.root,'Marlin',file)).then(()=>file).catch(()=>null))
+        .map(file => seek4File(file, ['Marlin', path.join('Marlin', 'src', 'config')]).catch(()=>null))
       )
-      .then(files=>({root:dirs.root,files:files.filter(a=>a),to:dirs.dir,message:req.query.message}))
+      .then(files => Object.assign(dirs, {files: files.filter(a => a), message:req.query.message}))
     )
     .then(dirs=>
-      Promise.all(
-        dirs.files.map(f=>
-          copyFile(path.join(dirs.root,'Marlin',f), path.join(dirs.to,f) )
-        )
-      )
+      Promise.all(dirs.files.map(f => copyFile(f, path.join(dirs.to, path.basename(f)))))
       .then(()=>dirs)
     )
     .then(dirs=>promisify(fs.writeFile)(path.join(dirs.to,'contents.json'),JSON.stringify(dirs,null,2)).then(()=>dirs))
@@ -326,8 +325,9 @@ app.get('/restore/:path', function (req, res) {
     .map(f=>({path:f,name:path.parse(f).base}))
     var cp=files
     .filter(i=>/_Bootscreen\.h/.test(i))
-    .map(f=>git.root()
-      .then(root=>copyFile(f,path.join(root,'Marlin',path.parse(f).base)))
+    .map(f =>
+      seek4File('', [path.join('Marlin', 'src', 'config'), 'Marlin'])
+      .then(dir => copyFile(f, path.join(dir, path.basename(f) )))
     )
     console.log(cp);
     //return (uploadFiles(up));
@@ -489,18 +489,18 @@ app.get('/bs/default', function (req, res) {
 });
 app.post('/bs/custom', function (req, res) {
   var name='_Bootscreen.h';
-  Promise
-  .resolve(path.join(__dirname,'..','views',name))
-  .then(file=>promisify(fs.readFile)(file,'utf8'))
-  .then(text=>text.replace(/{{([\w.]+)}}/g,(m,r)=>r.split('.').reduce((p,o)=>(p=p&&p[o],p),req.body)))
-  .then(file=>git.root().then(p=>promisify(fs.writeFile)(path.join(p,'Marlin',name),file)))
+  Promise.all([
+    seek4File('', [path.join('Marlin', 'src', 'config'), 'Marlin']),
+    promisify(fs.readFile)(path.join(__dirname, '..', 'views', name), 'utf8')
+    .then(text => text.replace(/{{([\w.]+)}}/g, (m, r) => r.split('.').reduce((p, o) => (p = p && p[o], p), req.body)))
+  ])
+  .then(p => promisify(fs.writeFile)(path.join(p[0], name), p[1]))
   .then(a=>res.end('writed'))
   .catch(e=>res.status(403).send(e))
 });
 app.get('/bs/custom', function (req, res) {
-  git.root()
-  .then(f=>path.join(f,'Marlin','_Bootscreen.h'))
-  .then(file=>promisify(fs.readFile)(file,'utf8'))
+  seek4File('_Bootscreen.h', [ 'Marlin', path.join('Marlin', 'src', 'config')])
+  .then(file => promisify(fs.readFile)(file, 'utf8'))
   .then(data=>{
     var d=getMatch(/{(([^}]|\r\n?|\n)*)}/g,data);
     d=d.replace(/\n/g,'').replace(/ /g,'');

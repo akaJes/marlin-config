@@ -41,7 +41,7 @@ exports.Status=()=>promisify('status',git(root))();
 exports.Fetch=()=>promisify('fetch',git(root))(['--all']);
 exports.Tag=gitTag;
 exports.Tags=gitTags;
-exports.Show=(branch,file)=>promisify('show',git(root))([branch+':'+file]);
+exports.Show = (branch, file) => promisify('show', git(root))([branch + ':' + file.replace(/\\/g, '/')]);
 exports.git=git;
 exports.root=a=>a?gitRoot(a):root?Promise.resolve(root):Promise.reject();
 
