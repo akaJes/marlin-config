@@ -1,6 +1,6 @@
 {
   "name": "marlin-conf",
-  "version": "2.7.16",
+  "version": "2.7.17",
   "description": "configuration tool for Marlin project",
   "main": "./index.js",
   "scripts": {
@@ -74,6 +74,7 @@
     "mkdirp": "^0.5.1",
     "moment": "^2.18.1",
     "nat-upnp": "^1.1.0",
+    "node-machine-id": "^1.1.9",
     "node-notifier": "^5.1.2",
     "opn": "^5.0.0",
     "qr-image": "^3.2.0",

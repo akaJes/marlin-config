@@ -15,7 +15,6 @@ function build(base){
 }
 module.exports.build=build;
 module.exports.h2json=function(h){
-  return new Promise(function(r){
     var lines=h.split(/\r\n?|\n/);
     var section,condition=[],select;
     var all=lines.map(function(val,i){
@@ -65,8 +64,7 @@ module.exports.h2json=function(h){
         base.back=build(base);
       }
     }).filter(a=>a)
-    r(all);
-  })
+    return Promise.resolve(all);
 }
 module.exports.compare=function(a,b){
   return new Promise(function(r){

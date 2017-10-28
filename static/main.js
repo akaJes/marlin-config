@@ -394,10 +394,11 @@ $(function(){
               d.find('.col-sm-6').attr('title',title)//.tooltip(tooltip_large);
             }
             var b=d.find('button');
+            b.eq(1).on('click', function(){ window.open("https://github.com/MarlinFirmware/Marlin/search?q=" + define + "&type=Issues&utf8=%E2%9C%93", "_blank"); })
             if ( def.hint == undefined )
-              b.remove();
+              b.eq(0).remove();
             else
-              b.on('click',function(){ loadHint(define) })
+              b.eq(0).on('click',function(){ loadHint(define) })
           })
           sec.find('.card-header span.badge:eq(0)').text(cnt);
           updateChanged(sec);
@@ -427,8 +428,13 @@ $(function(){
           setTimeout(function(){location.hash=href+' ';},500);
         }
       });
-      $(window).scroll($.debounce( 250, true, function(){ $('.navbar-side-right').toggleClass('toggled',true);  } ) );
-      $(window).scroll($.debounce( 1250, function(){ $('.navbar-side-right').toggleClass('toggled',false); } ) );
+      var sideCountdown = 3;
+      $(window).scroll($.debounce( 250, true, function(){
+        sideCountdown && $('.navbar-side-right').toggleClass('toggled', true);
+      }));
+      $(window).scroll($.debounce( 1250, function(){
+        sideCountdown && sideCountdown-- && $('.navbar-side-right').toggleClass('toggled', false);
+      }));
     });
     function resolveDef(name){
       function scroll(ui){
@@ -677,7 +683,7 @@ $(function(){
           var p=$('#mct-log-modal .modal-body p');
           var badge=$('.mct-info span')
           badge.text(parseInt(badge.text())+1).removeAttr('hidden')
-          p.append('<br>'+(new Date()).toLocaleString()+': '+data.name+' '+data.prop+'='+data.value);
+          p.append('<br>' + (new Date()).toLocaleString() + '(' + data.ip + '): ' + data.name + ' ' + data.prop + '=' + data.value);
         }
         lastChanged='';
       });

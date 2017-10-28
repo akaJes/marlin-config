@@ -18,23 +18,12 @@ var promisify = require('./helpers').promisify;
 var walk=require('./helpers').walk;
 var qr = require('qr-image');
 var os = require('os');
-var ifaces = os.networkInterfaces();
 var natUpnp = require('nat-upnp');
 var moment = require('moment');
 var mkdirp = require('mkdirp');
+var machineId = require('node-machine-id').machineId;
 
 var natClient;
-
-function getIP(){
-  return Object.keys(ifaces).map(function (ifname) {
-    return ifaces[ifname].map(function (iface) {
-      if ('IPv4' !== iface.family || iface.internal !== false)
-        return;
-      return iface.address;
-    }).filter(a=>a)[0];
-  }).filter(a=>a);
-}
-
 var store='.mct.bak';
 var httpPort = 3000;
 var httpsPort = 3002;
@@ -64,48 +53,48 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.get('/qr/:url', function (req, res) {
   var url=atob(decodeURI(req.params.url)).toString();
   res.set('Content-Type', 'image/svg+xml');
-  //var ip=getIP();
   var qr_svg = qr.image(url, { type: 'svg' });
   qr_svg.pipe(res);
 })
 
 /* UPNP */
 
+function getIP() {
+  var ifaces = os.networkInterfaces();
+  return Object.keys(ifaces).reduce((p, c) =>
+    p.concat(ifaces[c].filter(i => !i.internal && 'IPv4' == i.family).map(i => i.address)), []);
+}
+
 app.get('/upnp/open', function (req, res) {
-  natClient.portMapping({
+  promisify('portMapping', natClient)({
     public: httpPort,
     private: httpPort,
     ttl: 0,
     description: 'Marlin-conf public port'
-  }, function(err) {
-    if (err)
-      return res.status(403).send(err)
-    natClient.externalIp(function(err, ip) {
-      if (err)
-        return res.status(403).send(err)
-      res.send({ip:ip,port:httpPort});
-    });
-  });
+  })
+  .then(a => promisify('externalIp', natClient)())
+  .then(ip => res.send({ip: ip, port: httpPort}))
+  .catch(e => res.status(403).send(e));
 })
 app.get('/upnp/local', function (req, res) {
   res.send({ip:getIP()[0],port:httpPort,https:httpsPort});
 })
 app.get('/upnp/check', function (req, res) {
-  natClient.getMappings(function(err, results) {
-    if (err)
-      return res.status(403).send(err)
-    natClient.externalIp(function(err, ip) {
-      if (err)
-        return res.status(403).send(err)
-      res.send(results.filter(i=>i.public.port==httpPort).map(i=>({ip:ip,port:i.public.port})));
-    });
-  });
+  Promise.all([
+    promisify('getMappings', natClient)(),
+    promisify('externalIp', natClient)()
+  ])
+  .then(p => p[0].filter(i => i.public.port == httpPort).map(i => ({ip: p[1], port: i.public.port})))
+  .then(data => (data.length && console.log('Opened external access at http://' + data[0].ip + ':' + data[0].port, '!!!'), data))
+  .then(data => res.send(data))
+  .catch(e => res.status(403).send(e));
 })
 app.get('/upnp/close', function (req, res) {
-  natClient.portUnmapping({
+  promisify('portUnmapping', natClient)({
     public: httpPort,
   })
-  res.end();
+  .then(data => res.send())
+  .catch(e => res.status(403).send(e));
 })
 
 /* SERIAL */
@@ -121,11 +110,9 @@ function serial_init(){
   return serial.changesPoll().then(monitor=>{
     monitor.on("created", function (f, stat) {
       SSEsend('created',f)
-//      serial.list().then(a=>SSEsend('list',a));
     })
     monitor.on("deleted", function (f, stat) {
       SSEsend('deleted',f)
-//      serial.list().then(a=>SSEsend('list',a));
     })
     monitor.on("opened", function (f, stat) {
       SSEsend('opened',f)
@@ -217,10 +204,7 @@ var get_cfg=()=>{
   });
   return Promise.all(list)
 }
-app.get('/now/', function (req, res) { //???
-  res.set('Content-Type', 'text/plain');
-  get_cfg().then(a=>res.send(JSON.stringify(a,null,2)))
-});
+
 var unique=a=>a.filter((elem, index, self)=>index == self.indexOf(elem))
 var ex_dir = (rel) => seek4File('', [path.join('Marlin', 'example_configurations'), path.join('Marlin', 'src', 'config', 'examples')], rel)
 app.get('/examples', function (req, res) {
@@ -255,12 +239,14 @@ app.get('/checkout-force', function (req, res) {
     ))
   var rm = () =>
     seek4File('_Bootscreen.h', [path.join('Marlin', 'src', 'config'), 'Marlin'])
-    .then(file => file && promisify(fs.unlink)(file));
+    .then(file => file && promisify(fs.unlink)(file))
+    .catch(a=>a);
 
   git.Checkout('--force')
   .then(rm)
   .then(a => baseCfg == 'Marlin' ? a : cp())
-  .then(a=>res.send(a));
+  .then(a=>res.send(a))
+  .catch(e=>res.status(403).send(e))
 });
 app.get('/fetch', function (req, res) {
   git.Fetch()
@@ -369,13 +355,6 @@ app.get('/saved', function (req, res) {
 
 /* VERSION */
 
-app.get('/cert', function (req, res) { //??
-  res.set('Content-Type', 'application/x-x509-ca-cert');
-  res.set('Content-Disposition','inline; filename="server.der"');
-  var file=path.join(__dirname,'sslcert','server.der');
-  return promisify(fs.readFile)(file)
-  .then(data=>res.send(data))
-});
 app.get('/version', function (req, res) {
   res.set('Content-Type', 'image/svg+xml');
   var badge={
@@ -397,20 +376,21 @@ var pioEnv = (file) =>
   .then(a=>a.map(i=>i.match(/\[env\:(.*)\]/)).filter(i=>i).map(i=>i[1]))
 
 app.get('/version/:screen', function (req, res) {
-  res.set('Content-Type', 'text/plain');
+  machineId()
+  .then(id =>
     visitor.screenview({
       cd:req.params.screen,
       an:pjson.name+(isElectron&&"-electron"||''),
       av:pjson.version,
       ua:req.headers['user-agent'],
+      cid: id,
       ul:req.headers['accept-language'].split(',')[0],
     }).send()
+  )
   Promise.all([pio.isPIO().catch(() => false), git.root(), pioRoot().then(pioEnv).catch(e => [])])
-  .then(pp=>{
-    //console.log(a)
+  .then(pp => {
     var cfg={pio:pp[0],version:pjson.version,root:pp[1],base:baseCfg,env:pp[2]};
-    res.write("var config="+JSON.stringify(cfg));
-    res.end();
+    res.set('Content-Type', 'application/javascript').send("var config = " + JSON.stringify(cfg));
   })
 });
 
@@ -545,7 +525,7 @@ app.get('/json/', function (req, res) {
   res.set('Content-Type', 'application/json');
   get_cfg().then(a=>res.send(a))
 });
-//files=[{path:path&name,name:name}]
+
 var uploadFiles=files=>
   Promise.all(files.map(file=>
     git.root()
@@ -563,7 +543,6 @@ var uploadFiles=files=>
   ))
 
 app.post('/upload', function(req, res){
-  //var uploadDir = path.join(__dirname, '/uploads');
   new Promise((done,fail)=>{
     var form = new formidable.IncomingForm();
     form.multiples = true;
@@ -589,59 +568,47 @@ app.post('/upload', function(req, res){
   .catch(e=>res.status(403).send(e))
 });
 app.post('/set/:file/:name/:prop/:value', function (req, res) {
-  git.root()
-  .then(root=>{
-    var ob=[{ name:req.params.name}]
-    if (req.params.prop=='disabled')
-      ob[0].disabled=req.params.value=='true';
-    else
-      ob[0][req.params.prop]=req.params.value;
-    return mctool.updateH(root,path.join(root,'Marlin',req.params.file+'.h'),ob);
-  })
-  .then(a=>res.send(req.params))
-  .then(a=>SSEsend('set',req.params))
+  var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  var ob = {name: req.params.name};
+  var set = (prop, val) => ob[prop] = (prop == 'disabled' ? val == 'true' : val);
+  set(req.params.prop, req.params.value);
+  return git.root()
+  .then(root => mctool.updateH(root, path.join(root, 'Marlin', req.params.file + '.h'), [ob]))
+  .then(a => Object.assign(req.params, {ip: ip}))
+  .then(data => (res.send(data), SSEsend('set', data)))
   .catch(a=>res.status(403).send(a))
 })
-function main(noOpn){
-  natClient = natUpnp.createClient();
-  natClient.timeout=10*1000;
-  return Promise.resolve()
-  .then(()=>hints.init(1))
-  .catch(a=>console.error('hints failed'))
-  .then(()=>git.root())
-  .then(root=>promisify(fs.stat)(path.join(root,'Marlin')))
-  .catch(a=>{
-    var e=('this git not look like Marlin repository');
-    console.error(e);
-    throw e;
+var serve = (http, port) =>
+  new Promise((resolve, reject) => {
+    http.on('error', reject);
+    http.listen(port, function () {
+      resolve(port);
+    });
   })
-  .then(serial_enabled?serial_init:a=>a)
-//  .catch(a=>console.error('serial failed'))
-  .then(()=>getPort(httpsPort))
-  .then(port =>new Promise((done,fail)=>{
-      camServer.on('error',function(e){
-        fail(e)
-      })
-      camServer.listen(port, function () {
-        httpsPort=port;
-        var url='https://localhost:'+port+'/';
-        console.log('Marlin cam started on '+url);
-        done(url);
-      });
-  }))
-  .then(()=>getPort(httpPort))
-  .then(port =>new Promise((done,fail)=>{
-      httpPort=port;
-      server.on('error',function(e){
-        fail(e)
-      })
-      server.listen(port, function () {
-        var url='http://localhost:'+port+'/';
-        console.log('Marlin config tool started on '+url);
-        done(url);
-      });
-  }))
-  .then(url=>(!noOpn&&opn(url),url))
+function main(noOpn) {
+  natClient = natUpnp.createClient();
+  natClient.timeout = 10*1000;
+  return git.root()
+    .then(root => promisify(fs.stat)(path.join(root, 'Marlin')))
+    .catch(e => {
+      var e = 'this git not look like Marlin repository';
+      console.error(e);
+      throw new Error(e);
+    })
+    .then(a => Promise.all([
+        hints.init(1).catch(a => console.error('hints failed')),
+        serial_enabled && serial_init(),
+        getPort(httpsPort).then(port => serve(camServer, port))
+          .then(port => (httpsPort = port, 'https://localhost:' + port + '/')),
+        getPort(httpPort).then(port => serve(server, port))
+          .then(port => (httpPort = port, 'http://localhost:' + port + '/')),
+      ])
+    )
+    .then(p => {
+      console.log('Marlin config started at:', '[ service =>', p[3], '] [ cam =>', p[2], ']');
+      !noOpn && opn(p[3]);
+      return p[3];
+    })
 }
 module.exports.main=main;
 require.main===module && main();

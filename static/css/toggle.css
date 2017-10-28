@@ -20,7 +20,7 @@
     overflow: hidden;
     clip: rect(0 0 0 0);
   }
-.onoffswitch-label {
+.onoffswitch label {
     display: block; overflow: hidden; cursor: pointer;
     border: 1px solid #999999; border-radius: 20px;
     margin-bottom:0;
@@ -56,10 +56,10 @@
     border: 1px solid #999999; border-radius: 20px;
     transition: all 0.3s ease-in 0s; 
 }
- .onoffswitch-label .onoffswitch-checkbox:checked ~ .onoffswitch-inner {
+.onoffswitch label .onoffswitch-checkbox:checked ~ .onoffswitch-inner {
     margin-left: 0;
 }
-.onoffswitch-label .onoffswitch-checkbox:checked ~ .onoffswitch-switch {
+.onoffswitch label .onoffswitch-checkbox:checked ~ .onoffswitch-switch {
     left: 100%;
     margin-left:-28px;
 }

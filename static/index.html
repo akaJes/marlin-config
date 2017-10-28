@@ -341,45 +341,39 @@ if (typeof require === 'function') { //commonJS from electron
   </button>
   <a class="navbar-brand" target="_blank" href="https://github.com/MarlinFirmware/Marlin">Marlin</a>
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item mr-sm-2 my-auto p-1">
-      <div class="dropdown d-inline-block">
+    <div class="navbar-nav mr-auto">
+      <div class="form-inline">
+      <div class="dropdown d-inline-block mr-2">
         <button class="btn btn-info dropdown-toggle mct-tag" title="Current release" id="dropdownTagsLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           TAGS
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownTagsLink">
-          <button class="dropdown-item mct-tags" title="Change version (Releases)" >Change</button>
-          <button class="dropdown-item mct-branches" title="Change version (Development verions - these can be unstable!!!)" >Branches</button>
-          <button class="dropdown-item mct-update" title="Update version list from GitHub (git fetch)">Update</button>
-          <button class="dropdown-item bg-danger text-white mct-reset" title="Reset all changes (git checkout -f) or copy from examples if choosen">Reset</button>
-          <button class="dropdown-item mct-examples" title="Choose base file from examples">Examples</button>
-          <button class="dropdown-item mct-save" data-toggle="modal" data-target="#mct-promptModal" title="Place current configuration in the safe place">Save</button>
+          <button class="dropdown-item mct-tags" title="Change version (Releases)" ><i class="fa fa-tag"></i> Change</button>
+          <button class="dropdown-item mct-branches" title="Change version (Development verions - these can be unstable!!!)" ><i class="fa fa-code-fork"></i> Branches</button>
+          <button class="dropdown-item mct-update" title="Update version list from GitHub (git fetch)"><i class="fa fa-refresh"></i> Update</button>
+          <button class="dropdown-item bg-danger text-white mct-reset" title="Reset all changes (git checkout -f) or copy from examples if choosen"><i class="fa fa-trash"></i> Reset</button>
+          <button class="dropdown-item mct-examples" title="Choose base file from examples"><i class="fa fa-archive"></i> Examples</button>
+          <button class="dropdown-item mct-save" data-toggle="modal" data-target="#mct-promptModal" title="Place current configuration in the safe place"><i class="fa fa-floppy-o"></i> Save</button>
         </div>
       </div>
-      </li>
-      <li class="nav-item mr-sm-2 my-auto p-1">
-        <button type="button" class="btn btn-warning mct-info" title="Show information">? <span class="badge badge-danger" hidden>0</span></button>
-      </li>
-      <li class="nav-item mr-sm-2 my-auto p-1">
-<div class="onoffswitch mct-changed"  title="Toggle only changed options">
-    <label class="onoffswitch-label" >
+      <button type="button" class="btn btn-warning mct-info mr-2 fa fa-info" title="Show information"><span class="badge badge-danger ml-2" hidden>0</span></button>
+<div class="onoffswitch mct-changed mr-2"  title="Toggle only changed options">
+    <label>
         <input type="checkbox" class="onoffswitch-checkbox">
         <span class="onoffswitch-inner" data-content-on="Changed" data-content-off="All"></span>
         <span class="onoffswitch-switch"></span>
     </label>
 </div>
-        <div class="dropdown d-inline-block">
+        <div class="dropdown d-inline-block mr-2">
           <button class="btn btn-warning dropdown-toggle" id="dropdownUploadLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="update current configuration from files or store">Upload</button>
           <div class="dropdown-menu" aria-labelledby="dropdownUploadLink">
-            <button class="dropdown-item bg-warning mct-upload" title="Upload your old configuration or drag it in browser">Files</button>
-            <button class="dropdown-item mct-restore" title="Get files from storage">Saved</button>
+            <button class="dropdown-item bg-warning mct-upload" title="Upload your old configuration or drag it in browser"><i class="fa fa-file"></i> Files</button>
+            <button class="dropdown-item mct-restore" title="Get files from storage"><i class="fa fa-heart"></i> Saved</button>
           </div>
         </div>
           <input type="file" name="files[]" class="mct-upload" multiple style="display:none;">
-      </li>
-      <li class="nav-item mr-sm-2 p-1">
-<div class="btn-group">
-  <button type="button" class="btn btn-secondary mct-pio-compile disabled" title="Compile Marlin with PlatformIO">Compile</button>
+<div class="btn-group mr-2">
+  <button type="button" class="btn btn-secondary mct-pio-compile disabled" title="Compile Marlin with PlatformIO"><i class="fa fa-code"></i> Compile</button>
   <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" title="Select enviroment for compilation" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     <span class="sr-only">Toggle Dropdown</span>
   </button>
@@ -389,8 +383,8 @@ if (typeof require === 'function') { //commonJS from electron
   </div>
 </div>
 
-<div class="btn-group">
-  <button type="button" class="btn btn-secondary mct-pio-flash disabled" title="Upload firmware with PlatformIO to selected port">Flash</button>
+<div class="btn-group mr-2">
+  <button type="button" class="btn btn-secondary mct-pio-flash disabled" title="Upload firmware with PlatformIO to selected port"><i class="fa fa-upload"></i> Flash</button>
   <button type="button" class="btn btn-secondary mct-pio-ports dropdown-toggle dropdown-toggle-split" title="Select port for your PlatformIO device" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     <span class="sr-only">Toggle Dropdown</span>
   </button>
@@ -399,14 +393,10 @@ if (typeof require === 'function') { //commonJS from electron
     <div class="dropdown-divider"></div>
   </div>
 </div>
-      </li>
-      <li class="nav-item mr-sm-2 p-1">
-        <button type="button" class="btn btn-secondary mct-consoles" data-toggle="toggle" title="Manager of serial consoles">Consoles</button>
-      </li>
-      <li class="nav-item mr-sm-2 p-1">
-        <button type="button" class="btn btn-warning mct-issue" title="Create an issue on Marlin GitHub repository" >Issue</button>
-      </li>
-    </ul>
+        <button type="button" class="btn btn-secondary mct-consoles mr-2" data-toggle="toggle" title="Manager of serial consoles"><i class="fa fa-terminal"></i> Consoles</button>
+        <button type="button" class="btn btn-warning mct-issue mr-2" title="Create an issue on Marlin GitHub repository" ><i class="fa fa-bug"></i> Issue</button>
+    </div>
+    </div>
     <div class="text-right">
     <a target="_blank" href="https://github.com/akaJes/marlin-config"><img src="/version" title="current version" height="18"></a><br>
     <a target="_blank" href="https://www.npmjs.com/package/marlin-conf"><img src="https://badge.fury.io/js/marlin-conf.svg" alt="npm version" height="18"></a><br>
@@ -481,7 +471,7 @@ if (typeof require === 'function') { //commonJS from electron
               <template class="_section">
               <div class="card">
                 <div class="card-header h5">
-                    <label class="form-control-label col-sm-2 col-4 text-right" >Section:</label><strong><span></span></strong>
+                    <label class="form-control-label col-sm-2 col-4 text-right" ><i class="fa fa-folder"></i></label><strong><span></span></strong>
                     <button type="button" class="btn btn btn-sm float-right" title="show all">All <span class="badge badge-default"></span></button>
                     <span class="float-right">&nbsp;</span>
                     <button type="button" class="btn btn-info btn-sm float-right" title="show only changed">Changed <span class="badge badge-default"></span></button>
@@ -490,10 +480,10 @@ if (typeof require === 'function') { //commonJS from electron
                   <div class="form-horizontal" role="form">
                   <template class="_define">
                     <div class="form-group row">
-                      <label class="col-sm-5 col-5 col-form-label col-form-label-sm my-auto" data-toggle="tooltip" data-animation="false"></label>
-                      <div class="col-sm-6 col-6 my-auto" data-toggle="tooltip"  data-animation="false">
+                      <label class="col-sm-5 col-5 col-form-label col-form-label-sm my-auto"></label>
+                      <div class="col-sm-6 col-6 my-auto">
 <div class="onoffswitch">
-    <label class="onoffswitch-label" >
+    <label>
         <input type="checkbox" class="onoffswitch-checkbox">
         <span class="onoffswitch-inner" data-content-on="On" data-content-off="Off"></span>
         <span class="onoffswitch-switch"></span>
@@ -506,8 +496,9 @@ if (typeof require === 'function') { //commonJS from electron
     <option value="false">False</option>
   </select>
                       </div>
-                      <div class="col-sm-1 col-1 my-auto">
-                        <button type="button" class="btn btn-warning btn-sm" title="Show explanation">?</button>
+                      <div class="col-sm-1 col-1 my-auto btn-group px-0">
+                        <button type="button" class="btn btn-warning btn-sm fa fa-info" title="Show explanation"></button>
+                        <button type="button" class="btn btn-secondary btn-sm fa fa-github" title="Github issues"></button>
                       </div>
                     </div>
                   </template>

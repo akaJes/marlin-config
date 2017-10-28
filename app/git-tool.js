@@ -10,11 +10,9 @@ var gitRoot=(dir)=>
   .then(str=>(console.log('[gitRoot]',str),root=str))
   .catch(mst=>{ console.log('no root'); throw mst});
 
-gitRoot().catch(a=>a);
-
-var gitTag=()=>
-new Promise((done,fail)=>git(root).raw(['describe','--all'],(e,a)=>e?fail(e):done(a.replace(/\r|\n/,''))))
-.then(root=>root.replace(/remotes\//,""))
+exports.Tag = () =>
+  promisify('raw', git(root))(['describe', '--all'])
+  .then(root => root.replace(/\r|\n/g, '').replace(/remotes\//, ""))
 .then(root=>(console.log('[gitTag]',root),root))
 .catch(mst=>console.log('no tag'))
 
@@ -23,8 +21,9 @@ var getTag=msg=>{
   return m&&m[1];
 }
 var simplyTag=o=>o.all.map(i=>({date:i.date,tag:getTag(i.message)})).filter(i=>i.tag) //m=?m[1]:
-var gitTags=(verbose)=>
-new Promise((done,fail)=>git(root).log(['--tags','--simplify-by-decoration'],(e,a)=>e?fail(e):done(a))) //,'--pretty="format:%ci %d"'
+
+exports.Tags = (verbose) =>
+  promisify('log', git(root))(['--tags', '--simplify-by-decoration'])
 .then(simplyTag)
 .then(root=>(verbose&&console.log('[gitTags]',root),root))
 .catch(mst=>console.log('no tags'))
@@ -39,11 +38,9 @@ exports.Branches = () => {
 exports.Checkout=(branch)=>promisify('checkout',git(root))(branch);
 exports.Status=()=>promisify('status',git(root))();
 exports.Fetch=()=>promisify('fetch',git(root))(['--all']);
-exports.Tag=gitTag;
-exports.Tags=gitTags;
 exports.Show = (branch, file) => promisify('show', git(root))([branch + ':' + file.replace(/\\/g, '/')]);
 exports.git=git;
-exports.root=a=>a?gitRoot(a):root?Promise.resolve(root):Promise.reject();
+exports.root = dir => dir || !root ? gitRoot(dir) : Promise.resolve(root);
 
 exports.clone=name=>new Promise((done,fail)=>{
   name = name && ('"' + name + '"') || '';
