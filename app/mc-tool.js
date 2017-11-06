@@ -75,11 +75,12 @@ var addChanged=target=>origin=>
   .then(remap)
   .then(map=>
     origin.map(i=>{
-      if (i.number != undefined && i.disabled ) return; //no need dublicates
       var oo=map[i.name];
       if (oo){
-        oo=oo.filter(i=>!i.disabled|| i.number == undefined)
-        o=oo[oo.length-1];
+        if ('number' in i && i.number < oo.length)
+          o = oo[i.number]
+        else
+          o = oo.pop();
         if (o){
           var changed = {};
           if ( o.disabled != i.disabled )
@@ -199,9 +200,10 @@ module.exports.getJson=(root,base,tag)=>file=>{
     return h
     .then(mc.h2json)
     .then(addNumber)
+    .then(a => a.reduce((p, i) => (!(p.idx.indexOf(i.name + i.condition) >= 0 && i.disabled)
+        && (p.idx.push(i.name + i.condition), p.obj.push(i)), p), {idx: [], obj: []}).obj) //remove multiple samples
     .then(addChanged(conf))
-    .then(a=>a.filter(i=>!i.number||i.number !=undefined&&!i.disabled)) //remove commented duplicates
-//    .then(a=>a.filter(i=>i.number==undefined||i.changed&&!i.changed.disabled)) //remove commented duplicates
+    .then(a => a.map(i => ('number' in i && (i.name += '.' + i.number), i))) //extend define with number
     .then(a=>({file:path.parse(file),names:a,tag:tag}))
     .then(a=>(a.sections=unique(a.names.map(i=>i.section)).filter(i=>i),a))
     .then(a=>((a.sections=a.sections.length?a.sections:['common']),a))

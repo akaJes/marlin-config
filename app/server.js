@@ -569,8 +569,10 @@ app.post('/upload', function(req, res){
 });
 app.post('/set/:file/:name/:prop/:value', function (req, res) {
   var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-  var ob = {name: req.params.name};
+  var name = req.params.name.split('.');
+  var ob = {name: name[0]};
   var set = (prop, val) => ob[prop] = (prop == 'disabled' ? val == 'true' : val);
+  name.length > 1 && set('number', parseInt(name[1]));
   set(req.params.prop, req.params.value);
   return git.root()
   .then(root => mctool.updateH(root, path.join(root, 'Marlin', req.params.file + '.h'), [ob]))

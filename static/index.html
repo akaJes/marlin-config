@@ -354,9 +354,11 @@ if (typeof require === 'function') { //commonJS from electron
           <button class="dropdown-item bg-danger text-white mct-reset" title="Reset all changes (git checkout -f) or copy from examples if choosen"><i class="fa fa-trash"></i> Reset</button>
           <button class="dropdown-item mct-examples" title="Choose base file from examples"><i class="fa fa-archive"></i> Examples</button>
           <button class="dropdown-item mct-save" data-toggle="modal" data-target="#mct-promptModal" title="Place current configuration in the safe place"><i class="fa fa-floppy-o"></i> Save</button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item bg-warning mct-issue" title="Create an issue on Marlin Firmware GitHub repository" ><i class="fa fa-bug"></i> Firmware Issue</button>
         </div>
       </div>
-      <button type="button" class="btn btn-warning mct-info mr-2 fa fa-info" title="Show information"><span class="badge badge-danger ml-2" hidden>0</span></button>
+      <button type="button" class="btn btn-warning mct-info mr-2" title="Show information"><i class="fa fa-info"></i><span class="badge badge-danger ml-2" hidden>0</span></button>
 <div class="onoffswitch mct-changed mr-2"  title="Toggle only changed options">
     <label>
         <input type="checkbox" class="onoffswitch-checkbox">
@@ -394,7 +396,6 @@ if (typeof require === 'function') { //commonJS from electron
   </div>
 </div>
         <button type="button" class="btn btn-secondary mct-consoles mr-2" data-toggle="toggle" title="Manager of serial consoles"><i class="fa fa-terminal"></i> Consoles</button>
-        <button type="button" class="btn btn-warning mct-issue mr-2" title="Create an issue on Marlin GitHub repository" ><i class="fa fa-bug"></i> Issue</button>
     </div>
     </div>
     <div class="text-right">
@@ -481,6 +482,7 @@ if (typeof require === 'function') { //commonJS from electron
                   <template class="_define">
                     <div class="form-group row">
                       <label class="col-sm-5 col-5 col-form-label col-form-label-sm my-auto"></label>
+
                       <div class="col-sm-6 col-6 my-auto">
 <div class="onoffswitch">
     <label>

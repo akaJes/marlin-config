@@ -322,7 +322,7 @@ $(function(){
             opts[define]=file.defs[define];
             if (def.changed)
               d.addClass('bg-info')
-            d.find('label').eq(0).text(define).attr('title',def.line.trim())//.tooltip(def.line.length>24&&tooltip_large); //take 200ms
+            d.find('label').eq(0).text(define.split('.')[0]).attr('title',def.line.trim())//.tooltip(def.line.length>24&&tooltip_large); //take 200ms
             var dis=d.find('.onoffswitch')
             var p=d.find('.mct-splitter');
             var val=d.find('input[type=text]');
