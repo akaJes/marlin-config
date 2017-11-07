@@ -285,6 +285,40 @@ if (typeof require === 'function') { //commonJS from electron
             </div>
           </div>
         </div>
+<div class="modal fade" id="mct-publishModal" tabindex="-1" role="dialog" aria-labelledby="mct-publishModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="mct-publishModalLabel">Type some description</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="message-text" class="form-control-label">Version:</label>
+            <input class="form-control" name="version" disabled>
+          </div>
+          <div class="form-group">
+            <label for="message-text" class="form-control-label">Author:</label>
+            <input class="form-control" name="author">
+          </div>
+          <div class="form-group">
+            <label for="message-text" class="form-control-label">Message:</label>
+            <textarea class="form-control" rows="8" name="description"></textarea>
+          </div>
+          <input name="session" type="hidden">
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Publicate</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade" id="mct-promptModal" tabindex="-1" role="dialog" aria-labelledby="mct-promptModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -309,6 +343,7 @@ if (typeof require === 'function') { //commonJS from electron
     </div>
   </div>
 </div>
+
 <div class="modal fade" id="mct-restoreModal" tabindex="-1" role="dialog" aria-labelledby="mct-restoreModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -326,6 +361,7 @@ if (typeof require === 'function') { //commonJS from electron
           </div>
       </div>
       <div class="modal-footer">
+        <button type="button" class="btn btn-secondary mct-download">Download</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary">Upload</button>
       </div>
@@ -354,6 +390,8 @@ if (typeof require === 'function') { //commonJS from electron
           <button class="dropdown-item bg-danger text-white mct-reset" title="Reset all changes (git checkout -f) or copy from examples if choosen"><i class="fa fa-trash"></i> Reset</button>
           <button class="dropdown-item mct-examples" title="Choose base file from examples"><i class="fa fa-archive"></i> Examples</button>
           <button class="dropdown-item mct-save" data-toggle="modal" data-target="#mct-promptModal" title="Place current configuration in the safe place"><i class="fa fa-floppy-o"></i> Save</button>
+          <a href="zip/TWFybGlu" class="dropdown-item" title="Get zipped configuration files" ><i class="fa fa-file-archive-o"></i> Download</a>
+          <button class="dropdown-item mct-publish" title="Publish your configuration files" ><i class="fa fa-share"></i> Publish</button>
           <div class="dropdown-divider"></div>
           <button class="dropdown-item bg-warning mct-issue" title="Create an issue on Marlin Firmware GitHub repository" ><i class="fa fa-bug"></i> Firmware Issue</button>
         </div>

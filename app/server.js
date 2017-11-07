@@ -22,6 +22,10 @@ var natUpnp = require('nat-upnp');
 var moment = require('moment');
 var mkdirp = require('mkdirp');
 var machineId = require('node-machine-id').machineId;
+var yazl = require("yazl");
+var crypto = require("crypto");
+var FormData = require('form-data');
+var tmp = require('tmp');
 
 var natClient;
 var store='.mct.bak';
@@ -183,25 +187,26 @@ app.get('/checkout/:branch', function (req, res) {
   })
   .catch(a=>res.status(403).send(a))
 });
+var getBoards = () =>
+  seek4File('boards.h', [ 'Marlin', path.join('Marlin', 'src', 'core')])
+  .then(mctool.getBoards);
+
 var get_cfg=()=>{
   var base=Promise.all([git.root(),git.Tag()]);
+  var setBoards = a => getBoards()
+    .then(a => JSON.stringify(a.list))
+    .catch(e => '' )
+    .then(boards => (Object.assign(a.defs['MOTHERBOARD'], {select: boards, type:"select"}), a));
   var list=['Configuration.h','Configuration_adv.h']
-  .map(f=>{
-    return base
+  .map(f => base
       .then(p=>
           git.Show(p[1], path.join(baseCfg, f)).catch(e => git.Show(p[1], path.join('Marlin', f)))
           .then(file=>mctool.getJson(p[0],file,p[1])(path.join(p[0],'Marlin',f)))
       )
       .then(o=>(o.names.filter(n=>hints.d2i(n.name),1).map(n=>o.defs[n.name].hint=!0),o))
-      .then(a=>(a.names=undefined,type='file',a))
-      .then(a=>
-        (!a.defs['MOTHERBOARD']&&a)||
-        seek4File('boards.h', [ 'Marlin', path.join('Marlin', 'src', 'core')])
-          .then(mctool.getBoards)
-          .catch(e => '' )
-          .then(boards=>(Object.assign(a.defs['MOTHERBOARD'],{select:boards,type:"select"}),a))
-      )
-  });
+      .then(a => Object.assign(a, {names: undefined, type: 'file'}))
+      .then(a => a.defs['MOTHERBOARD'] && setBoards(a) || a)
+  );
   return Promise.all(list)
 }
 
@@ -265,6 +270,12 @@ var copyFile=(from,to)=>
       .on('error',fail)
     )
   );
+
+const configFiles = p => Promise.all(
+    ['Configuration.h', 'Configuration_adv.h', '_Bootscreen.h']
+      .map(file => seek4File(file, p ? [p.replace(/\\/g, path.sep)] : ['Marlin', path.join('Marlin', 'src', 'config')]).catch(() => null))
+  ).then(files => files.filter(a => a));
+
 app.get('/save', function (req, res) {
   var dt=moment().format('YYYY-MM-DD kk-mm-ss');
     Promise.all([git.root(), git.Tag()])
@@ -272,11 +283,8 @@ app.get('/save', function (req, res) {
       var dir = path.join(p[0], store, p[1].replace('/', path.sep), dt);
       return promisify(mkdirp)(dir).then(a => ({to: dir, root: p[0]}));
     })
-    .then(dirs=>Promise.all(
-        ['Configuration.h','Configuration_adv.h','_Bootscreen.h']
-        .map(file => seek4File(file, ['Marlin', path.join('Marlin', 'src', 'config')]).catch(()=>null))
-      )
-      .then(files => Object.assign(dirs, {files: files.filter(a => a), message:req.query.message}))
+    .then(dirs => configFiles()
+      .then(files => Object.assign(dirs, {files: files, message: req.query.message}))
     )
     .then(dirs=>
       Promise.all(dirs.files.map(f => copyFile(f, path.join(dirs.to, path.basename(f)))))
@@ -285,6 +293,68 @@ app.get('/save', function (req, res) {
     .then(dirs=>promisify(fs.writeFile)(path.join(dirs.to,'contents.json'),JSON.stringify(dirs,null,2)).then(()=>dirs))
     .then(a=>(console.log('stat',a),a))
     .then(dirs=>res.send(dirs))
+    .catch(e => res.status(403).send(e))
+});
+var pubs = {};
+app.get('/publish/:path', function (req, res) {
+  var name = atob(decodeURI(req.params.path)).toString();
+  var ses = crypto.createHash('md5').update((new Date()).toJSON()).digest("hex");
+  var obj = pubs[ses] = {session: ses, name: name, description: '', };
+  configFiles(name != 'Marlin' && path.join(store, name))
+  .then(files => (obj.files = files).filter(i => /Configuration/.test(i))[0])
+  .then(file => Promise.all([promisify(fs.readFile)(file, 'utf8'), git.Tag(), getBoards().catch(e => [] )]))
+  .then(p => {
+    res.set('Access-Control-Allow-Origin', '*');
+    obj.motherboard = (m => m && m[1])(p[0].match(/\s*#define\s+MOTHERBOARD\s+(\w*)/));
+    obj.author = (m => m && m[1])(p[0].match(/#define\s+STRING_CONFIG_H_AUTHOR\s+"(.*)"/));
+    obj.version = p[1];
+    obj.motherboardId = p[2].objs.filter(i => i.name == obj.motherboard)[0].value;
+    return obj;
+  })
+  .then(a => res.send(a))
+  .catch(e => res.status(403).send(e))
+});
+app.post('/publicate', function (req, res) {
+  new Promise((resolve, reject) => {
+  try{
+    var obj = pubs[req.body.session];
+    if (!obj)
+      return reject('session');
+    Object.assign(obj, req.body);
+    var zip = new yazl.ZipFile();
+    obj.files.map(file => zip.addFile(file, path.basename(file)))
+    zip.end();
+    var tmpobj = tmp.fileSync();
+    console.log('File: ', tmpobj.name); // npm/formidable cant recieve native streams !!!
+    zip.outputStream.pipe(fs.createWriteStream(tmpobj.name))
+    .on("close", function() {
+      var form = new FormData();
+      form.append('params', JSON.stringify(obj));
+      form.append('file', fs.createReadStream(tmpobj.name));
+      form.submit('http://lt.rv.ua/mc/s/post', function(err, res) {
+        if (err) reject(err);
+        resolve(res.statusCode);
+        console.log(res.statusCode);
+      });
+    });
+  }catch(e){ throw e }
+  })
+  .then(a => res.send(a))
+  .catch(e=>res.status(403).send(e))
+});
+app.get('/zip/:path', function (req, res) {
+  var name = atob(decodeURI(req.params.path)).toString();
+  Promise.all([configFiles(name != 'Marlin' && path.join(store, name)), git.Tag()])
+  .then(p => {
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Content-Type', 'application/octet-stream');
+    res.set('Content-Disposition', 'attachment; filename="Marlin-' + (name != 'Marlin' && name || p[1]).replace('/', '-') + '.zip"');
+    var zip = new yazl.ZipFile();
+    zip.outputStream.pipe(res);
+    p[0].map(file => zip.addFile(file, path.basename(file)))
+    zip.end();
+  })
+  .catch(e=>res.status(403).send(e))
 });
 var recurseObj=(obj,p)=>{
   p=p||'';

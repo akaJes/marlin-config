@@ -319,6 +319,6 @@ exports.getBoards=(file)=>{
     .then(a=>a.map(i=>i.replace(/(.*#define\s+BOARD_.+?)(\/\/.*)/,"$1")))
     .then(a=>a.map(i=>i.match(/.*#define\s+(\w+)\s+(\d+)\s*/)))
     .then(a=>a.filter(i=>i))
-    .then(a=>a.map(i=>i[1]))
-    .then(JSON.stringify)
+    .then(a => ({list: a.map(i => i[1]), objs: a.map(i => ({name: i[1], value: i[2]}))}))
+//    .then(JSON.stringify)
 }

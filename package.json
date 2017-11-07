@@ -1,6 +1,6 @@
 {
   "name": "marlin-conf",
-  "version": "2.7.17",
+  "version": "2.8.0",
   "description": "configuration tool for Marlin project",
   "main": "./index.js",
   "scripts": {
@@ -64,6 +64,7 @@
     "express": "^4.15.2",
     "fix-path": "^2.1.0",
     "font-awesome": "^4.7.0",
+    "form-data": "^2.3.1",
     "formidable": "^1.1.1",
     "get-port": "^3.1.0",
     "highlight.js": "^9.11.0",
@@ -84,9 +85,11 @@
     "socket.io": "^2.0.1",
     "swig-templates": "^2.0.2",
     "tether": "^1.4.0",
+    "tmp": "0.0.33",
     "tty2html": "^1.0.0",
     "universal-analytics": "^0.4.13",
-    "which": "^1.2.14"
+    "which": "^1.2.14",
+    "yazl": "^2.4.3"
   },
   "devDependencies": {
     "devtron": "^1.4.0",

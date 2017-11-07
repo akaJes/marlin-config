@@ -596,6 +596,29 @@ $(function(){
       })
     });
   }($('#mct-promptModal')));
+  //tag menu - publish
+  (function(m, btn) {
+    var obj;
+    btn.on('click', function() {
+      $.ajax('/publish/TWFybGlu')
+      .then(function(data) {
+        obj = data;
+        m.find('[name]').map(function() {
+          var name = $(this).attr('name');
+          if (name && name in data)
+            $(this).val(data[name]);
+        })
+        m.modal('show');
+      });
+    });
+    m.find('.btn-primary').on('click', function() {
+      m.modal('hide');
+      $.ajax('/publicate/', {method: 'POST', data: m.find('[name]')})
+      .then(function(data) {
+        window.open('http://lt.rv.ua/mc/?h=' + location.host + '&s=' + obj.session, "_blank")
+      })
+    });
+  }($('#mct-publishModal'), $('.mct-publish')));
   // upload menu - restore
   (function(btn,m){
     var p=m.find('.modal-body p');
@@ -606,6 +629,13 @@ $(function(){
       if (selected){
         var path=btoa(selected);
         cmdReload($.ajax('/restore/'+encodeURI(path)),m);
+      }
+    });
+    m.find('.mct-download')
+    .on('click', function() {
+      if (selected) {
+        var path = btoa(selected);
+        window.open('/zip/' + encodeURI(path), '_blank');
       }
     });
     btn.on('click',function(){
