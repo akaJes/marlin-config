@@ -89,6 +89,7 @@
     "tty2html": "^1.0.0",
     "universal-analytics": "^0.4.13",
     "which": "^1.2.14",
+    "yauzl": "^2.9.1",
     "yazl": "^2.4.3"
   },
   "devDependencies": {

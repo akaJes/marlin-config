@@ -394,7 +394,7 @@ $(function(){
               d.find('.col-sm-6').attr('title',title)//.tooltip(tooltip_large);
             }
             var b=d.find('button');
-            b.eq(1).on('click', function(){ window.open("https://github.com/MarlinFirmware/Marlin/search?q=" + define + "&type=Issues&utf8=%E2%9C%93", "_blank"); })
+            b.eq(1).on('click', function(){ window.opener("https://github.com/MarlinFirmware/Marlin/search?q=" + define + "&type=Issues&utf8=%E2%9C%93", "_blank"); })
             if ( def.hint == undefined )
               b.eq(0).remove();
             else
@@ -615,10 +615,13 @@ $(function(){
       m.modal('hide');
       $.ajax('/publicate/', {method: 'POST', data: m.find('[name]')})
       .then(function(data) {
-        window.open('http://lt.rv.ua/mc/?h=' + location.host + '&s=' + obj.session, "_blank")
+        window.opener('http://lt.rv.ua/mc/?h=' + location.host + '&s=' + obj.session, "_blank")
       })
     });
   }($('#mct-publishModal'), $('.mct-publish')));
+  $('.mct-published').on('click', function() {
+    window.opener('http://lt.rv.ua/mc/?h=' + location.host, "_blank");
+  });
   // upload menu - restore
   (function(btn,m){
     var p=m.find('.modal-body p');
@@ -635,7 +638,7 @@ $(function(){
     .on('click', function() {
       if (selected) {
         var path = btoa(selected);
-        window.open('/zip/' + encodeURI(path), '_blank');
+        window.opener('/zip/' + encodeURI(path), '_blank');
       }
     });
     btn.on('click',function(){
@@ -684,6 +687,9 @@ $(function(){
       });
       source.addEventListener('open', function(event) {
         $('.mct-consoles,.mct-pio-ports').removeAttr('disabled')
+      });
+      source.addEventListener('reload', function(event) {
+        location.reload()
       });
       source.addEventListener('created', function(event) {
         var port= JSON.parse(event.data);
@@ -794,10 +800,7 @@ $(function(){
             text+='\n//file '+file.file.base+' Release:'+file.tag+'\n'+f;
         })
         var url=encodeURI('https://github.com/MarlinFirmware/Marlin/issues/new?title=&body='+text).replace(/\#/g,'%23');
-        if( typeof require === 'function' )
-          require('electron').shell.openExternal(url);
-        else
-          window.open(url)
+        window.opener(url)
       })
     })
   }());

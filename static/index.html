@@ -116,10 +116,12 @@
 </style>
 <script>
   //open links externally by default
+window.opener = window.open;
 if (typeof require === 'function') { //commonJS from electron
+  var shell = require('electron').shell;
+  window.opener = shell.openExternal;
   $(document).on('click', 'a[href^="http"]', function(event) {
       event.preventDefault();
-      var shell = require('electron').shell;
       shell.openExternal(this.href);
   });
 }
@@ -409,6 +411,7 @@ if (typeof require === 'function') { //commonJS from electron
           <div class="dropdown-menu" aria-labelledby="dropdownUploadLink">
             <button class="dropdown-item bg-warning mct-upload" title="Upload your old configuration or drag it in browser"><i class="fa fa-file"></i> Files</button>
             <button class="dropdown-item mct-restore" title="Get files from storage"><i class="fa fa-heart"></i> Saved</button>
+            <button class="dropdown-item mct-published" title="Get published files from site"><i class="fa fa-globe"></i> Published</button>
           </div>
         </div>
           <input type="file" name="files[]" class="mct-upload" multiple style="display:none;">

@@ -5,7 +5,7 @@ var mc = require('./mc');
 var promisify = require('./helpers').promisify;
 
 //common
-var inFile=name=>promisify(fs.readFile)( name, 'utf8' )
+var inFile = name => typeof name == 'string' ? promisify(fs.readFile)(name, 'utf8') : Promise.resolve(name.toString());
 var outFile=name=>text=>promisify(fs.writeFile)(name,text)
 var toJson=a=>JSON.stringify(a,null,2);
 var parseJson=a=>JSON.parse(a);

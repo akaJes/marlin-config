@@ -23,6 +23,7 @@ var moment = require('moment');
 var mkdirp = require('mkdirp');
 var machineId = require('node-machine-id').machineId;
 var yazl = require("yazl");
+var yauzl = require("yauzl");
 var crypto = require("crypto");
 var FormData = require('form-data');
 var tmp = require('tmp');
@@ -341,6 +342,54 @@ app.post('/publicate', function (req, res) {
   })
   .then(a => res.send(a))
   .catch(e=>res.status(403).send(e))
+});
+var fetchStream = res =>
+  new Promise((resolve, reject) => {
+    var data = [];
+    res.on('data', function(chunk) {
+      data.push(chunk);
+    }).on('end', function() {
+      resolve(Buffer.concat(data));
+    });
+  })
+var readZip = zip =>
+  new Promise((resolve, reject) => {
+    var files = [];
+    zip.readEntry();
+    zip.on("entry", function(entry) {
+      if (/\/$/.test(entry.fileName))
+        zip.readEntry();
+      else {
+        // file entry
+        promisify('openReadStream', zip)(entry)
+          .then(fetchStream)
+          .then(file => {
+            files.push({entry: entry, file: file});
+            zip.readEntry();
+          })
+      }
+    })
+    zip.on("end", function(){
+      resolve(Promise.all(files))
+    });
+  });
+var httpGet = url =>
+  new Promise((resolve, reject) => {
+    http.get(url, function(res) {
+      resolve(res);
+    });
+  })
+app.get('/site/:Id', function (req, res) {
+  var url = 'http://lt.rv.ua/mc/s/getzip/' + req.params.Id;
+  httpGet(url)
+  .then(fetchStream)
+  .then(buf => promisify(yauzl.fromBuffer)(buf, {lazyEntries:true}))
+  .then(readZip)
+  .then(files => files.map(i => ({path: i.file, name: i.entry.fileName})))
+  .then(uploadFiles)
+  .then(a => (SSEsend('reload'),"page/application reloaded"))
+  .then(a => res.send(a))
+  .catch(e => (console.error(e),res.status(403).send(e)))
 });
 app.get('/zip/:path', function (req, res) {
   var name = atob(decodeURI(req.params.path)).toString();
