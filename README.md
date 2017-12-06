@@ -35,9 +35,7 @@ supported OS: Linux,Mac,Windows
 
 
 in project used documentation from [MarlinDocumentation](https://github.com/MarlinFirmware/MarlinDocumentation/_configuration/configuration.md)
-# Installation files
-(prebuilt with Electron versions)
-  [Releases](https://github.com/akaJes/marlin-config/releases) (Mac versions has no console manager)
+# [Installation files](https://github.com/akaJes/marlin-config/releases)
 ## Dependencies
 * [git](https://git-scm.com/downloads)
 * [PlatformIO](http://docs.platformio.org/en/latest/installation.html) (optional)
