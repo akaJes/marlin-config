@@ -35,7 +35,12 @@ supported OS: Linux,Mac,Windows
 
 
 in project used documentation from [MarlinDocumentation](https://github.com/MarlinFirmware/MarlinDocumentation/_configuration/configuration.md)
-# [Installation files](https://github.com/akaJes/marlin-config/releases)
+
+## Install marlin-config
+
+We provide [prebuilt binaries](https://github.com/akaJes/marlin-config/releases) for macOS, Linux 32 / 64 and Windows 32 / 64. This is the [latest release](https://github.com/akaJes/marlin-config/releases/latest).
+
+
 ## Dependencies
 * [git](https://git-scm.com/downloads)
 * [PlatformIO](http://docs.platformio.org/en/latest/installation.html) (optional)
