@@ -191,13 +191,21 @@ app.get('/checkout/:branch', function (req, res) {
 var getBoards = () =>
   seek4File('boards.h', [ 'Marlin', path.join('Marlin', 'src', 'core')])
   .then(mctool.getBoards);
+var getThermistors = () =>
+  seek4File('thermistornames.h', [ 'Marlin', path.join('Marlin', 'src', 'lcd')])
+  .then(mctool.getThermistors);
 
 var get_cfg=()=>{
   var base=Promise.all([git.root(),git.Tag()]);
   var setBoards = a => getBoards()
-    .then(a => JSON.stringify(a.list))
-    .catch(e => '' )
-    .then(boards => (Object.assign(a.defs['MOTHERBOARD'], {select: boards, type:"select"}), a));
+    .then(boards => (Object.assign(a.defs['MOTHERBOARD'], {select: boards.select, type:"select"}), a));
+  var setThermistors = defs => getThermistors()
+    .then(a => {
+      Object.keys(defs.defs)
+        .filter(i => /^TEMP_SENSOR/.test(i))
+        .map(i => Object.assign(defs.defs[i], {select: a.select, type: "select"}))
+      return defs;
+    })
   var list=['Configuration.h','Configuration_adv.h']
   .map(f => base
       .then(p=>
@@ -206,7 +214,7 @@ var get_cfg=()=>{
       )
       .then(o=>(o.names.filter(n=>hints.d2i(n.name),1).map(n=>o.defs[n.name].hint=!0),o))
       .then(a => Object.assign(a, {names: undefined, type: 'file'}))
-      .then(a => a.defs['MOTHERBOARD'] && setBoards(a) || a)
+      .then(a => 'MOTHERBOARD' in a.defs ? setBoards(a).then(setThermistors) : a)
   );
   return Promise.all(list)
 }

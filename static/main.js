@@ -331,6 +331,7 @@ $(function(){
               val.remove(),p.remove(),sel.remove();
             else{
               var dv=(def.changed&&def.changed.value||def.value);
+              if (typeof def.select != "object")
               if (def.type=='select'){ //try to recover ugly json
                 var json=def.select.trim();
                 if (json[0]=='[')

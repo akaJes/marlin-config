@@ -184,7 +184,7 @@ var groups=[
       ['TODO: //LCDs'],
 ]
 var type=i=>i.value==undefined?'BOOL':'string'
-var type1=i=>i.value&&(i.select?'select':/\".*\"/.test(i.value)?'string':/false|true/.test(i.value)?'boolean':'numeric')||undefined //"
+var type1=i=>i.value&&(i.select?'select':/\".*\"/.test(i.value)?'string':/^false|true$/.test(i.value)?'boolean':'numeric')||undefined //"
 var section0=i=>i.name+' '+type(i)+(i.condition.length&&(' == '+i.condition.join(' AND '))||'')
 var section=i=>({name:i.name,type:type(i),condition:i.condition.length&&i.condition||undefined,value:i.value||!i.disabled})
 var section1=(p,i)=>(p[i.name]={changed:i.changed,type:type1(i),condition:i.condition.length&&i.condition||undefined,value:i.value,disabled:i.disabled,line:i.line,select:i.select},p)
@@ -312,13 +312,33 @@ module.exports.makeHfile=(root,name,dir)=>conf=>{
     .catch(a=>(console.log('fail update h file: ',file,a),a))
 }
 
-exports.getBoards=(file)=>{
-    return Promise.resolve(file)
+exports.getBoards = file => Promise.resolve(file)
     .then(inFile)
+    .catch(a => '')
     .then(text2array)
     .then(a=>a.map(i=>i.replace(/(.*#define\s+BOARD_.+?)(\/\/.*)/,"$1")))
     .then(a=>a.map(i=>i.match(/.*#define\s+(\w+)\s+(\d+)\s*/)))
     .then(a=>a.filter(i=>i))
-    .then(a => ({list: a.map(i => i[1]), objs: a.map(i => ({name: i[1], value: i[2]}))}))
-//    .then(JSON.stringify)
+    .then(a => ({
+        list: a.map(i => i[1]),
+        objs: a.map(i => ({name: i[1], value: i[2]})),
+        select: a.reduce((p, i) => (p[i[1]] = i[1] + ' (' + i[2] + ')', p), {})
+    }))
+
+const thermistors = /THERMISTOR_ID\s+==\s+(-?\d*).*\n.*THERMISTOR_NAME\s+"([^"]+)/g;
+const splitter = (regex, str) => {
+  var list = [], m;
+  while ((m = regex.exec(str)) !== null) {
+    if (m.index === regex.lastIndex) regex.lastIndex++;
+    list.push(m);
+  }
+  return list;
 }
+exports.getThermistors = file => Promise.resolve(file)
+    .then(inFile)
+    .catch(a => '')
+    .then(text => splitter(thermistors, text))
+    .then(a => ({
+        list: a.map(i => i[2]),
+        select: a.reduce((p, i) => (p[i[1]] = i[2] + ' (' + i[1] + ')', p), {'0': 'Not used'})
+    }))
