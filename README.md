@@ -7,46 +7,47 @@ supported OS: Linux,Mac,Windows
 
 # Main features
 * instant changing of Configuration*.h files
-* quick help for Marlin options and Gcodes
+* quick help for Marlin options and G-codes
 * compilation and uploading your customized firmware
 * console for access to serial ports
+* share your configuration on [the site](http://lt.rv.ua/mc)
 # Features:
-* automatically clone repository from github if you don't have it
+* automatically clone repository from [Marlin github](https://github.com/MarlinFirmware/Marlin) if you don't have it
 * instant changing of Configuration*.h files
 * allow to filter only changed options overall and for each section
 * show help for all options
 * show help for G-codes
 * show allowed options/gcodes depend to your configuration
+* auto search options in Marlin github issues
 * reset configuration changes
-* switch between releases and update git repository from github
-* **upload your old configuration over current**
-* **compile and upload the firmware** to your device via PlatformIO
-* **access to all serial ports** using console manager (Linux/Mac with auto ports changing detection)
+* switch between **releases/branches** and update git repository from github
+* switch or load provided examples of configuration
+* **upload your old configuration over current** from Configuration files
+* **compile and upload the firmware** to your device via [PlatformIO](http://docs.platformio.org/en/latest/installation.html)
+* **access to all serial ports** using console manager (with auto ports changing detection)
 * simple 3D tool for positioning printer head in console manager
 * **snippets** allow compose the BootScreen, calculate a step values for various stepper motors
 * quick navigation with a right sided menu
 * create an issue on [Marlin github](https://github.com/MarlinFirmware/Marlin) with your configuration
+* share your configurator access via LAN or WAN (with changes log)
 ## Snippets
 * stepper motors calculators (belt driven, screw driven, extruder)
 * startup bootscreen preview
 * custom bootscreen editor
-* sharing UPnP helper with QRcodes
+* sharing your connection with UPnP helper with QRcodes
 * using your phone as webcam
-
 
 in project used documentation from [MarlinDocumentation](https://github.com/MarlinFirmware/MarlinDocumentation/_configuration/configuration.md)
 
-## Install marlin-config
-
+# Install marlin-config from binaries
 We provide [prebuilt binaries](https://github.com/akaJes/marlin-config/releases) for macOS, Linux 32 / 64 and Windows 32 / 64. This is the [latest release](https://github.com/akaJes/marlin-config/releases/latest).
-
-
 ## Dependencies
 * [git](https://git-scm.com/downloads)
 * [PlatformIO](http://docs.platformio.org/en/latest/installation.html) (optional)
 ## Using
 After run appears a File dialog and asks to open any empty folder (then will be cloning for last version of marlin from github) or folder with the Marlin git repository
-# Installation NPM
+
+# Install from NPM package
 [![npm version](https://badge.fury.io/js/marlin-conf.svg)](https://badge.fury.io/js/marlin-conf)
 
 `sudo npm -g i marlin-conf`
