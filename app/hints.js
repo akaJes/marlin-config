@@ -4,6 +4,9 @@ var marked = require('marked');
 var hljs=require('highlight.js');
 var path= require('path');
 var http = require('https');
+var gtBanner = '';
+var hlBanner='<link rel="stylesheet" title="Default" href="libs/highlight.js/styles/default.css">';
+var srBanner='<script src="js/head.min.js"></script><script>head.load("js/sheetrock.min.js");</script>';
 
 marked.setOptions({
   highlight: function (code) {
@@ -76,8 +79,6 @@ function init_hints(){
 
 function hint(name){
   var find=d2i[name]
-  var banner='<link rel="stylesheet" title="Default" href="libs/highlight.js/styles/default.css">';
-  var banner2='<script src="js/head.min.js"></script><script>head.load("js/sheetrock.min.js");</script>';
   var add_banner='';
   if (find){
     var ob=headings.reduce((ob,v)=>{
@@ -88,9 +89,9 @@ function hint(name){
     var cut=tokens.slice(ob.min,ob.max);
     cut=extendTokens(cut);
     if(cut.filter(i=>/sheetrock\.min/.test(i.text||'')).length)
-      add_banner=banner2;
+      add_banner=srBanner;
     cut.links={};
-    return banner+add_banner+marked.parser(cut);
+    return gtBanner+hlBanner+add_banner+marked.parser(cut);
   }
 }
 
@@ -115,14 +116,13 @@ var template = swig.compileFile(path.join(__dirname,'..','views','gcode-info.htm
 var gcodes=[],tags={},list={groups:[],tags:{},list:{}};
 
 function getGhint(tag){
-  var banner='<link rel="stylesheet" title="Default" href="libs/highlight.js/styles/default.css">';
   var banner2="<style> .param-desc-list p { display: inline; } </style>";
   if (tags[tag]){
     var output = template({
         page: {category:[]},
         gcode: tags[tag],
     });
-    return banner+banner2+output;
+    return gtBanner+hlBanner+banner2+output;
   }
 }
 function parse_requires(req){
@@ -168,12 +168,16 @@ function init_gcode(){
         list.list[i].sort();
   });
 }
+var init_gt = () =>
+    promisify(fs.readFile)(path.join(__dirname, '..', 'views', 'gt.html'))
+    .then(txt => gtBanner = txt)
 
 exports.init=(verbose)=>
   init_hints()
   .then(a=>verbose&&console.log('loaded configuration hints'))
   .then(init_gcode)
   .then(a=>verbose&&console.log('loaded gcodes'))
+  .then(init_gt)
 
 exports.marked=marked;
 exports.hint=hint;

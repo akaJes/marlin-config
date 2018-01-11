@@ -30,6 +30,7 @@ function addNewSection(tab,id,section,sec){
 }
 
 function loadHint(name){
+  return $('.mct-hint iframe').attr('src', '/hint/' + name);
   $.ajax('/hint/'+name)
   .fail(ajaxAlert)
   .then(function(data){
@@ -37,6 +38,7 @@ function loadHint(name){
   })
 }
 function loadGcode(name){
+  return $('.mct-hint iframe').attr('src', '/gcode/' + name);
   $.ajax('/gcode/'+name)
   .fail(ajaxAlert)
   .then(function(data){

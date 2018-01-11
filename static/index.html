@@ -113,6 +113,12 @@
     max-height: 500px;
     overflow-y: auto;
 }
+.mct-hint iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    margin-bottom: -10px;
+}
 </style>
 <script>
   //open links externally by default
@@ -564,7 +570,7 @@ if (typeof require === 'function') { //commonJS from electron
                       <div class="col-sm-2 my-auto" data-toggle="tooltip"  data-animation="false">
                       </div>
                       <div class="col-sm-1 my-auto">
-                        <button type="button" class="btn btn-warning btn-sm" title="Show explanation">?</button>
+                        <button type="button" class="btn btn-warning btn-sm fa fa-info" title="Show explanation"></button>
                       </div>
                     </div>
                   </template>
@@ -589,6 +595,7 @@ if (typeof require === 'function') { //commonJS from electron
       </div>
     </div>
     <div class="col-lg-5 mct-hint">
+      <iframe></iframe>
     </div>
   </div>
 </div>
