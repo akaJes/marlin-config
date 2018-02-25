@@ -116,21 +116,21 @@ parameters:
     optional: true
     description: |
                  - Override the Y-size of the grid that will be probed (`AUTO_BED_LEVELING_LINEAR`).
-                 - Specify Y when setting a mesh value (`PROBE_MANUALLY`).
+                 - Specify Y when setting a mesh value (`AUTO_BED_LEVELING_LINEAR`).
     values:
       -
         type: int/float
   -
     tag: Z
     optional: true
-    description: Specify the Z offset when setting a mesh value (`PROBE_MANUALLY`).
+    description: Specify the Z offset when setting a mesh value (`AUTO_BED_LEVELING_BILINEAR`).
     values:
       -
         type: float
   -
     tag: W
     optional: true
-    description: Write a mesh Z offset (`PROBE_MANUALLY`). `W` requires `X`, `Y`, and `Z`.
+    description: Write a mesh Z offset (`AUTO_BED_LEVELING_BILINEAR`). Requires `X`,`Y` or `I`,`J` to specify the point, and `Z` to specify the value.
     values:
       -
         type: bool
@@ -224,7 +224,7 @@ parameters:
   -
     tag: J
     optional: true
-    description: Jettison the leveling data stored in SRAM and turn off leveling compensation. Data in EEPROM is not affected.
+    description: (Without `W`) Jettison the leveling data stored in SRAM and turn off leveling compensation. Data in EEPROM is not affected.
     values:
       -
         type: bool
@@ -238,7 +238,7 @@ examples:
     post: 'Probe a 5x5 matrix. (`AUTO_BED_LEVELING_LINEAR`)'
     code: G29 P5 ; 5x5 matrix
   -
-    post: 'Probe a 4x8 matrix from `X50` `Y50` to `X150` `Y150`, printing a full report. (`AUTO_BED_LEVELING_LINEAR`, `AUTO_BED_LEVELING_BILINEAR`)'
+    post: 'Probe a 4x8 matrix from `X50` `Y50` to `X150` `Y150`, printing a full report. (`AUTO_BED_LEVELING_LINEAR`)'
     code: G29 X4 Y8 L50 R150 F50 B150 T V4
   -
     pre: 'Manual Probing example'
