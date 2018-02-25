@@ -60,7 +60,6 @@
     "bootstrap": "4.0.0-alpha.6",
     "byline": "^5.0.0",
     "cropper": "^3.0.0-rc.2",
-    "electron-debug": "^1.2.0",
     "express": "^4.15.2",
     "fix-path": "^2.1.0",
     "font-awesome": "^4.7.0",
@@ -94,8 +93,9 @@
   },
   "devDependencies": {
     "devtron": "^1.4.0",
-    "electron": "*",
+    "electron": "^1.7.10",
     "electron-builder": "*",
+    "electron-debug": "^1.2.0",
     "eslint": "^4.3.0",
     "json": "^9.0.6",
     "nodemon": "^1.11.0"

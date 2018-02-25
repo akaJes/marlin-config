@@ -25,6 +25,7 @@
     <link href="css/toggle.css" rel="stylesheet">
     <link href="libs/font-awesome/css/font-awesome.css" rel="stylesheet"> <!-- rework to svg-->
     <link href="css/spinner.css" rel="stylesheet">
+    <link href="css/input-expand-group.css" rel="stylesheet">
 <script src="/version/Home"></script>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -131,6 +132,23 @@ if (typeof require === 'function') { //commonJS from electron
       shell.openExternal(this.href);
   });
 }
+$(function() {
+  if (typeof require === 'function') { //commonJS from electron
+    var ipc = require('electron').ipcRenderer;
+    function found(val) {
+      $('.mct-search').focus().parent().find('span').text(val);
+    }
+    $('.mct-search').on('change', function() {
+      ipc.send('search-text', $(this).val());
+      !$(this).val().length && found(0)
+    })
+    ipc.on('search-found', function(ev, arg) {
+      found(arg);
+    })
+  } else {
+    $('.mct-search').parent().hide();
+  }
+})
 </script>
   </head>
   <body lang="en">
@@ -405,6 +423,11 @@ if (typeof require === 'function') { //commonJS from electron
         </div>
       </div>
       <button type="button" class="btn btn-warning mct-info mr-2" title="Show information"><i class="fa fa-info"></i><span class="badge badge-danger ml-2" hidden>0</span></button>
+      <div class="input-expand-group mr-2" >
+        <input class="form-control input-lg mct-search" placeholder="Searchin text" type="text">
+        <div> <i class=" fa fa-search"></i></div>
+        <div><div>found <span>0</span></div></div>
+      </div>
 <div class="onoffswitch mct-changed mr-2"  title="Toggle only changed options">
     <label>
         <input type="checkbox" class="onoffswitch-checkbox">

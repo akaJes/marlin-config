@@ -1,5 +1,5 @@
 'use strict';
-const {app, BrowserWindow, Menu, dialog} = require('electron');
+const {app, BrowserWindow, Menu, dialog, ipcMain} = require('electron');
 //require('electron-debug')({showDevTools: true, enabled: true}); //runtime debug
 console.log('Node',process.version);
 const notifier = require('node-notifier');
@@ -35,6 +35,11 @@ function showNotify(text){
     wait: true // Wait with callback, until user action is taken against notification
   });
 }
+ipcMain.on('search-text', (event, arg) => {
+  var wc = mainWindow && mainWindow.webContents;
+  arg.length && wc.findInPage(arg) || wc.stopFindInPage('clearSelection');
+})
+
 app.on('ready', function() {
     promisify(which)('git')
     .then(function(){
@@ -69,6 +74,12 @@ app.on('ready', function() {
           },
       });
       mainWindow.loadURL(url);
+      mainWindow.webContents.on('found-in-page', function (event, result) {
+        var count = 0;
+        if (result && result.finalUpdate)
+          count = result.matches;
+        event.sender.send('search-found', count);
+      });
     })
     .catch(e => {
       console.error(e.message);

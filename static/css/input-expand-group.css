@@ -1,0 +1,37 @@
+.input-expand-group {
+  width: 40px;
+  max-width: 300px;
+  position: relative;
+}
+.input-expand-group > div {
+  top:0;
+  position: absolute;
+  height:100%;
+  display:flex;
+}
+.input-expand-group :nth-child(2) {
+  left:10px;
+}
+.input-expand-group :nth-child(3) {
+  right:10px;
+}
+.input-expand-group div * {
+  margin-top:auto;
+  margin-bottom:auto;
+}
+.input-expand-group div div {
+  opacity:0;
+}
+.input-expand-group .form-control {
+  padding-left:25px;
+  width:100%;
+}
+
+.input-expand-group:hover div div {
+  opacity:1;
+  -webkit-transition:opacity 0.5s ease-in-out;
+}
+.input-expand-group:hover {
+  width:100%;
+  -webkit-transition:width 0.5s ease-in-out;
+}

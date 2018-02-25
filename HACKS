@@ -1,0 +1,5 @@
+nat-upnp/lib/nat-upnp/client.js
+@@ -106,2 +106,3 @@
+        });
+      if (!key) return callback(Error('Incorrect response'));
+        data = data[key];
