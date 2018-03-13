@@ -23,7 +23,7 @@ supported OS: Linux,Mac,Windows
 * switch between **releases/branches** and update git repository from github
 * switch or load provided examples of configuration
 * **upload your old configuration over current** from Configuration files
-* **compile and upload the firmware** to your device via [PlatformIO](http://docs.platformio.org/en/latest/installation.html)
+* **compile and upload the firmware** to your device via [PlatformIO Core](http://docs.platformio.org/en/latest/installation.html)
 * **access to all serial ports** using console manager (with auto ports changing detection)
 * simple 3D tool for positioning printer head in console manager
 * **snippets** allow compose the BootScreen, calculate a step values for various stepper motors
@@ -43,7 +43,7 @@ in project used documentation from [MarlinDocumentation](https://github.com/Marl
 We provide [prebuilt binaries](https://github.com/akaJes/marlin-config/releases) for macOS, Linux 32 / 64 and Windows 32 / 64. This is the [latest release](https://github.com/akaJes/marlin-config/releases/latest).
 ## Dependencies
 * [git](https://git-scm.com/downloads)
-* [PlatformIO](http://docs.platformio.org/en/latest/installation.html) (optional)
+* [PlatformIO Core](http://docs.platformio.org/en/latest/installation.html) (optional)
 ## Using
 After run appears a File dialog and asks to open any empty folder (then will be cloning for last version of marlin from github) or folder with the Marlin git repository
 
@@ -56,7 +56,7 @@ some hints for [Windows-Installation](https://github.com/akaJes/marlin-config/wi
 ## Dependencies
 * [git](https://git-scm.com/downloads)
 * [node.js](https://nodejs.org/en/download/)
-* [PlatformIO](http://docs.platformio.org/en/latest/installation.html) (optional)
+* [PlatformIO Core](http://docs.platformio.org/en/latest/installation.html) (optional)
 ## Hints
 ### Linux users issue about access to USB serial ports
 Warning! Please install `99-platformio-udev.rules` and check that your board's PID and VID are listed in the rules.
