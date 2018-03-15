@@ -1,0 +1,162 @@
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+<style type="text/css">
+body {
+  display: flex;
+  text-align:center;
+}
+.starter {
+  width: 400px;
+  margin: auto;
+}
+.component {
+ width: 150px;
+ height: 150px;
+ border-radius: 5px;
+ display: inline-block;
+ border: 1px solid red;
+ background-color: pink;
+ margin: 5px;
+ text-align: center;
+ vertical-align: top;
+}
+.component>div {
+ height: 50%;
+ padding:10px;
+ box-sizing: border-box;
+}
+.component .state {
+ margin:5px;
+ *padding:5px;
+}
+.component img {
+ max-height: 100%;
+ max-width:100%;
+ }
+.component.installed {
+ border: 1px solid green;
+ background-color: lightgreen;
+}
+.site {
+ border: 1px solid black;
+ background-color: lightyellow;
+}
+.folder {
+ border: 1px solid black;
+ background-color: lightblue;
+}
+button {
+ margin: auto;
+ display: block;
+ background-color: greenyellow;
+ box-shadow: 2px 2px gray;
+ border-radius: 3px;
+ border: solid gray 1px;
+ transition: opacity .15s ease-in-out;
+ cursor: pointer;
+ user-select: none;
+ padding: 5px 20px;
+ vertical-align: middle;
+ outline: none;
+ margin-bottom: 10px;
+}
+.installed button {
+   background-color: lightgray;
+}
+button:active {
+ opacity: .3;
+ box-shadow: 0 0;
+}
+ul {
+ list-style: none;
+ margin: 5px;
+ padding:0;
+}
+li {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  direction: rtl;
+  text-align: left;
+}
+li:first-child {
+  text-align:center;
+}
+li.active {
+ background-color: gray;
+}
+li:hover {
+  opacity: .5;
+}
+
+</style>
+<script>
+typeof $ == 'undefined' && ($ = require('jquery'));
+$(function() {
+  var shell = require('electron').shell;
+  window.opener = shell.openExternal;
+
+  $('a, button[href]').on('click', function (ev) {
+    ev.preventDefault();
+    window.opener($(this).attr('href'), '_blank')
+  })
+  $('ul').on('click', 'li', function() {
+    $(this).addClass('active').siblings().removeClass('active');
+  })
+  $('.pio button').on('click', function () {
+    $(this).attr('disabled', '').siblings('.state').text('wait a minute...');
+    ipc.send('starter-pio');
+  })
+  $('.folder button').on('click', function () {
+    ipc.send('starter-folder', [$('li.active').attr('n')]);
+  })
+  var ipc = require('electron').ipcRenderer;
+  ipc.send('starter-init');
+  ipc.on('starter-pio', function(ev, data) {
+    $('.component.pio .state').text(data ? 'instaled' : 'error');
+    data && $('.component.pio').addClass('installed');
+  });
+  ipc.on('starter-init', function(ev, data) {
+    ['git','pio'].map(function(i) {
+      var c = $('.component.' + i)
+      data[i] && c.addClass('installed');
+      c.find('.state').text(data[i] ? 'Installed' : 'NOT Installed');
+    });
+    data.pio && $('.component.pio button').text('reinstall')
+    +(data.folders || []).slice(0,4).map(function(f, n) {
+      $('ul').append($('<li>').text(f).attr('n', n).attr('title', f))
+    });
+  })
+})
+</script>
+<div class="starter">
+<div class="component git">
+<div><img src="https://git-scm.com/images/logo@2x.png" alt="git" title="git">
+</div><div>
+<div class="state">not found</div>
+<button href="https://git-scm.com/downloads">install</button></div>
+</div>
+<div class="component pio">
+<div><img src="https://platformio.org/images/platformio-logo.17fdc3bc.png" alt="PlatformIO" title="PlatformIO">
+</div><div title="it can take up to 5 minutes">
+<div class="state">not found</div>
+<button>auto install</button>
+</div>
+</div>
+
+<div class="component site">
+<div><a href="https://github.com/akaJes/marlin-config"><img src="https://raw.githubusercontent.com/akaJes/marlin-config/master/build/icons/icon_128x128.png"></a></div>
+<div>
+<button href="http://lt.rv.ua/mc">configurations</button>
+<a href="https://www.paypal.me/AKruk508">
+<img src="https://img.shields.io/badge/Donate-PayPal-green.svg"></a>
+</div></div>
+
+<div class="component folder">
+<br>
+<button>open folder</button>
+<ul>
+<li n="new" class="active">new</li>
+</ul>
+</div>
+
+</div>

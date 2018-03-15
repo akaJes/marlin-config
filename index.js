@@ -10,6 +10,9 @@ var fs = require('fs');
 var promisify = require('./app/helpers').promisify;
 var git = require('./app/git-tool');
 var server = require('./app/server');
+const store = require('data-store')('marlin-config');
+const pio  = require('./app/pio-inst');
+const gitExe = 'git';
 
 var mainWindow = null;
 var getFolder=()=>new Promise((done,fail)=>
@@ -24,6 +27,7 @@ var getFolder=()=>new Promise((done,fail)=>
     })
   )
 app.on('window-all-closed', () => {
+  console.log('window-all-closed');
   app.quit()
 })
 function showNotify(text){
@@ -39,18 +43,49 @@ ipcMain.on('search-text', (event, arg) => {
   var wc = mainWindow && mainWindow.webContents;
   arg.length && wc.findInPage(arg) || wc.stopFindInPage('clearSelection');
 })
+ipcMain.on('starter-pio', function(ev) {
+  pio.install()
+  .then(result => ev.sender.send('starter-pio', result))
+  .catch(e => dialog.showErrorBox('Error', e))
+})
 
 app.on('ready', function() {
-    promisify(which)('git')
-    .then(function(){
-      var is={'-G':0}
-      .filter((v,key,o,p,i)=>(p=process.argv,i=p.indexOf(key),!v&&i>=0&&i+1<p.length&&(o[key]=p[i+1]),i>=0));
-      var chain = () => getFolder().then(dir =>
+    var status = new BrowserWindow({width: 400, height: 400, maximizable: false})
+    status.setMenu(null);
+    var folders = store.get('folders') || [];
+    var opts = {'-G': 0};
+    Object.keys(opts).reduce((v, key) => (v.i = v.p.indexOf(key), v.i >= 0 && (opts[key] = v.p[v.i + 1]), v), {p: process.argv});
+
+    Promise.all([
+      promisify(which)(gitExe).then(a => 1).catch(a => 0),
+      promisify(which)('pio').then(a => 1).catch(a => 0),
+      promisify(fs.readFile)(path.join(__dirname, 'views', 'start.html')),
+    ])
+    .then(p => {
+      var statusFile = 'data:text/html;charset=UTF-8,' + encodeURIComponent(p[2].toString());
+      status.loadURL(statusFile);
+      status.show()
+      ipcMain.on('starter-init', ev => {
+        ev.sender.send('starter-init', {
+            git: p[0],
+            pio: p[1],
+            folders: folders,
+        })
+      })
+      return (new Promise(function(resolve, reject) {
+        ipcMain.on('starter-folder', function(ev, num) {
+          resolve(num == 'new' ? '' : folders[num]);
+        })
+      }))
+    })
+    .then(folder => promisify(which)(gitExe).then(a => folder))
+    .then(function(folder) {
+      const check = dir =>
           promisify(fs.access)(dir, fs.constants.W_OK)
           .then(a => dir)
           .catch(e => (dialog.showErrorBox('Access','The application hasn\'t access to this folder,\nselect a folder from my Documents or Desktop'),chain()))
-        );
-      return is['-G'] || chain();
+      const chain = () => getFolder().then(check);
+      return folder && check(folder) || opts['-G'] || chain();
     })
     .then(dir => git.root(dir)
         .catch(e => {
@@ -63,6 +98,13 @@ app.on('ready', function() {
             .catch(e => git.root(dir));
         })
     )
+    .then(folder => {
+      var i = folders.indexOf(folder);
+      i >= 0 && folders.splice(i, 1);
+      folders.unshift(folder);
+      store.set('folders', folders);
+      return folder;
+    })
     .then(()=>server.main(1))
     .then(function(url){
       mainWindow = new BrowserWindow({
@@ -74,12 +116,17 @@ app.on('ready', function() {
           },
       });
       mainWindow.loadURL(url);
+      status.close();
       mainWindow.webContents.on('found-in-page', function (event, result) {
         var count = 0;
         if (result && result.finalUpdate)
           count = result.matches;
         event.sender.send('search-found', count);
       });
+      mainWindow.on('close', function() {
+      console.log('quit()')
+        app.quit();
+      })
     })
     .catch(e => {
       console.error(e.message);
