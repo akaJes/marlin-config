@@ -324,6 +324,7 @@ $(function(){
             opts[define]=file.defs[define];
             if (def.changed)
               d.addClass('bg-info')
+            d.attr('define', define);
             d.find('label').eq(0).text(define.split('.')[0]).attr('title',def.line.trim())//.tooltip(def.line.length>24&&tooltip_large); //take 200ms
             var dis=d.find('.onoffswitch')
             var p=d.find('.mct-splitter');
@@ -368,49 +369,58 @@ $(function(){
                 val.val(dv);
                 sel.remove();
               }
-              inp
-              .on('change',function(){
-                var dv=$(this).val();
-                if (def.type=='string')
-                  dv='"'+dv+'"';
-                processProp('value',dv);
-              })
+              inp.attr('dtype', def.type)
             }
-            function processProp(name,val){
-              lastChanged=define+name;
-              saveProp('/set/'+file.file.name+'/'+define+'/'+name+'/'+val)
-              .then(function(){
-                setProp(define,name,val);
-              });
-            }
+
             if ( !( def.changed && def.changed.disabled ) && !def.disabled && def.value != undefined)
               dis.remove(),p.remove();
             else{
               dis.find('input')
               .attr('checked',!getVal(def,'disabled'))
-              .on('change',function(){
-                processProp('disabled',!$(this).prop('checked'));
-              })
             }
             if (def.condition){
               var title='( '+def.condition.join(') && (')+' )';
               d.find('.col-sm-6').attr('title',title)//.tooltip(tooltip_large);
             }
-            var b=d.find('button');
-            b.eq(1).on('click', function(){ window.opener("https://github.com/MarlinFirmware/Marlin/search?q=" + define + "&type=Issues&utf8=%E2%9C%93", "_blank"); })
+            var b = d.find('button');
             if ( def.hint == undefined )
               b.eq(0).remove();
-            else
-              b.eq(0).on('click',function(){ loadHint(define) })
-          })
+          }) //define
+
           sec.find('.card-header span.badge:eq(0)').text(cnt);
           updateChanged(sec);
           var btns=sec.find('.card-header button');
           btns.eq(1).on('click',function(){sec.find('.form-group').not('.bg-info').hide()})
           btns.eq(0).on('click',function(){sec.find('.form-group').show()})
           $('.config-files a[href$=Configuration]').tab('show');
+        }) //section
+        tab.tab.on('click', '.card-block button', function() {
+          var btn = $(this), define = btn.parents('.form-group').attr('define');
+          if (btn.hasClass('fa-info'))
+            loadHint(define);
+          if (btn.hasClass('fa-github'))
+            window.opener("https://github.com/MarlinFirmware/Marlin/search?q=" + define + "&type=Issues&utf8=%E2%9C%93", "_blank");
         })
-      })
+        function processProp(define, name, val) {
+          lastChanged = define + name;
+          saveProp('/set/' + file.file.name + '/' + define + '/' + name + '/' + val)
+          .then(function() {
+              setProp(define, name, val);
+          });
+        }
+        tab.tab.on('change', '.card-block select,.card-block input[type=text]', function() {
+          var btn = $(this), define = btn.parents('.form-group').attr('define');
+          var val = btn.val();
+          if (btn.attr('dtype') == 'string')
+              val = '"' + val + '"';
+          processProp(define, 'value', val);
+        })
+        tab.tab.on('change', '.card-block .onoffswitch input', function() {
+          var btn = $(this), define = btn.parents('.form-group').attr('define');
+          processProp(define, 'disabled', !$(this).prop('checked'));
+        })
+
+      }) //file
       $('body').scrollspy({ target: '#navbar-sections' })
       $('.config-files .nav-tabs a[data-toggle="tab"]').on('show.bs.tab', function (e) { //sync tab with nav
         var href=$(e.target).attr('href')
@@ -480,7 +490,7 @@ $(function(){
               })
             );
           });
-          d.find('button').on('click',function(){ loadGcode(tag)});
+          d.on('click', 'button', function(){ loadGcode(tag)});
         });
       })
         $.each(data.tags,function(name,d){ //TODO:put it into server
