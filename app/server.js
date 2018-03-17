@@ -700,7 +700,7 @@ app.post('/set/:file/:name/:prop/:value', function (req, res) {
   var ob = {name: name[0]};
   var set = (prop, val) => ob[prop] = (prop == 'disabled' ? val == 'true' : val);
   name.length > 1 && set('number', parseInt(name[1]));
-  set(req.params.prop, req.params.value);
+  set(req.params.prop, atob(decodeURI(req.params.value)).toString());
   return git.root()
   .then(root => mctool.updateH(root, path.join(root, 'Marlin', req.params.file + '.h'), [ob]))
   .then(a => Object.assign(req.params, {ip: ip}))

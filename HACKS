@@ -1,5 +1,4 @@
 nat-upnp/lib/nat-upnp/client.js
-@@ -106,2 +106,3 @@
-        });
-      if (!key) return callback(Error('Incorrect response'));
-        data = data[key];
+@@ -119,3 +119,3 @@
+-       protocol: data.NewProtocol.toLowerCase(),
++       protocol: (data.NewProtocol || '').toLowerCase(),

@@ -71,7 +71,7 @@ ul {
  margin: 5px;
  padding:0;
 }
-li {
+.trim-left {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -115,6 +115,11 @@ $(function() {
     $('.component.pio .state').text(data ? 'instaled' : 'error');
     data && $('.component.pio').addClass('installed');
   });
+  ipc.on('starter-git', function(ev, data) {
+    var a = data.split(' ');
+    var i = a.findIndex(function(i) { return i.indexOf('%') >= 0;})
+    i >= 0 && $('.folder span').text(a[i] + ' ' + a[i + 1]);
+  });
   ipc.on('starter-init', function(ev, data) {
     ['git','pio'].map(function(i) {
       var c = $('.component.' + i)
@@ -123,7 +128,7 @@ $(function() {
     });
     data.pio && $('.component.pio button').text('reinstall')
     +(data.folders || []).slice(0,4).map(function(f, n) {
-      $('ul').append($('<li>').text(f).attr('n', n).attr('title', f))
+      $('ul').append($('<li>').addClass('trim-left').text(f).attr('n', n).attr('title', f))
     });
   })
 })
@@ -152,7 +157,7 @@ $(function() {
 </div></div>
 
 <div class="component folder">
-<br>
+<span>&nbsp;</span>
 <button>open folder</button>
 <ul>
 <li n="new" class="active">new</li>

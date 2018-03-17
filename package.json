@@ -1,6 +1,6 @@
 {
   "name": "marlin-conf",
-  "version": "2.9.0",
+  "version": "2.9.1",
   "description": "configuration tool for Marlin project",
   "main": "./index.js",
   "scripts": {
@@ -92,9 +92,9 @@
     "yauzl": "^2.9.1",
     "yazl": "^2.4.3"
   },
-  "devDependencies": {
+  "devDependenciesOff": {
     "devtron": "^1.4.0",
-    "electron": "1.7.x",
+    "electron": "=1.7.10",
     "electron-builder": "^20.2.0",
     "electron-debug": "^1.5.0",
     "eslint": "^4.18.1",

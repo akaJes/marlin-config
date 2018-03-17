@@ -52,6 +52,7 @@ ipcMain.on('starter-pio', function(ev) {
 app.on('ready', function() {
     var status = new BrowserWindow({width: 400, height: 400, maximizable: false})
     status.setMenu(null);
+    const update = val => status.webContents.send('starter-git', val);
     var folders = store.get('folders') || [];
     var opts = {'-G': 0};
     Object.keys(opts).reduce((v, key) => (v.i = v.p.indexOf(key), v.i >= 0 && (opts[key] = v.p[v.i + 1]), v), {p: process.argv});
@@ -92,7 +93,7 @@ app.on('ready', function() {
           console.log('no repository found in this folder');
           showNotify('Wait while Marlin Firmware repo cloning');
           dir = path.join(dir, 'Marlin')
-          return git.clone(dir)
+          return git.clone(dir, update)
             .then(git.root)
             .then(a => showNotify('Well done!'))
             .catch(e => git.root(dir));

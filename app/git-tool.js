@@ -42,15 +42,16 @@ exports.Show = (branch, file) => promisify('show', git(root))([branch + ':' + fi
 exports.git=git;
 exports.root = dir => dir || !root ? gitRoot(dir) : Promise.resolve(root);
 
-exports.clone=name=>new Promise((done,fail)=>{
+exports.clone = (name, cb) => new Promise((done, fail) => {
   name = name && ('"' + name + '"') || '';
-  var cmd = exec('git clone https://github.com/MarlinFirmware/Marlin.git ' + name);
+  var cmd = exec('git clone --progress https://github.com/MarlinFirmware/Marlin.git ' + name);
   var timer = setInterval(a=>process.stdout.write("."), 500)
   cmd.stdout.on('data', (data) => {
-    console.log(data.toString());
+    //console.log(data.toString());
   });
   cmd.stderr.on('data', (data) => {
-    console.log(data.toString());
+    //console.error(data.toString());
+    cb && cb(data.toString());
   });
   cmd.on('close', (code) => {
     clearInterval(timer);

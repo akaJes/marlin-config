@@ -328,7 +328,7 @@ $(function(){
             d.find('label').eq(0).text(define.split('.')[0]).attr('title',def.line.trim())//.tooltip(def.line.length>24&&tooltip_large); //take 200ms
             var dis=d.find('.onoffswitch')
             var p=d.find('.mct-splitter');
-            var val=d.find('input[type=text]');
+            var val=d.find('.input-group');
             var sel=d.find('select');
             if (def.value == undefined)
               val.remove(),p.remove(),sel.remove();
@@ -348,7 +348,7 @@ $(function(){
                   def.type='numeric';
                 }
               }
-              var inp=val;
+              var inp=val.find('input');
               if (['boolean','select'].indexOf(def.type)>=0){
                 inp=sel;
                 val.remove();
@@ -366,10 +366,9 @@ $(function(){
               }else{
                 if (def.type=='string')
                   dv=dv.slice(1,-1)
-                val.val(dv);
+                inp.val(dv);
                 sel.remove();
               }
-              inp.attr('dtype', def.type)
             }
 
             if ( !( def.changed && def.changed.disabled ) && !def.disabled && def.value != undefined)
@@ -400,10 +399,18 @@ $(function(){
             loadHint(define);
           if (btn.hasClass('fa-github'))
             window.opener("https://github.com/MarlinFirmware/Marlin/search?q=" + define + "&type=Issues&utf8=%E2%9C%93", "_blank");
+          if (btn.find('.fa-times').length) {
+            var inp = $(this).parent().siblings('input');
+            var val = opts[define].value;
+            if (opts[define].type == 'string')
+              val = val.slice(1, -1);
+            inp.val(val);
+            processProp(define, 'value', opts[define].value)
+          }
         })
         function processProp(define, name, val) {
           lastChanged = define + name;
-          saveProp('/set/' + file.file.name + '/' + define + '/' + name + '/' + val)
+          saveProp('/set/' + file.file.name + '/' + define + '/' + name + '/' + encodeURI(btoa(val)))
           .then(function() {
               setProp(define, name, val);
           });
@@ -411,7 +418,7 @@ $(function(){
         tab.tab.on('change', '.card-block select,.card-block input[type=text]', function() {
           var btn = $(this), define = btn.parents('.form-group').attr('define');
           var val = btn.val();
-          if (btn.attr('dtype') == 'string')
+          if (opts[define].type == 'string')
               val = '"' + val + '"';
           processProp(define, 'value', val);
         })
@@ -441,6 +448,7 @@ $(function(){
           setTimeout(function(){location.hash=href+' ';},500);
         }
       });
+      return;
       var sideCountdown = 3;
       $(window).scroll($.debounce( 250, true, function(){
         sideCountdown && $('.navbar-side-right').toggleClass('toggled', true);
@@ -715,7 +723,7 @@ $(function(){
       source.addEventListener('set', function(event) {
         var data= JSON.parse(event.data);
         if (lastChanged!==data.name+data.prop){
-          var def=opts[data.name],val=data.value,ui=uiDefs[data.name];
+          var def=opts[data.name],val=atob(decodeURI(data.value)).toString(),ui=uiDefs[data.name];
           if (data.prop=='disabled'){
             val=val=='true';
             ui.find('.onoffswitch input').prop('checked',!val)
@@ -757,7 +765,7 @@ $(function(){
     proc.init=function(){ p.text(''); r.modal();}
     proc.info=function(){
       _add($('template._alert'))
-      .find('p').html(`to install PlatformIO use guide from 
+      .find('p').html(`to install PlatformIO use guide from
 <strong><a target="_blank" href="http://docs.platformio.org/en/latest/installation.html">Official site</a></strong>
 <br>Linux/Mac hint:  <code>sudo apt install python-pip</code> <code>sudo pip install -U platformio</code>`)
     }

@@ -49,7 +49,7 @@ function marlin(){
   else
   if ( is.git ) {
     ['Marlin/Configuration_adv','Marlin/Configuration'].forEach(f=>{
-      var base=Promise.all([git.root(),git.Show(is.git,f)]);
+      var base = Promise.all([git.root(), git.Show(is.git, f + '.h')]);
       if ( is.json )
         base
         .then(a=>mctool.makeJson(a[0],a[1])(path.join(a[0],f+'.h')))

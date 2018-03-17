@@ -32,11 +32,13 @@ var addNumber=a=>{
 var killComments=a=>a.map(i=>(i.comment=null,i))
 var killDublicated=a=>a.filter(i=>i.number==undefined||!i.disabled).map(i=>(i.number=undefined,i))
 
+const skips = ['CONFIGURATION_H_VERSION'];
+
 var setConfig=(target,file,root)=>a=>{
   var map=remap(a);
   return Promise.resolve(target).then(t=>{
     var undef=[];
-    var res=t.map(i=>{
+    var res=t.filter(i => skips.indexOf(i.name) < 0).map(i => {
       var o=map[i.name];
       if (!o){
         undef.push(i.line);

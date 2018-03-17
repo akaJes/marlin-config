@@ -62,6 +62,7 @@
   background: white;
   top: 70%;
   height: 30%;
+  z-index: 5;
 }
 @media (min-width: 992px){
 .mct-hint{
@@ -94,6 +95,7 @@
     z-index: 1030;
     transition: right 1s;
     right:-200px;
+    max-width: 200px;
 }
 .navbar-side-right.toggled,
 .navbar-side-right:hover{
@@ -474,7 +476,15 @@ $(function() {
     </div>
   </div>
 </nav>
-
+<nav class="navbar navbar-toggleable-md navbar-light bg-faded config-files">
+        <ul class="nav nav-tabs" role="tablist">
+          <template class="_tab_item">
+          <li class="nav-item">
+            <a href="#" class="nav-link" role="tab" data-toggle="tab"></a>
+          </li>
+          </template>
+        </ul>
+</nav>
   <div class="upload-drop-zone" id="mct-dragzone" style="display:none">
       Just drag and drop files here
   </div>
@@ -525,16 +535,9 @@ $(function() {
 </nav>
 </div>
 <!-- content -->
-  <div class="row" style="margin-bottom: 300px;margin-top:100px;">
+  <div class="row" style="margin-bottom: 300px;margin-top:150px;">
     <div class="col-12 col-md-12 col-lg-7">
-      <div class="tabbable config-files">
-        <ul class="nav nav-tabs" role="tablist">
-          <template class="_tab_item">
-          <li class="nav-item">
-            <a href="#" class="nav-link" role="tab" data-toggle="tab"></a>
-          </li>
-          </template>
-        </ul>
+      <div class="tabbable">
         <div class="tab-content">
           <template class="_tab_content">
           <div class="tab-pane fade" id="panel-ID" role="tabpanel">
@@ -561,7 +564,12 @@ $(function() {
     </label>
 </div>
                         <div class="mb-1 mct-splitter"></div>
+<div class="input-group">
                         <input type="text" class="form-control form-control-sm">
+  <div class="input-group-btn">
+<button class="btn btn-secondary btn-sm" type="button"><i class="fa fa-times"></i></button>
+  </div>
+</div>
   <select class="custom-select   form-control-sm">
     <option value="true">True</option>
     <option value="false">False</option>
