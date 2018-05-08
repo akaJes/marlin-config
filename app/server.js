@@ -17,8 +17,6 @@ var ua = require('universal-analytics');
 var promisify = require('./helpers').promisify;
 var walk=require('./helpers').walk;
 var qr = require('qr-image');
-var os = require('os');
-var natUpnp = require('nat-upnp');
 var moment = require('moment');
 var mkdirp = require('mkdirp');
 var machineId = require('node-machine-id').machineId;
@@ -28,19 +26,14 @@ var crypto = require("crypto");
 var FormData = require('form-data');
 var tmp = require('tmp');
 
-var natClient;
-var store='.mct.bak';
-var httpPort = 3000;
-var httpsPort = 3002;
+const store = require('./store');
+const vars = store.vars;
+
 var server = http.Server(app);
 var visitor = ua('UA-99239389-1');
 var isElectron=module.parent&&module.parent.filename.indexOf('index.js')>=0;
 
 var baseCfg='Marlin';
-var serial;
-var serial_enabled = true; //!(isElectron&&process.platform=='darwin');
-if (serial_enabled)
-  serial = require('./console');
 
 var privateKey  = fs.readFileSync(path.join(__dirname,'..','sslcert','server.key'), 'utf8');
 var certificate = fs.readFileSync(path.join(__dirname,'..','sslcert','server.crt'), 'utf8');
@@ -61,111 +54,6 @@ app.get('/qr/:url', function (req, res) {
   var qr_svg = qr.image(url, { type: 'svg' });
   qr_svg.pipe(res);
 })
-
-/* UPNP */
-
-function getIP() {
-  var ifaces = os.networkInterfaces();
-  return Object.keys(ifaces).reduce((p, c) =>
-    p.concat(ifaces[c].filter(i => !i.internal && 'IPv4' == i.family).map(i => i.address)), []);
-}
-
-app.get('/upnp/open', function (req, res) {
-  promisify('portMapping', natClient)({
-    public: httpPort,
-    private: httpPort,
-    ttl: 0,
-    description: 'Marlin-conf public port'
-  })
-  .then(a => promisify('externalIp', natClient)())
-  .then(ip => res.send({ip: ip, port: httpPort}))
-  .catch(e => res.status(403).send(e));
-})
-app.get('/upnp/local', function (req, res) {
-  res.send({ip:getIP()[0],port:httpPort,https:httpsPort});
-})
-app.get('/upnp/check', function (req, res) {
-  Promise.all([
-    promisify('getMappings', natClient)(),
-    promisify('externalIp', natClient)()
-  ])
-  .then(p => p[0].filter(i => i.public.port == httpPort).map(i => ({ip: p[1], port: i.public.port})))
-  .then(data => (data.length && console.log('Opened external access at http://' + data[0].ip + ':' + data[0].port, '!!!'), data))
-  .then(data => res.send(data))
-  .catch(e => res.status(403).send(e));
-})
-app.get('/upnp/close', function (req, res) {
-  promisify('portUnmapping', natClient)({
-    public: httpPort,
-  })
-  .then(data => res.send())
-  .catch(e => res.status(403).send(e));
-})
-
-/* SERIAL */
-
-var SSEports=[];
-function SSEsend(event,data){
-  SSEports.forEach(function(res){
-    res.write("event: " + event + "\n");
-    res.write("data: " + JSON.stringify(data) + "\n\n");
-  });
-}
-function serial_init(){
-  return serial.changesPoll().then(monitor=>{
-    monitor.on("created", function (f, stat) {
-      SSEsend('created',f)
-    })
-    monitor.on("deleted", function (f, stat) {
-      SSEsend('deleted',f)
-    })
-    monitor.on("opened", function (f, stat) {
-      SSEsend('opened',f)
-    })
-    monitor.on("closed", function (f, stat) {
-      SSEsend('closed',f)
-    })
-  }).catch(a=>console.error(a));
-}
-app.get('/ports', function (req, res) {
-  if(!serial_enabled)
-    return res.status(403).end()
-  req.socket.setTimeout(Number.MAX_SAFE_INTEGER);
-  console.log('SSE conected');
-  res.writeHead(200, {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive'
-  });
-  SSEports.push(res);
-  serial.list().then(a=>SSEsend('list',a));
-  console.log('list sent');
-  req.on('close',function(){
-    var i=SSEports.indexOf(res);
-    if (i>=0)
-      SSEports.splice(i,1);
-    console.log('SSE removed');
-  })
-});
-
-app.get('/port/:port/:speed', function (req, res) {
-  if(!serial_enabled)
-    return res.status(404)
-  serial.init(server,req.params.port,req.params.speed)
-  .then(data=>{
-    res.send(data);
-  })
-  .catch(a=>res.status(403).send(a))
-});
-app.get('/port-close/:port', function (req, res) {
-  if(!serial_enabled)
-    return res.status(404)
-  serial.close(req.params.port)
-  .then(data=>{
-    res.send(data);
-  })
-  .catch(a=>res.status(403).send(a))
-});
 
 /* GIT */
 
@@ -289,7 +177,7 @@ app.get('/save', function (req, res) {
   var dt=moment().format('YYYY-MM-DD kk-mm-ss');
     Promise.all([git.root(), git.Tag()])
     .then(p => {
-      var dir = path.join(p[0], store, p[1].replace('/', path.sep), dt);
+      var dir = path.join(p[0], store.config.store, p[1].replace('/', path.sep), dt);
       return promisify(mkdirp)(dir).then(a => ({to: dir, root: p[0]}));
     })
     .then(dirs => configFiles()
@@ -309,7 +197,7 @@ app.get('/publish/:path', function (req, res) {
   var name = atob(decodeURI(req.params.path)).toString();
   var ses = crypto.createHash('md5').update((new Date()).toJSON()).digest("hex");
   var obj = pubs[ses] = {session: ses, name: name, description: '', };
-  configFiles(name != 'Marlin' && path.join(store, name))
+  configFiles(name != 'Marlin' && path.join(store.config.store, name))
   .then(files => (obj.files = files).filter(i => /Configuration/.test(i))[0])
   .then(file => Promise.all([promisify(fs.readFile)(file, 'utf8'), git.Tag(), getBoards().catch(e => [] )]))
   .then(p => {
@@ -401,7 +289,7 @@ app.get('/site/:Id', function (req, res) {
 });
 app.get('/zip/:path', function (req, res) {
   var name = atob(decodeURI(req.params.path)).toString();
-  Promise.all([configFiles(name != 'Marlin' && path.join(store, name)), git.Tag()])
+  Promise.all([configFiles(name != 'Marlin' && path.join(store.config.store, name)), git.Tag()])
   .then(p => {
     res.set('Access-Control-Allow-Origin', '*');
     res.set('Content-Type', 'application/octet-stream');
@@ -429,7 +317,7 @@ var recurseObj=(obj,p)=>{
 app.get('/restore/:path', function (req, res) {
   var p=atob(decodeURI(req.params.path)).toString();
   git.root()
-  .then(root=>path.join(root,store,p))
+  .then(root => path.join(root, store.config.store, p))
   .then(dir=>promisify(fs.stat)(dir).catch(a=>{throw 'no files';}).then(a=>dir))
   .then(walk)
   .then(files=>{
@@ -452,7 +340,7 @@ app.get('/restore/:path', function (req, res) {
 app.get('/saved', function (req, res) {
   git.root()
   .then(root=>{
-    var ex=path.join(root,store);
+    var ex = path.join(root, store.config.store);
     return Promise.resolve(ex)
     .then(dir=>promisify(fs.stat)(dir).catch(a=>{throw 'no files';}).then(a=>dir))
     .then(walk)
@@ -548,7 +436,7 @@ app.get('/pio/:env/:port', function (req, res) {
   if (close)
     params.push('--upload-port',port)
   console.log(); //if removed - process hangs :)
-  (close&&serial_enabled?serial.close(port):Promise.resolve(true))
+  (close && store.mods.serial ? sore.mods.serial.close(port) : Promise.resolve(true))
   .then(pioRoot)
   .then(file => {
     var cmd = pio.run(params, res, path.dirname(file));
@@ -707,6 +595,9 @@ app.post('/set/:file/:name/:prop/:value', function (req, res) {
   .then(data => (res.send(data), SSEsend('set', data)))
   .catch(a=>res.status(403).send(a))
 })
+
+app.use('/', require('./services'));
+
 var serve = (http, port) =>
   new Promise((resolve, reject) => {
     http.on('error', reject);
@@ -715,8 +606,8 @@ var serve = (http, port) =>
     });
   })
 function main(noOpn) {
-  natClient = natUpnp.createClient();
-  natClient.timeout = 10*1000;
+//  natClient = natUpnp.createClient();
+//  natClient.timeout = 10*1000;
   return git.root()
     .then(root => promisify(fs.stat)(path.join(root, 'Marlin')))
     .catch(e => {
@@ -726,11 +617,11 @@ function main(noOpn) {
     })
     .then(a => Promise.all([
         hints.init(1).catch(a => console.error('hints failed')),
-        serial_enabled && serial_init(),
-        getPort(httpsPort).then(port => serve(camServer, port))
-          .then(port => (httpsPort = port, 'https://localhost:' + port + '/')),
-        getPort(httpPort).then(port => serve(server, port))
-          .then(port => (httpPort = port, 'http://localhost:' + port + '/')),
+        store.mods.serial && store.mods.serial.ctor(server),
+        getPort(vars.httpsPort).then(port => serve(camServer, port))
+          .then(port => (vars.httpsPort = port, 'https://localhost:' + port + '/')),
+        getPort(vars.httpPort).then(port => serve(server, port))
+          .then(port => (vars.httpPort = port, 'http://localhost:' + port + '/')),
       ])
     )
     .then(p => {
