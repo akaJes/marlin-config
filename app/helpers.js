@@ -13,6 +13,9 @@ Object.prototype.filter = function( predicate, obj ) {
     return result;
 };
 
+function atob(b64) {
+  return process.version < "v6.0.0" ? Buffer.from(b64, 'base64') : new Buffer(b64, 'base64');
+}
 
 function promisify(func,that) {
   return function() {
@@ -53,7 +56,21 @@ var walk = function(dir){
   })
 };
 
+function getFirstFile(paths) {
+  if (!paths || paths.length == 0)
+    return Promise.reject();
+  var filePath = paths.shift();
+  return promisify(fs.access)(filePath, fs.constants.R_OK)
+    .then(a => filePath)
+    .catch(e => getFirstFile(paths) );
+}
+
+const unique = a => a.filter((elem, index, self) => index == self.indexOf(elem))
+
 module.exports = {
   promisify,
   walk,
+  atob,
+  getFirstFile,
+  unique,
 };

@@ -740,7 +740,7 @@ $(function(){
           var p=$('#mct-log-modal .modal-body p');
           var badge=$('.mct-info span')
           badge.text(parseInt(badge.text())+1).removeAttr('hidden')
-          p.append('<br>' + (new Date()).toLocaleString() + '(' + data.ip + '): ' + data.name + ' ' + data.prop + '=' + data.value);
+          p.append('<br>' + (new Date()).toLocaleString() + '(' + data.ip + '): ' + data.name + ' ' + data.prop + '=' + val);
         }
         lastChanged='';
       });
