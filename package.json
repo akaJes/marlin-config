@@ -56,10 +56,12 @@
   },
   "homepage": "https://github.com/akaJes/marlin-config#readme",
   "dependencies": {
+    "ace-builds": "^1.3.3",
     "body-parser": "^1.17.2",
     "bootstrap": "4.0.0-alpha.6",
     "cropper": "^3.1.5",
     "data-store": "^1.0.0",
+    "diff-match-patch": "^1.0.0",
     "express": "^4.16.2",
     "fix-path": "^2.1.0",
     "font-awesome": "^4.7.0",
@@ -70,6 +72,7 @@
     "jquery": "^3.3.1",
     "jquery-ui-dist": "^1.12.1",
     "js-yaml": "^3.8.4",
+    "jstree": "^3.3.5",
     "marked": "^0.3.16",
     "mkdirp": "^0.5.1",
     "moment": "^2.20.1",
@@ -92,7 +95,7 @@
     "yauzl": "^2.9.1",
     "yazl": "^2.4.3"
   },
-  "devDependenciesOff": {
+  "devDependencies": {
     "devtron": "^1.4.0",
     "electron": "=1.7.10",
     "electron-builder": "^20.2.0",

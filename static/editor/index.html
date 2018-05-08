@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Editor</title>
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+    <script src="/libs/jquery/dist/jquery.min.js"></script>
+    <script src="/libs/ace-builds/src/ace.js"></script>
+    <script src="/libs/jstree/dist/jstree.js"></script>
+
+    <link href="/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/libs/tether/dist/js/tether.min.js"></script>
+    <script src="/libs/bootstrap/dist/js/bootstrap.min.js"></script>
+
+<script>
+module = {};
+</script>
+<script src="/libs/diff-match-patch/index.js" type="text/javascript" charset="utf-8"></script>
+<script src="diff.js" type="text/javascript" charset="utf-8"></script>
+<script src="marker_tooltip.js" type="text/javascript" charset="utf-8"></script>
+<style type="text/css" media="screen">
+.added-gutter { background: #00AA0055; }
+.changed-gutter { background: #AA000055; }
+.changed-text { background: #AA000055; position:absolute; z-index:2;}
+.added-text { background: #00AA0055; position:absolute; z-index:2;}
+</style>
+
+
+    <script src="editor.js"></script>
+    <link rel="stylesheet" href="/libs/jstree/dist/themes/default/style.min.css" />
+    <style type="text/css" media="screen">
+      body {
+        margin:0;
+      }
+      .uploader { 
+        line-height: 28px;
+        padding-left: 10px;
+        background-color: #444;
+        color:#EEE;
+      }
+      .tree {
+        width:200px;
+        overflow: auto;
+        position: absolute;
+        bottom: 0;
+        top: 75px;
+      }
+      .tab-content {
+        *margin-left: 200px;
+        position: absolute;
+        top: 75px;
+        right: 0;
+        bottom: 0;
+        left: 200px;
+      }
+      #editorTab, #previewTab {
+        height:100%;
+        width:100%;
+      }
+      #editor, #preview {
+        height:100%;
+        width:100%;
+      }
+      #preview {
+        background-color: #EEE;
+        padding:5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="uploader"></div>
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#previewTab" role="tab" aria-controls="home" aria-selected="true">Home</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#editorTab" role="tab" aria-controls="profile" aria-selected="false">Profile</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="contact-tab" data-toggle="tab" href="#editorTab" role="tab" aria-controls="contact" aria-selected="false">Contact</a>
+  </li>
+</ul>
+    <div class="tree"></div>
+<div class="tab-content" id="myTabContent">
+  <div id="previewTab" class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+    <div id="preview" style="display:none;"></div>
+  </div>
+  <div id="editorTab" class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+    <div id="editor"></div>
+  </div>
+</div>
+    <iframe id=download-frame style='display:none;'></iframe>
+  </body>
+</html>
