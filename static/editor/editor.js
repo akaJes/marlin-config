@@ -80,6 +80,8 @@
       }
 
       function createTree(element, editor) {
+        fsbrowser($('.tree'), loadEditor)
+return;
         $('.tree').jstree({
             'core' : {
               check_callback : true, //allow delete_node

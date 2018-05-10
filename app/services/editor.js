@@ -4,32 +4,76 @@ const path = require('path');
 const promisify = require('../helpers').promisify;
 const fs = require('fs');
 
+const safePath = val => val.replace(/|\.\.|\/\//g, '');
+
+//create
+router.post('/file/*', (req, res) => {
+  const f = req.query.type == 'file';
+  const p = safePath(req.url.slice(5));
+  return git.root()
+  .then(root => promisify(f && fs.writeFile || fs.mkdir)(path.join(root, p), f ? '' : 0o777)) //TODO: check if exists
+  .then(a => ({id: p}))
+  .catch(e => res.status(501).send(e.message))
+  .then(data => res.send(data))
+})
+
+//remove
+router.delete('/file/*', (req, res) => {
+  const p = safePath(req.url.slice(5));
+  return git.root()
+  .then(root => promisify(fs.stat)(path.join(root, p)).then(stats => promisify(stats.isDirectory() ? fs.rmdir : fs.unlink)(path.join(root, p)) ))
+  .then(a => ({id: p}))
+  .catch(e => res.status(501).send(e.message))
+  .then(data => res.send(data))
+})
+
+//move
+router.put('/file/*', (req, res) => {
+  const p = safePath(req.url.slice(5));
+  const t = safePath(req.body.to);
+  return git.root()
+  .then(root => promisify(fs.rename)(path.join(root, p), path.join(root, t)))
+  .then(a => ({id: t}))
+  .catch(e => res.status(501).send(e.message))
+  .then(data => res.send(data))
+})
+
+//TODO:copy
+
+//list
 router.get('/tree', function(req, res) {
-  var dir = req.query.dir.replace(/\.\./g, '');
-  git.root()
-  .then(root => {
-    var folder = path.join(root, dir);
-    return promisify(fs.readdir)(folder)
-    .then(list => Promise.all(list.map(file => promisify(fs.stat)(path.join(folder, file)).then(stats => ({stats: stats, name: file})))))
-  })
-  .then(list => list.map(i => ({children: i.stats.isDirectory(), icon: (i.stats.isDirectory() ? "" : "jstree-file"), id: path.join(dir, i.name), text: i.name})))
-//  .catch(e => console.error(e))
-  .catch(e => res.status(501).send(e))
+  var dir = req.query.id == '#' && '/' || req.query.id || '';
+  dir = dir.replace(/\.\./g, '');
+  return git.root()
+  .then(root => promisify(fs.readdir)(path.join(root, dir))
+    .then(list => list.filter(name => name && name != '.' || name != '..'))
+    .then(list => Promise.all(list.map(name => promisify(fs.stat)(path.join(root, dir, name))
+      .then(stats => ({
+        children: stats.isDirectory(),
+        type: stats.isDirectory() ? 'default' : "file",
+        text: name,
+        id: path.join(dir, name),
+//        icon: stats.isDirectory() ? 'jstree-folder' : "jstree-file",
+      }))))
+    )
+  )
+  .then(list => dir != '/' && list || {text: 'ProjectName', children: list, id: '/', type: 'default', state: {opened: true, disabled: true}})
+  .catch(e => res.status(501).send(e.message))
   .then(data => res.send(data))
 })
 
+//content
 router.get('/files/*', function(req, res) {
-  git.root()
-  .then(root => promisify(fs.readFile)(path.join(root, req.originalUrl.replace(/.*files\//, ''))))
-//  .catch(e => console.error(e))
-  .catch(e => res.status(501).send(e))
+  return git.root()
+  .then(root => promisify(fs.readFile)(path.join(root, safePath(req.url.slice(6)))))
+  .catch(e => res.status(501).send(e.message))
   .then(data => res.send(data))
 })
 
+//git file
 router.get('/git/*', function(req, res) {
   git.Tag()
   .then(tag => git.Show(tag, req.originalUrl.replace(/.*git\//, '')))
-  .catch(e => console.error(e))
-  .catch(e => res.status(501).send(e))
+  .catch(e => res.status(501).send(e.message))
   .then(data => res.send(data))
 })
