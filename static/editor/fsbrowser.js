@@ -1,4 +1,22 @@
 function fsbrowser(ui, cb) {
+    var upload = $('<input type="file" name="data" style="display: none;">');
+    var download = $('<iframe style="display:none;"></iframe>');
+    var path;
+    upload.on('change', function(ev) {
+      if (this.files.length && path) {
+        var form = new FormData();
+        form.append("data", this.files[0], this.files[0].name);
+        $.ajax({url:'/s/editor/upload' + path + '/' + this.files[0].name, type: 'POST', data: form, contentType: false, processData: false})
+        .then(function(data) {
+          ui.jstree('refresh');
+        })
+        .fail(function(data) {
+            alert("ERROR["+data.status+"]: "+data.responseText);
+        });
+       }
+    })
+    ui.after(upload);
+    ui.after(download);
 	ui.jstree({
 		'core' : {
 			'data' : {
@@ -37,21 +55,45 @@ function fsbrowser(ui, cb) {
 					});
 				  }
                 }
-			    tmp.create.label = "New";
-			    tmp.create.submenu = {
-				  "create_folder" : {
-				    "separator_after"	: true,
-				    "label"				: "Folder",
-				    "action"			: action({type : "default", icon: 'jstree-folder'}),
-				  },
-				  "create_file" : {
-				    "label"				: "File",
-				    "action"			: action({type : "file", icon: 'jstree-file' }),
-				  }
-			    };
-			    if(this.get_type(node) === "file") {
-				delete tmp.create;
-			    }
+			    if(this.get_type(node) === "default") {
+			      tmp.create.label = "New";
+			      tmp.create.submenu = {
+				    "create_folder" : {
+				      "separator_after"	: true,
+				      "label"				: "Folder",
+				      "action"			: action({type : "default", icon: 'jstree-folder'}),
+				    },
+				    "create_file" : {
+				      "label"				: "File",
+				      "action"			: action({type : "file", icon: 'jstree-file' }),
+				    }
+			      };
+                  if (node.state.opened) {
+                    tmp["Collapse"] = {
+                      label: "Collapse",
+                      action: function(e) { ui.jstree('close_node', node.id); }
+                    };
+                    tmp["Refresh"] = {
+                      label: "Refresh",
+                      action: function(e) { ui.jstree('refresh_node', node.id); }
+                    };
+                  } else {
+                    tmp["Expand"] = {
+                      label: "Expand",
+                      action: function(e) { ui.jstree('open_node', node.id); }
+                    };
+                  }
+                  tmp["Upload"] = {
+                    label: "Upload",
+                    action: function(e) { path = node.id; upload.trigger('click'); }
+                  };
+
+                } else {
+                  tmp["Download"] = {
+                    label: "Download",
+                    action: function(e) { download.attr('src', '/s/editor/files' + node.id);}
+                  };
+                }
 			    return tmp;
 			}
 		},

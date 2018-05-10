@@ -18,7 +18,7 @@ ace.define("diff", function(require, exports, module) {
 			self.scan();
 		}
 		this.updateAnnotations = function(session) {
-		  self.editor.renderer.setAnnotations((session.$annotations || []).concat(session.diffAnnotations))
+		  self.editor.renderer.setAnnotations((session.$annotations || []).concat(session.diffAnnotations || []))
         }
 		this.onChangeAnnotation = function(obj, session) {
           self.updateAnnotations(session)

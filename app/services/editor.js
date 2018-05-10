@@ -3,8 +3,9 @@ const git = require('../git-tool');
 const path = require('path');
 const promisify = require('../helpers').promisify;
 const fs = require('fs');
+const formidable = require('formidable');
 
-const safePath = val => val.replace(/|\.\.|\/\//g, '');
+const safePath = val => decodeURI(val).replace(/|\.\.|\/\//g, '');
 
 //create
 router.post('/file/*', (req, res) => {
@@ -63,12 +64,29 @@ router.get('/tree', function(req, res) {
 })
 
 //content
-router.get('/files/*', function(req, res) {
+router.get('/file/*', function(req, res) {
+  const p = safePath(req.url.slice(5));
   return git.root()
-  .then(root => promisify(fs.readFile)(path.join(root, safePath(req.url.slice(6)))))
+  .then(root => promisify(fs.stat)(path.join(root, p)).then(stats => !stats.isDirectory() && promisify(fs.readFile)(path.join(root, p)) || '' ))
   .catch(e => res.status(501).send(e.message))
   .then(data => res.send(data))
 })
+
+const parseForm = req => new Promise((resolve, reject) => {
+    var form = new formidable.IncomingForm();
+    form.parse(req, function (err, fields, files) {
+      return err && reject(err) || resolve([fields, files]);
+    })
+  })
+
+router.post('/upload/*', function(req, res) {
+  const p = safePath(req.url.slice(7));
+  return git.root()
+  .then(root => parseForm(req).then(ff => promisify(fs.rename)(ff[1].data.path, path.join(root, p)).then(a => p) ))
+  .catch(e => res.status(501).send(e.message))
+  .then(data => res.send(data))
+ });
+
 
 //git file
 router.get('/git/*', function(req, res) {
