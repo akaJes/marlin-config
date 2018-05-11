@@ -1,0 +1,57 @@
+/* editor*/
+.added-gutter { background: #00AA0055; }
+.changed-gutter { background: #AA000055; }
+.changed-text { background: #AA000055; position:absolute; z-index:2;}
+.added-text { background: #00AA0055; position:absolute; z-index:2;}
+
+/* layout */
+html, body {
+  margin:0;
+  height: 100%;
+}
+
+.stickit {
+  display: flex;
+}
+.stickit.top {
+  flex-flow: column;
+  height: 100%;
+}
+.stickit>*:nth-child(1) {
+  flex: 0 0 auto;
+}
+.stickit>*:nth-child(2) {
+  flex: 1 1 auto;
+}
+
+.uploader {
+  line-height: 28px;
+  padding-left: 10px;
+  background-color: #444;
+  color:#EEE;
+}
+.tree {
+  width: 250px;
+  overflow: auto;
+  display: inline-block;
+}
+.jstree-contextmenu {
+  z-index: 5;
+}
+
+#previewTab {
+  height:100%;
+  width:100%;
+  background-color: #EEE;
+  padding:5px;
+}
+
+.nav-tabs {
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: -webkit-box;
+  display: -moz-box;
+}
+.nav-tabs>li {
+  float:none;
+}

@@ -24,10 +24,11 @@
 
       function createTree(element, editor) {
         fsbrowser($('.tree'), loadFile)
-        function loadFile(path){
+        function loadFile(path, type){
+          if (type != 'file') ;
 //          if(isTextFile(path))
 //            loadEditor(path);
-//          else
+          else
           if(isImageFile(path))
             loadPreview('/s/editor/file/' + path);
           else
@@ -63,11 +64,11 @@
             editor.loadUrl(path);
           }
           s[0].tab.find('a').tab('show')
-          $('#preview').hide();
+          //$('#preview').hide();
         }
         function loadPreview(path){
           $('#preview-tab').tab('show')
-          $('#preview').show().html('<img src="'+path+'" style="max-width:100%; max-height:100%; margin:auto; display:block;" />');
+          $('#previewTab').html('<img src="'+path+'" style="max-width:100%; max-height:100%; margin:auto; display:block;" />');
         }
         function isTextFile(path){
           var ext = (/(?:\.([^.]+))?$/.exec(path)[1]||'').toLowerCase();
