@@ -1,8 +1,8 @@
 /* editor*/
 .added-gutter { background: #00AA0055; }
 .changed-gutter { background: #AA000055; }
-.changed-text { background: #AA000055; position:absolute; z-index:2;}
-.added-text { background: #00AA0055; position:absolute; z-index:2;}
+.changed-text { background: #AA000025; position:absolute; z-index:2;}
+.added-text { background: #00AA0025; position:absolute; z-index:2;}
 
 /* layout */
 html, body {
@@ -54,4 +54,25 @@ html, body {
 }
 .nav-tabs>li {
   float:none;
+}
+
+/* selection marker */
+.remoteCaret {
+  position: absolute;
+}
+
+.squareCaret {
+  position: absolute;
+  top: -6px;
+  left: -2px;
+  width: 6px;
+  height: 6px;
+}
+
+.infoCaret {
+  position: absolute;
+  bottom: 6px;
+  left: -6px;
+  padding: 2px 4px;
+  color: #333;
 }

@@ -1,14 +1,18 @@
+var myName;
+var otI;
       function createFileUploader(element, tree, editor) {
         function addButton(name,fn){
           $(element).append($('<button>').text(name).on('click',fn));
         }
+        addButton('<<',function(e){ $('.jstree').toggle(); });
+        addButton('A',function(e){ toggleFullScreen(); });
         addButton('Save',function(e){ editor.saveUrl(); });
         addButton('diff Next',function(e){ editor.execCommand("nextDiff") });
         addButton('diff Prev',function(e){ editor.execCommand("prevDiff") });
         addButton('Beautify selected', function(e) {
           if (!editor.getSelectedText()) return;
           var beautify = ace.require("ace/ext/beautify"); // get reference to extension
-          var session = ace.createEditSession('demo', editor.session.getOption('mode'));
+          var session = ace.createEditSession('', editor.session.getOption('mode'));
 //          var sel = editor.session.getSelection();
           var range = editor.selection.getRange();
           range.start.column = 0;
@@ -20,8 +24,10 @@
           editor.session.doc.replace(range, b);
           editor._signal("change", {});
         });
+        addButton('NAME',function(e){ myName = prompt('Tell Ur Name!!!'); otI.setName(myName); });
       }
 
+      var ses = [];     // {path, tab, name, session}
       function createTree(element, editor) {
         fsbrowser($('.tree'), loadFile)
         function loadFile(path, type){
@@ -34,7 +40,6 @@
           else
             loadEditor(path);
         };
-        var ses = [];
         function loadEditor(path) {
           var s = ses.filter(function(i) { return i.path == path; });
           if (!s.length) {
@@ -46,7 +51,7 @@
               tab: tab,
               path: path,
               name: name,
-              session: ace.createEditSession('demo', 'ace/mode/' + getLangFromFilename(name)),
+              session: ace.createEditSession('', 'ace/mode/' + getLangFromFilename(name)),
             }
             tab.find('a').on('shown.bs.tab', function(ev) {
               editor.setSession(o.session);
@@ -56,7 +61,11 @@
               if( $(this).parent().is('[aria-expanded=true]'))
                 $('#preview-tab').tab('show')
               $(this).parents('li').remove();
-              ses = ses.filter(function(i) { return i.path != path; });
+              otI.shut(path);
+              ses.map(function (item, index) {
+                if (item.path == path)
+                    return index;
+              }).map(function(index){ ses.splice(index, 1); });
             })
             s.push(o);
             ses.push(o);
@@ -124,9 +133,11 @@ new (require("marker_tooltip").MarkerTooltip)(editor); // show previous text ove
           });
         }
         function httpGet(theUrl) {
-          $.when($.get('/s/editor/file' + theUrl), $.get('/s/editor/git' + theUrl).catch(function(){ return [' ']}))
+          $.when($.get('/s/editor/file' + theUrl), $.get('/s/editor/git' + theUrl, otI.init(theUrl)).catch(function(){ return [' ']}))
           .then(function(data, dataGit){
+            delete editor.$setBaseText; //TODO: set option to session
             editor.setOptions({setBaseText: dataGit[0] })
+if(0)
             editor.setValue(data[0]);
 //            editor.clearSelection();
             editor.gotoLine(0);
@@ -141,6 +152,10 @@ new (require("marker_tooltip").MarkerTooltip)(editor); // show previous text ove
 //        ace.config.loadModule('/libs/diff-match-patch/index', function() {
           ace.config.loadModule('diff', function(diff) {
             console.log('diff loaded')
+          });
+          ace.config.loadModule('ot', function(OT) {
+            otI = new OT(editor, ses);
+            console.log('ot loaded')
           });
 //        });
         ace.config.loadModule('ace/ext/beautify', function(diff) {

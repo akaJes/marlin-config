@@ -80,6 +80,7 @@
     "node-machine-id": "^1.1.10",
     "node-notifier": "^5.2.1",
     "opn": "^5.2.0",
+    "ot": "git+https://github.com/Operational-Transformation/ot.js.git",
     "platformio-node-helpers": "^0.4.3",
     "qr-image": "^3.2.0",
     "rtcmulticonnection-v3": "^3.4.4",

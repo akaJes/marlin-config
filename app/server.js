@@ -27,6 +27,7 @@ var FormData = require('form-data');
 var tmp = require('tmp');
 
 const store = require('./store');
+store.mods.editor && (store.mods.editor.root = () => git.root())
 const vars = store.vars;
 
 var server = http.Server(app);
@@ -597,6 +598,8 @@ app.post('/set/:file/:name/:prop/:value', function (req, res) {
 })
 
 app.use('/', require('./services'));
+
+require('./services/ot').init(server, '/ws');
 
 var serve = (http, port) =>
   new Promise((resolve, reject) => {
