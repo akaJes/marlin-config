@@ -3,7 +3,7 @@
 .changed-gutter { background: #AA000055; }
 .changed-text { background: #AA000025; position:absolute; z-index:2;}
 .added-text { background: #00AA0025; position:absolute; z-index:2;}
-
+.ace_gutter-cell { background-repeat: no-repeat; }
 /* layout */
 html, body {
   margin:0;
@@ -25,10 +25,11 @@ html, body {
 }
 
 .uploader {
+  min-width: 500px;
   line-height: 28px;
   padding-left: 10px;
-  background-color: #444;
-  color:#EEE;
+  background-color: linen;
+  color: green;
 }
 .tree {
   width: 250px;

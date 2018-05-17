@@ -6,6 +6,7 @@
     <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
     <script src="/libs/jquery/dist/jquery.min.js"></script>
     <script src="/libs/ace-builds/src/ace.js"></script>
+    <script src="/libs/ace-builds/src/ext-beautify.js"></script>
     <script src="/libs/jstree/dist/jstree.js"></script>
 
     <link href="/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -30,11 +31,16 @@ module = {};
   </head>
   <body>
 <div class="stickit top">
-    <ul class="nav nav-tabs" id="myTab" role="tablist">
+  <div>
+    <button class="btn btn-sm m-1" onclick="$('.tree').toggle()" style="float: left;">&lt;</button>
+    <button class="btn btn-sm m-1" onclick="toggleFullScreen()" style="float: left;">F</button>
+    <button type="button" class="btn btn-warning btn-sm m-1" style="float: left;display:none;" title="share workflow to friends">QR</button>
+    <ul class="nav nav-tabs" id="myTab" role="tablist" style="margin-left: 75px;">
       <li class="nav-item">
         <a class="nav-link active" id="preview-tab" data-toggle="tab" href="#previewTab" role="tab" aria-controls="home" aria-selected="true">Preview</a>
       </li>
     </ul>
+  </div>
     <div class="tabs-content stickit">
       <div class="tree"></div>
       <div class="tab-content w-100" id="myTabContent">
@@ -49,5 +55,25 @@ module = {};
       </div>
     </div>
     </div>
+
+        <div class="modal fade" id="mct-qr-modal" tabindex="-1" role="dialog" aria-labelledby="qrModalLabel" aria-hidden="true" >
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title" id="qrModalLabel">Scan this QRcode to open url</h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="modal-body">
+                <img style="width:100%"></img>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
   </body>
 </html>

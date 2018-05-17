@@ -99,7 +99,7 @@ oop.inherits(MarkerTooltip, Tooltip);
     };
 
 }).call(MarkerTooltip.prototype);
-
-exports.MarkerTooltip = MarkerTooltip;
+return MarkerTooltip;
+//exports.MarkerTooltip = MarkerTooltip;
 
 });

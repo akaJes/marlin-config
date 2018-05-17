@@ -7,7 +7,7 @@ ace.define("diff", function(require, exports, module) {
       throw new Error(error);
     }
     var dmp = new diff_match_patch();
-    dmp.Diff_Timeout = 1;
+    dmp.Diff_Timeout = .1;
     dmp.Diff_EditCost = 10;
     var dmpMode = 0; //TODO
 

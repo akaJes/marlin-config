@@ -1,15 +1,16 @@
 var myName;
 var otI;
+var state;
       function createFileUploader(element, tree, editor) {
         function addButton(name,fn){
-          $(element).append($('<button>').text(name).on('click',fn));
+          $(element).append($('<button>').addClass('btn btn-sm m-1').text(name).on('click',fn));
         }
-        addButton('<<',function(e){ $('.jstree').toggle(); });
-        addButton('A',function(e){ toggleFullScreen(); });
-        addButton('Save',function(e){ editor.saveUrl(); });
-        addButton('diff Next',function(e){ editor.execCommand("nextDiff") });
-        addButton('diff Prev',function(e){ editor.execCommand("prevDiff") });
-        addButton('Beautify selected', function(e) {
+//        addButton('<<',function(e){ $('.jstree').toggle(); });
+//        addButton('A',function(e){ toggleFullScreen(); });
+//        addButton('Save',function(e){ editor.execCommand("saveCommand") });
+        addButton('next',function(e){ editor.execCommand("nextDiff") });
+        addButton('prev',function(e){ editor.execCommand("prevDiff") });
+        addButton('{}', function(e) {
           if (!editor.getSelectedText()) return;
           var beautify = ace.require("ace/ext/beautify"); // get reference to extension
           var session = ace.createEditSession('', editor.session.getOption('mode'));
@@ -25,9 +26,11 @@ var otI;
           editor._signal("change", {});
         });
         addButton('NAME',function(e){ myName = prompt('Tell Ur Name!!!'); otI.setName(myName); });
+        addButton('undo',function(e){ editor.getSession().getUndoManager().undo(false); });
+        $(element).append(state = $('<span class="m-1">Loading...</span>'));
       }
 
-      var ses = [];     // {path, tab, name, session}
+      var manager = {};     // {path, tab, name, session}
       function createTree(element, editor) {
         fsbrowser($('.tree'), loadFile)
         function loadFile(path, type){
@@ -41,39 +44,37 @@ var otI;
             loadEditor(path);
         };
         function loadEditor(path) {
-          var s = ses.filter(function(i) { return i.path == path; });
-          if (!s.length) {
+          var s = manager[path];
+          if (!s) {
             var name = path.slice(path.lastIndexOf("/") + 1);
             var tab = $('<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#editorTab" role="tab" aria-controls="profile" aria-selected="false">'
-              + '<button class="close closeTab" type="button" >×</button>' + name + '</a></li>');
+              + '<button class="close closeTab pl-2" type="button" >×</button>' + name + '</a></li>');
             $('ul.nav').append(tab);
-            var o = {
+            s = manager[path] = {
               tab: tab,
               path: path,
               name: name,
               session: ace.createEditSession('', 'ace/mode/' + getLangFromFilename(name)),
             }
+            s.session.path = path;
             tab.find('a').on('shown.bs.tab', function(ev) {
-              editor.setSession(o.session);
-            })
+              state.text('');
+              editor.setSession(s.session);
+              editor.dmp && editor.dmp.scan();
+            }).tab('show');
             tab.find('button').on('click', function(ev) {
               ev.preventDefault();
               if( $(this).parent().is('[aria-expanded=true]'))
                 $('#preview-tab').tab('show')
               $(this).parents('li').remove();
               otI.shut(path);
-              ses.map(function (item, index) {
-                if (item.path == path)
-                    return index;
-              }).map(function(index){ ses.splice(index, 1); });
+              delete manager[path];
             })
-            s.push(o);
-            ses.push(o);
-            editor.setSession(o.session);
+            editor.setSession(s.session);
             editor.loadUrl(path);
+          } else {
+            s.tab.find('a').tab('show')
           }
-          s[0].tab.find('a').tab('show')
-          //$('#preview').hide();
         }
         function loadPreview(path){
           $('#preview-tab').tab('show')
@@ -87,12 +88,6 @@ var otI;
           var ext = (/(?:\.([^.]+))?$/.exec(path)[1]||'').toLowerCase();
           return 'png,jpg,jpeg,webp,apng,pdf,gif,xbm,bmp,ico'.split(',').indexOf(ext)>=0;
         }
-        this.refreshPath = function(path){
-          if(path.lastIndexOf('/') < 1)
-            path = '/';
-          else
-            path = path.substring(0, path.lastIndexOf('/'));
-        };
         return this;
       }
         function getLangFromFilename(filename) {
@@ -120,82 +115,56 @@ var otI;
 
       function createEditor(element, file, lang, theme, type){
         var editor = ace.edit(element);
-new (require("marker_tooltip").MarkerTooltip)(editor); // show previous text over highlighted
+        require('ace/ext/beautify');
+        var MT = require("marker_tooltip");
+        new MT(editor)
+        require('diff');
+        var OT = require("ot");
+        otI = new OT(manager, function(text){ state.text(text)});
+
         function httpPost(filename, data, type) {
           var formData = new FormData();
           formData.append("data", new Blob([data], { type: type }), filename);
-          $.post({url:'/s/editor/upload' + file, data: formData, contentType: false, processData: false})
-//          $.post({url: '/s/editor/upload' + file, data: data, contentType: false, processData: false})
-          .then(function(data){
-            alert('saved!');
+          $.post({url:'/s/editor/upload' + filename, data: formData, contentType: false, processData: false})
+          .then(function(data) {
+            state.text('saved!');
           },function(data){
             alert("ERROR["+data.status+"]: "+data.responseText);
           });
         }
         function httpGet(theUrl) {
-          $.when($.get('/s/editor/file' + theUrl), $.get('/s/editor/git' + theUrl, otI.init(theUrl)).catch(function(){ return [' ']}))
+          $.when(0 && $.get('/s/editor/file' + theUrl), $.get('/s/editor/git' + theUrl, otI.init(theUrl)).catch(function(){ return [' ']}))
           .then(function(data, dataGit){
             delete editor.$setBaseText; //TODO: set option to session
             editor.setOptions({setBaseText: dataGit[0] })
 if(0)
             editor.setValue(data[0]);
-//            editor.clearSelection();
             editor.gotoLine(0);
             editor.getSession()._signal("changeAnnotation", {}); //TODO: bug update
+            state.text('opened!');
           },function(data){
             editor.setValue("");
             alert("ERROR["+data.status+"]: "+data.responseText);
           });
         }
-        if(typeof theme === "undefined") theme = "textmate";
 
-//        ace.config.loadModule('/libs/diff-match-patch/index', function() {
-          ace.config.loadModule('diff', function(diff) {
-            console.log('diff loaded')
-          });
-          ace.config.loadModule('ot', function(OT) {
-            otI = new OT(editor, ses);
-            console.log('ot loaded')
-          });
-//        });
-        ace.config.loadModule('ace/ext/beautify', function(diff) {
-          console.log('ace/ext/beautify loaded')
-        });
+        theme = theme || "textmate";
         editor.setTheme("ace/theme/"+theme);
         editor.$blockScrolling = Infinity;
         editor.getSession().setUseSoftTabs(true);
         editor.getSession().setTabSize(2);
         editor.setHighlightActiveLine(true);
         editor.setShowPrintMargin(false);
+
         editor.commands.addCommand({
             name: 'saveCommand',
             bindKey: {win: 'Ctrl-S',  mac: 'Command-S'},
             exec: function(editor) {
-              httpPost(file, editor.getValue()+"", type);
+              httpPost(editor.session.path, editor.getValue(), type);
             },
             readOnly: false
         });
-        editor.commands.addCommand({
-            name: 'undoCommand',
-            bindKey: {win: 'Ctrl-Z',  mac: 'Command-Z'},
-            exec: function(editor) {
-              editor.getSession().getUndoManager().undo(false);
-            },
-            readOnly: false
-        });
-        editor.commands.addCommand({
-            name: 'redoCommand',
-            bindKey: {win: 'Ctrl-Shift-Z',  mac: 'Command-Shift-Z'},
-            exec: function(editor) {
-              editor.getSession().getUndoManager().redo(false);
-            },
-            readOnly: false
-        });
-	      editor.saveUrl = function(){
-	        httpPost(file, editor.getValue()+"", type);
-	      }
-        editor.loadUrl = function(filename, lang, type){
-          file = filename;
+        editor.loadUrl = function(file, lang, type) {
           if(typeof file === "undefined") return file = "/index.htm";
           if(typeof lang === "undefined")
             lang = getLangFromFilename(file);
@@ -206,14 +175,26 @@ if(0)
           if(lang !== "plain") editor.getSession().setMode("ace/mode/"+lang);
           httpGet(file);
         }
-        editor.loadUrl(file,lang,type);
+        editor.loadUrl(file, lang, type);
         return editor;
       }
-      $(function(){
+
+$(function(){
         $(window).on('beforeunload',function() { return "Realy?"; });
         var vars = {};
         var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) { vars[key] = value; });
         var editor = createEditor("editor", vars.file, vars.lang, vars.theme);
         var tree = createTree("tree", editor);
         createFileUploader(".uploader", tree, editor);
-      });
+    $.ajax('/upnp/check')
+    .then(function(data) {
+      if(data && data[0]) {
+        $('.btn-warning').show().on('click',function() {
+          var url='http://' + data[0].ip + ':' + data[0].port + '/editor';
+          var m=$('#mct-qr-modal');
+          m.find('.modal-body img').attr('src','/qr/'+encodeURI(btoa(url)))
+          m.modal();
+        })
+      }
+    })
+});
