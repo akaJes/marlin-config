@@ -685,6 +685,7 @@ $(function(){
   }($('.mct-restore'),$('#mct-restoreModal')));
   // consoles menu
   $('.mct-consoles').on('click',function(){ window.open('consoles.html','_blank') });
+  $('.mct-editor').on('click',function(){ window.open('editor','_blank') });
   // ports dropdown menu management
   (function(ports){
     function createPort(p){

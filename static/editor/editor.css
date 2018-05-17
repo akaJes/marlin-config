@@ -1,0 +1,79 @@
+/* editor*/
+.added-gutter { background: #00AA0055; }
+.changed-gutter { background: #AA000055; }
+.changed-text { background: #AA000025; position:absolute; z-index:2;}
+.added-text { background: #00AA0025; position:absolute; z-index:2;}
+.ace_gutter-cell { background-repeat: no-repeat; }
+/* layout */
+html, body {
+  margin:0;
+  height: 100%;
+}
+
+.stickit {
+  display: flex;
+}
+.stickit.top {
+  flex-flow: column;
+  height: 100%;
+}
+.stickit>*:nth-child(1) {
+  flex: 0 0 auto;
+}
+.stickit>*:nth-child(2) {
+  flex: 1 1 auto;
+}
+
+.uploader {
+  min-width: 500px;
+  line-height: 28px;
+  padding-left: 10px;
+  background-color: linen;
+  color: green;
+}
+.tree {
+  width: 250px;
+  overflow: auto;
+  display: inline-block;
+}
+.jstree-contextmenu {
+  z-index: 5;
+}
+
+#previewTab {
+  height:100%;
+  width:100%;
+  background-color: #EEE;
+  padding:5px;
+}
+
+.nav-tabs {
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: -webkit-box;
+  display: -moz-box;
+}
+.nav-tabs>li {
+  float:none;
+}
+
+/* selection marker */
+.remoteCaret {
+  position: absolute;
+}
+
+.squareCaret {
+  position: absolute;
+  top: -6px;
+  left: -2px;
+  width: 6px;
+  height: 6px;
+}
+
+.infoCaret {
+  position: absolute;
+  bottom: 6px;
+  left: -6px;
+  padding: 2px 4px;
+  color: #333;
+}

@@ -467,7 +467,16 @@ $(function() {
     <div class="dropdown-divider"></div>
   </div>
 </div>
-        <button type="button" class="btn btn-secondary mct-consoles mr-2" data-toggle="toggle" title="Manager of serial consoles"><i class="fa fa-terminal"></i> Consoles</button>
+      <div class="dropdown d-inline-block mr-2">
+        <button class="btn btn-info dropdown-toggle mct-tag" title="Current release" id="dropdownTagsLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Tools
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownTagsLink">
+        <button type="button" class="dropdown-item mct-consoles mr-2" title="Manager of serial consoles"><i class="fa fa-terminal"></i> Consoles</button>
+        <button type="button" class="dropdown-item mct-editor mr-2" title="Online instant collaboration editor"><i class="fa fa-edit"></i> Editor</button>
+        </div>
+      </div>
+
     </div>
     </div>
     <div class="text-right">

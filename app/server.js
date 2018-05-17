@@ -20,6 +20,7 @@ var qr = require('qr-image');
 var machineId = require('node-machine-id').machineId;
 
 const store = require('./store');
+store.mods.editor && (store.mods.editor.root = () => git.root())
 
 var server = http.Server(app);
 var visitor = ua('UA-99239389-1');
@@ -223,6 +224,8 @@ app.post('/set/:file/:name/:prop/:value', function (req, res) {
 })
 
 app.use('/', require('./services'));
+
+require('./services/ot').init(server, '/ws');
 
 var serve = (http, port) =>
   new Promise((resolve, reject) => {
