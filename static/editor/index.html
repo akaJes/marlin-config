@@ -14,6 +14,9 @@
     <script src="/libs/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="/libs/socket.io-client/dist/socket.io.js"></script>
     <script src="/libs/ot/dist/ot.js"></script>
+    <link href="/libs/vex-js/dist/css/vex.css" rel="stylesheet">
+    <link href="/libs/vex-js/dist/css/vex-theme-os.css" rel="stylesheet">
+    <script src="/libs/vex-js/dist/js/vex.combined.js"></script>
     <script src="marker.js"></script>
 
 <script>
@@ -32,8 +35,8 @@ module = {};
   <body>
 <div class="stickit top">
   <div>
-    <button class="btn btn-sm m-1" onclick="$('.tree').toggle()" style="float: left;">&lt;</button>
-    <button class="btn btn-sm m-1" onclick="toggleFullScreen()" style="float: left;">F</button>
+    <button class="btn btn-sm m-1" onclick="$('.tree').toggle()" style="float: left;" title="toggle filebrowser window">&lt;</button>
+    <button class="btn btn-sm m-1" onclick="toggleFullScreen()" style="float: left;" title="fullscreen">F</button>
     <button type="button" class="btn btn-warning btn-sm m-1" style="float: left;display:none;" title="share workflow to friends">QR</button>
     <ul class="nav nav-tabs" id="myTab" role="tablist" style="margin-left: 75px;">
       <li class="nav-item">

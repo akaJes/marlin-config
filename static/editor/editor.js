@@ -2,14 +2,14 @@ var myName;
 var otI;
 var state;
       function createFileUploader(element, tree, editor) {
-        function addButton(name,fn){
-          $(element).append($('<button>').addClass('btn btn-sm m-1').text(name).on('click',fn));
+        function addButton(name, fn, title) {
+          $(element).append($('<button>').addClass('btn btn-sm m-1').text(name).on('click', fn).attr('title', title));
         }
 //        addButton('<<',function(e){ $('.jstree').toggle(); });
 //        addButton('A',function(e){ toggleFullScreen(); });
 //        addButton('Save',function(e){ editor.execCommand("saveCommand") });
-        addButton('next',function(e){ editor.execCommand("nextDiff") });
-        addButton('prev',function(e){ editor.execCommand("prevDiff") });
+        addButton('next',function(e){ editor.execCommand("nextDiff") }, 'seek for next diff');
+        addButton('prev',function(e){ editor.execCommand("prevDiff") }, 'seek for previous diff');
         addButton('{}', function(e) {
           if (!editor.getSelectedText()) return;
           var beautify = ace.require("ace/ext/beautify"); // get reference to extension
@@ -22,10 +22,29 @@ var state;
           session.setValue(val);
           beautify.beautify(session);
           var b = session.getValue();
+          var space = val.match(/^\s+/);
+          if (space)
+            b = b.split(/\r\n?|\n/).map(function(line){ return space[0] + line;}).join('\n');
           editor.session.doc.replace(range, b);
           editor._signal("change", {});
-        });
-        addButton('NAME',function(e){ myName = prompt('Tell Ur Name!!!'); otI.setName(myName); });
+        }, 'beauitify JS code');
+        addButton('NAME',function(e){
+          if(isElectron()) {
+            var d = vex.dialog.prompt({
+              message: 'Tell Ur Name!!!',
+              placeholder: 'name',
+              callback: function (value) {
+                if(value)
+                  otI.setName(myName = value);
+              }
+            })
+            $(d.contentEl).find('input').val(myName);
+          } else {
+            var value = prompt('Tell Ur Name!!!', myName);
+            if(value)
+              otI.setName(myName = value);
+          }
+        }, 'set Your name for collaborative editing');
         addButton('undo',function(e){ editor.getSession().getUndoManager().undo(false); });
         $(element).append(state = $('<span class="m-1">Loading...</span>'));
       }
@@ -180,7 +199,7 @@ if(0)
       }
 
 $(function(){
-        $(window).on('beforeunload',function() { return "Realy?"; });
+//        $(window).on('beforeunload',function() { return "Realy?"; });
         var vars = {};
         var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) { vars[key] = value; });
         var editor = createEditor("editor", vars.file, vars.lang, vars.theme);

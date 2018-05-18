@@ -23,3 +23,6 @@ function toggleFullScreen() {
     cancelFullScreen.call(doc);
   }
 }
+function isElectron() {
+  return navigator.userAgent.toLowerCase().indexOf(' electron/') >= 0;
+}

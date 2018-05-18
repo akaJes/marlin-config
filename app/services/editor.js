@@ -93,7 +93,7 @@ router.post('/upload/*', function(req, res) {
 //git file TODO: git for multiproject
 router.get('/git/*', function(req, res) {
   git.Tag()
-  .then(tag => git.Show(tag, req.originalUrl.replace(/.*git\//, '')))
+  .then(tag => git.Show(tag, req.originalUrl.replace(/.*git\//, '')).catch(a=>''))
   .catch(e => res.status(501).send(e.message))
   .then(data => res.send(data))
 })

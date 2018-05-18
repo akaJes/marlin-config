@@ -41,3 +41,4 @@ bower_components
 **/test
 package-lock.json
 unused
+.DS_Store

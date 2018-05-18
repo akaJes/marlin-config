@@ -2,3 +2,11 @@ nat-upnp/lib/nat-upnp/client.js
 @@ -119,3 +119,3 @@
 -       protocol: data.NewProtocol.toLowerCase(),
 +       protocol: (data.NewProtocol || '').toLowerCase(),
+
+used updated version from:
+https://github.com/MelvinTo/node-nat-upnp
+
+cd node_modules/ot
+npm i
+node_modules/.bin/grunt --force
+rm -r node_modules

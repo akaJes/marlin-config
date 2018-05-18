@@ -14,8 +14,9 @@ ace.define("diff", function(require, exports, module) {
     function DMP(editor) {
         this.editor = editor;
 		var self = this;
+        var dc = debounce(scan, 500, self)
 		this.onChange = function(obj, editor) {
-			self.scan();
+			dc(); //self.scan();
 		}
 		this.updateAnnotations = function(session) {
 		  self.editor.renderer.setAnnotations((session.$annotations || []).concat(session.diffAnnotations || []))
@@ -96,7 +97,8 @@ ace.define("diff", function(require, exports, module) {
           }
           return seek(-1).concat(quote(diffs[pos][1], diffs[pos][0]), seek(1));
         }
-        this.scan = function() {
+        this.scan = scan;
+        function scan() {
           var session = this.editor.getSession();
           session.diffAnnotations = [];
           var markers = session.getMarkers();

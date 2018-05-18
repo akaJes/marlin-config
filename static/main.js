@@ -684,8 +684,12 @@ $(function(){
     })
   }($('.mct-restore'),$('#mct-restoreModal')));
   // consoles menu
-  $('.mct-consoles').on('click',function(){ window.open('consoles.html','_blank') });
-  $('.mct-editor').on('click',function(){ window.open('editor','_blank') });
+  var wins = {};
+  function openWin(url, target) {
+    (wins[target] || ( wins[target] = window.open(url, target))).focus();
+  }
+  $('.mct-consoles').on('click',function(){ openWin('consoles.html', 'consoles') });
+  $('.mct-editor').on('click',function(){ openWin('editor', 'editor') });
   // ports dropdown menu management
   (function(ports){
     function createPort(p){

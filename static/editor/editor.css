@@ -1,8 +1,8 @@
 /* editor*/
-.added-gutter { background: #00AA0055; }
-.changed-gutter { background: #AA000055; }
-.changed-text { background: #AA000025; position:absolute; z-index:2;}
-.added-text { background: #00AA0025; position:absolute; z-index:2;}
+.added-gutter { background-color: rgba(0,170,0,.33); }
+.changed-gutter { background-color: rgba(170,0,0,.33); }
+.changed-text { background-color: rgba(170,0,0,.14); position:absolute; z-index:2;}
+.added-text { background-color: rgba(0,170,0,.14); position:absolute; z-index:2;}
 .ace_gutter-cell { background-repeat: no-repeat; }
 /* layout */
 html, body {

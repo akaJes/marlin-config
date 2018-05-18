@@ -10,7 +10,9 @@ supported OS: Linux,Mac,Windows
 * quick help for Marlin options and G-codes
 * compilation and uploading your customized firmware
 * console for access to serial ports
+* **collaborative editor for whole project**
 * share your configuration on [the site](http://lt.rv.ua/mc)
+* **automatical installer for PlatformIO**
 # Features:
 * automatically clone repository from [Marlin github](https://github.com/MarlinFirmware/Marlin) if you don't have it
 * instant changing of Configuration*.h files
