@@ -1,6 +1,6 @@
 {
   "name": "marlin-conf",
-  "version": "2.10.1",
+  "version": "2.10.1-",
   "description": "configuration tool for Marlin project",
   "main": "./index.js",
   "scripts": {
@@ -13,7 +13,7 @@
     "rebuild": "npm rebuild serialport --update-binary",
     "prepublishOnly": "./node_modules/.bin/json -I -f package.json -e 'if(this.devDependencies)this.devDependenciesOff=this.devDependencies;this.devDependencies=undefined'",
     "postpublish": "./node_modules/.bin/json -I -f package.json -e 'if(this.devDependenciesOff)this.devDependencies=this.devDependenciesOff;this.devDependenciesOff=undefined'",
-    "prebuild-": "sudo apt install icnsutils graphicsmagick"
+    "postinstall": "cd node_modules/ot ; npm i ; node_modules/.bin/grunt --force ; rm -r node_modules"
   },
   "build": {
     "appId": "com.akajes.marlin.conf",
