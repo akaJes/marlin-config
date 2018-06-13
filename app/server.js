@@ -154,7 +154,7 @@ app.get('/pio/:env/:port', function (req, res) {
   if (close)
     params.push('--upload-port',port)
   console.log(); //if removed - process hangs :)
-  (close && store.mods.serial ? sore.mods.serial.close(port) : Promise.resolve(true))
+  (close && store.mods.serial ? store.mods.serial.close(port) : Promise.resolve(true))
   .then(pioRoot)
   .then(file => {
     var cmd = pio.run(params, res, path.dirname(file));
