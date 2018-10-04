@@ -12,7 +12,7 @@ const FormData = require('form-data');
 const git = require('../git-tool');
 const store = require('../store');
 const {promisify, atob, walk} = require('../helpers');
-const {seek4File, configFiles, getBoards, uploadFiles} = require('../common');
+const {seek4File, configFiles, getBoards, uploadCopyFiles} = require('../common');
 
 var pubs = {};
 
@@ -110,7 +110,7 @@ router.get('/site/:Id', function (req, res) {
   .then(buf => promisify(yauzl.fromBuffer)(buf, {lazyEntries:true}))
   .then(readZip)
   .then(files => files.map(i => ({path: i.file, name: i.entry.fileName})))
-  .then(uploadFiles)
+  .then(uploadCopyFiles)
   .then(a => (store.mods.sse.send('reload'),"page/application reloaded"))
   .then(a => res.send(a))
   .catch(e => (console.error(e),res.status(403).send(e)))

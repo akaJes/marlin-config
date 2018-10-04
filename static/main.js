@@ -429,7 +429,15 @@ $(function(){
 
       }) //file
       $('body').scrollspy({ target: '#navbar-sections' })
-      $('.config-files .nav-tabs a[data-toggle="tab"]').on('show.bs.tab', function (e) { //sync tab with nav
+      var tabScrolls = {};
+      $('.config-files .nav-tabs a[data-toggle="tab"]')
+      .on('hide.bs.tab', function (e) {
+        tabScrolls[$(this).prop('hash')] = window.scrollY;
+      })
+      .on('shown.bs.tab', function (e) {
+        window.scrollTo(0, tabScrolls[$(this).prop('hash')]);
+      })
+      .on('show.bs.tab', function (e) { //sync tab with nav
         var href=$(e.target).attr('href')
           $('#navbar-sections .tab-content .tab-pane').each(function(){
             $(this).toggleClass('active',$(this).attr('name')==href.slice(1));

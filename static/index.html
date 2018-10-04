@@ -138,9 +138,10 @@ $(function() {
   if (typeof require === 'function') { //commonJS from electron
     var ipc = require('electron').ipcRenderer;
     function found(val) {
-      $('.mct-search').focus().parent().find('span').text(val);
+      $('.mct-search').focus().parent().removeClass('expanded').find('span').text(val);
     }
     $('.mct-search').on('change', function() {
+      $(this).parent().addClass('expanded');
       ipc.send('search-text', $(this).val());
       !$(this).val().length && found(0)
     })
@@ -257,7 +258,8 @@ $(function() {
                   </button>
               </div>
               <div class="modal-body">
-                <p>Current is:<br><span></sapn></p>
+                <p>Current is:<br><b><span></sapn></b></p>
+                <p>to apply files do `RESET` command after configuration selection</p>
                 <table class="table table-hover table-sm">
                   <thead>
                     <tr>

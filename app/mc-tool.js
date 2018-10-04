@@ -32,7 +32,7 @@ var addNumber=a=>{
 var killComments=a=>a.map(i=>(i.comment=null,i))
 var killDublicated=a=>a.filter(i=>i.number==undefined||!i.disabled).map(i=>(i.number=undefined,i))
 
-const skips = ['CONFIGURATION_H_VERSION'];
+const skips = ['CONFIGURATION_H_VERSION', 'CONFIGURATION_ADV_H_VERSION'];
 
 var setConfig=(target,file,root)=>a=>{
   var map=remap(a);

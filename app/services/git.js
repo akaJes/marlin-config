@@ -1,7 +1,10 @@
+const path = require('path');
+const fs = require('fs');
 const router = module.exports = require('express').Router();
 const git = require('../git-tool');
 const store = require('../store');
-const atob = require('../helpers').atob;
+const {atob, promisify} = require('../helpers');
+const {seek4File, configFilesList, copyFile} = require('../common');
 
 router.get('/tags', function (req, res) {
   git.Tags()
@@ -32,17 +35,21 @@ router.get('/status', function (req, res) {
 router.get('/checkout-force', function (req, res) {
   var cp = () => git.root()
     .then(root => Promise.all(
-      ['Configuration.h', 'Configuration_adv.h', '_Bootscreen.h']
-      .map(f=>new Promise((done,fail)=>
-          fs.createReadStream(path.join(root, store.vars.baseCfg, f)).on('error', fail)
-          .pipe(fs.createWriteStream(path.join(root, 'Marlin', f)).on('finish', done))
-        ).catch(e => 'not found')
+      configFilesList
+      .map(f =>
+        copyFile(path.join(root, store.vars.baseCfg, f), path.join(root, 'Marlin', f))
+        .catch(e => 'not found')
       )
     ))
-  var rm = () =>
-    seek4File('_Bootscreen.h', [path.join('Marlin', 'src', 'config'), 'Marlin'])
-    .then(file => file && promisify(fs.unlink)(file))
-    .catch(a=>a);
+
+  var rm = () => Promise.all(
+      ['_Bootscreen.h', '_Statusscreen.h']
+      .map(f =>
+        seek4File(f, [path.join('Marlin', 'src', 'config'), 'Marlin'])
+        .then(file => file && promisify(fs.unlink)(file))
+        .catch(a=>a)
+      )
+    );
 
   git.Checkout('--force')
   .then(rm)

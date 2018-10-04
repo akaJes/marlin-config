@@ -8,7 +8,7 @@ const yazl = require("yazl");
 
 const git = require('../git-tool');
 const {promisify, atob, walk, unique} = require('../helpers');
-const {seek4File, configFiles, getBoards, uploadFiles, copyFile} = require('../common');
+const {seek4File, configFiles, getBoards, uploadCopyFiles, copyFile} = require('../common');
 const store = require('../store');
 
 router.get('/save', function (req, res) {
@@ -66,19 +66,7 @@ router.get('/restore/:path', function (req, res) {
   .then(root => path.join(root, store.config.store, p))
   .then(dir=>promisify(fs.stat)(dir).catch(a=>{throw 'no files';}).then(a=>dir))
   .then(walk)
-  .then(files=>{
-    var up=files
-    .filter(i=>/Configuration(_adv)?\.h/.test(i))
-    .map(f=>({path:f,name:path.parse(f).base}))
-    var cp=files
-    .filter(i=>/_Bootscreen\.h/.test(i))
-    .map(f =>
-      seek4File('', [path.join('Marlin', 'src', 'config'), 'Marlin'])
-      .then(dir => copyFile(f, path.join(dir, path.basename(f) )))
-    )
-    console.log(cp);
-    return uploadFiles(up).then(up=>Promise.all([...up,...cp]));
-  })
+  .then(files => uploadCopyFiles(files.map(f => ({path: f, name: path.parse(f).base}))))
   .then(a=>res.send(a))
   .catch(e=>res.status(403).send(e))
 });

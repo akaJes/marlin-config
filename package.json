@@ -1,6 +1,6 @@
 {
   "name": "marlin-conf",
-  "version": "2.10.3",
+  "version": "2.10.4",
   "description": "configuration tool for Marlin project",
   "main": "./index.js",
   "scripts": {
@@ -85,7 +85,7 @@
     "platformio-node-helpers": "^0.5.2",
     "qr-image": "^3.2.0",
     "rtcmulticonnection-v3": "^3.4.4",
-    "serialport": "^6.2.0",
+    "serialport": "=6.2.1",
     "simple-git": "^1.95.1",
     "socket.io": "^2.1.1",
     "swig-templates": "^2.0.2",

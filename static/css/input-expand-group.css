@@ -27,11 +27,13 @@
   width:100%;
 }
 
-.input-expand-group:hover div div {
+.input-expand-group:focus-within div div {
   opacity:1;
   -webkit-transition:opacity 0.5s ease-in-out;
 }
-.input-expand-group:hover {
+.input-expand-group.expanded,
+.input-expand-group:hover,
+.input-expand-group:focus-within {
   width:100%;
   -webkit-transition:width 0.5s ease-in-out;
 }

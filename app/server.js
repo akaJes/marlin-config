@@ -15,7 +15,7 @@ var http = require('http');
 var https = require('https');
 var ua = require('universal-analytics');
 const {promisify, atob, walk, unique} = require('./helpers');
-const {seek4File, copyFile, uploadFiles, configFiles, getBoards, getThermistors} = require('./common');
+const {seek4File, copyFile, uploadCopyFiles, configFilesList, configFiles, getBoards, getThermistors} = require('./common');
 var qr = require('qr-image');
 var machineId = require('node-machine-id').machineId;
 
@@ -73,6 +73,8 @@ var get_cfg=()=>{
 
 var ex_dir = (rel) => seek4File('', [path.join('Marlin', 'example_configurations'), path.join('Marlin', 'src', 'config', 'examples')], rel)
 
+const sortNCS = (a, b) => a.toLowerCase().localeCompare(b.toLowerCase());
+
 app.get('/examples', function (req, res) {
     var ex;
     return ex_dir()
@@ -81,6 +83,7 @@ app.get('/examples', function (req, res) {
     .then(a=>a.filter(i=>/Configuration(_adv)?\.h/.test(i)))
     .then(a=>a.map(i=>path.parse(path.relative(ex,i)).dir))
     .then(unique)
+    .then(a => a.sort(sortNCS))
     .catch(e => [])
     .then(a=>(a.unshift('Marlin'),a))
     .then(a => res.send({current: store.vars.baseCfg, list: a}))
@@ -196,19 +199,16 @@ app.post('/upload', function(req, res){
       done(files);
     })
   })
-  .then(files=>{
-    files.map(file=>{
-      if (['Configuration.h','Configuration_adv.h'].indexOf(file.name)<0)
-        throw 'Wrong file name! Allowed only Configuration.h and Configuration_adv.h';
-    })
-    return files;
-  })
+  .then(files => Promise.all(files.map(file =>
+      configFilesList.indexOf(file.name) >= 0 ? file : Promise.reject('Wrong file name! Allowed only files ' + configFilesList)
+  )))
 //  .then(a=>(console.log(a),a))
 //process
-  .then(uploadFiles)
+  .then(uploadCopyFiles)
   .then(a=>res.send(a))
   .catch(e=>res.status(403).send(e))
 });
+
 app.post('/set/:file/:name/:prop/:value', function (req, res) {
   var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   var name = req.params.name.split('.');

@@ -37,6 +37,6 @@
 #define CUSTOM_BOOTSCREEN_BMPWIDTH  {{width}}
 #define CUSTOM_BOOTSCREEN_BMPHEIGHT {{height}}
 
-const unsigned char custom_start_bmp[{{bytes}}] PROGMEM = {
+const unsigned char custom_start_bmp[] PROGMEM = {
 {{data}}
 };

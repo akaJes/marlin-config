@@ -39,9 +39,17 @@ const uploadFiles = files =>
       }
     })
   ))
+const configFilesList = ['Configuration.h', 'Configuration_adv.h', '_Bootscreen.h', '_Statusscreen.h'];
+const configFilesListUpload = configFilesList.slice(0, 2);
 
-const configFiles = p => Promise.all(
-    ['Configuration.h', 'Configuration_adv.h', '_Bootscreen.h']
+const uploadCopyFiles = files =>
+    uploadFiles(files.filter(file => configFilesListUpload.indexOf(file.name) >= 0))
+    .then(a => git.root())
+    .then(root => Promise.all(
+        files.filter(file => configFilesListUpload.indexOf(file.name) < 0).map(f => copyFile(f.path, path.join(root, 'Marlin', f.name)))
+    ))
+
+const configFiles = p => Promise.all(configFilesList
       .map(file => seek4File(file, p ? [p.replace(/\\/g, path.sep)] : ['Marlin', path.join('Marlin', 'src', 'config')]).catch(() => null))
   ).then(files => files.filter(a => a));
 
@@ -56,7 +64,9 @@ const getThermistors = () =>
 module.exports = {
   seek4File,
   copyFile,
+  uploadCopyFiles,
   uploadFiles,
+  configFilesList,
   configFiles,
   getBoards,
   getThermistors,

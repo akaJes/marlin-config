@@ -55,7 +55,7 @@ router.get('/tree', function(req, res) {
         children: stats.isDirectory(),
         type: stats.isDirectory() ? 'default' : "file",
         text: name,
-        id: path.join(dir, name),
+        id: path.join(dir, name).replace(/\\/g, '/'),
 //        icon: stats.isDirectory() ? 'jstree-folder' : "jstree-file",
       }))))
     )
