@@ -37,7 +37,7 @@ router.get('/checkout-force', function (req, res) {
     .then(root => Promise.all(
       configFilesList
       .map(f =>
-        copyFile(path.join(root, store.vars.baseCfg, f), path.join(root, 'Marlin', f))
+        copyFile(path.join(root, store.state.baseCfg, f), path.join(root, 'Marlin', f))
         .catch(e => 'not found')
       )
     ))
@@ -53,7 +53,7 @@ router.get('/checkout-force', function (req, res) {
 
   git.Checkout('--force')
   .then(rm)
-  .then(a => store.vars.baseCfg == 'Marlin' ? a : cp())
+  .then(a => store.state.baseCfg == 'Marlin' ? a : cp())
   .then(a => res.send(a))
   .catch(e => res.status(403).send(e))
 });

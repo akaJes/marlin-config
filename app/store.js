@@ -1,9 +1,11 @@
 exports.vars = {
   httpPort: 3000,
   httpsPort: 3002,
-  baseCfg: 'Marlin',
 };
 
+exports.state = {
+  baseCfg: 'Marlin',
+}
 exports.config = {
   store: '.mct.bak',
 };

@@ -15,12 +15,13 @@ var http = require('http');
 var https = require('https');
 var ua = require('universal-analytics');
 const {promisify, atob, walk, unique} = require('./helpers');
-const {seek4File, copyFile, uploadCopyFiles, configFilesList, configFiles, getBoards, getThermistors} = require('./common');
+const {seek4File, uploadCopyFiles, configFilesList, configFilesListUpload, getBoards, getThermistors} = require('./common');
 var qr = require('qr-image');
 var machineId = require('node-machine-id').machineId;
 
 const store = require('./store');
 store.mods.editor && (store.mods.editor.root = () => git.root())
+const st = require('./store-tool');
 
 var server = http.Server(app);
 var visitor = ua('UA-99239389-1');
@@ -58,10 +59,10 @@ var get_cfg=()=>{
         .map(i => Object.assign(defs.defs[i], {select: a.select, type: "select"}))
       return defs;
     })
-  var list=['Configuration.h','Configuration_adv.h']
+  var list = configFilesListUpload
   .map(f => base
       .then(p=>
-          git.Show(p[1], path.join(store.vars.baseCfg, f)).catch(e => git.Show(p[1], path.join('Marlin', f)))
+          git.Show(p[1], path.join(store.state.baseCfg, f)).catch(e => git.Show(p[1], path.join('Marlin', f)))
           .then(file=>mctool.getJson(p[0],file,p[1])(path.join(p[0],'Marlin',f)))
       )
       .then(o=>(o.names.filter(n=>hints.d2i(n.name),1).map(n=>o.defs[n.name].hint=!0),o))
@@ -80,19 +81,21 @@ app.get('/examples', function (req, res) {
     return ex_dir()
     .then(dir => (ex = dir))
     .then(walk)
-    .then(a=>a.filter(i=>/Configuration(_adv)?\.h/.test(i)))
+    .then(files => files.filter(file => configFilesList.indexOf(path.basename(file)) >= 0))
     .then(a=>a.map(i=>path.parse(path.relative(ex,i)).dir))
     .then(unique)
     .then(a => a.sort(sortNCS))
     .catch(e => [])
     .then(a=>(a.unshift('Marlin'),a))
-    .then(a => res.send({current: store.vars.baseCfg, list: a}))
+    .then(a => res.send({current: store.state.baseCfg, list: a}))
 });
 
 app.get('/set-base/:path', function (req, res) {
   return Promise.resolve(atob(decodeURI(req.params.path)).toString())
     .then(base => base == 'Marlin' && base || ex_dir(1).then(ex => path.join(ex, base)) )
-    .then(base => res.send(store.vars.baseCfg = base))
+    .then(base => store.state.baseCfg = base)
+    .then(st.write)
+    .then(base => res.send(store.state.baseCfg))
 });
 
 /* VERSION */
@@ -129,9 +132,14 @@ app.get('/version/:screen', function (req, res) {
       ul:req.headers['accept-language'].split(',')[0],
     }).send()
   )
-  Promise.all([pio.isPIO().catch(() => false), git.root(), pioRoot().then(pioEnv).catch(e => [])])
-  .then(pp => {
-    var cfg = {pio: pp[0], version: pjson.version, root: pp[1], base: store.vars.baseCfg, env: pp[2]};
+  Promise.all([
+    pio.isPIO().catch(() => false),
+    git.root(),
+    pioRoot().then(pioEnv).catch(e => []),
+    st.read(),
+  ])
+  .then(([pio, root, env]) => {
+    var cfg = {pio, version: pjson.version, root, base: store.state.baseCfg, env};
     res.set('Content-Type', 'application/javascript').send("var config = " + JSON.stringify(cfg));
   })
 });

@@ -694,6 +694,7 @@ $(function(){
   // consoles menu
   var wins = {};
   function openWin(url, target) {
+    wins[target] && wins[target].closed && (wins[target] = 0);
     (wins[target] || ( wins[target] = window.open(url, target))).focus();
   }
   $('.mct-consoles').on('click',function(){ openWin('consoles.html', 'consoles') });

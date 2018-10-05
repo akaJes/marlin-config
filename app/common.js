@@ -14,13 +14,15 @@ const seek4File = (file, paths, rel) =>
   )
 
 const copyFile = (from, to) =>
-  new Promise((resolve, reject) =>
-    fs.createReadStream(from)
+  new Promise((resolve, reject, stream) => (stream =
+    fs.createReadStream(from))
     .on('error', reject)
-    .pipe(
-      fs.createWriteStream(to)
-      .on('finish', () => resolve(to))
-      .on('error', reject)
+    .on('open', () =>
+      stream.pipe(
+        fs.createWriteStream(to)
+        .on('finish', () => resolve(to))
+        .on('error', reject)
+      )
     )
   );
 
@@ -31,7 +33,7 @@ const uploadFiles = files =>
       try {
         return mctool
           .makeCfg(file.path)
-          .then(mctool.makeHfile(root, file.name, store.vars.baseCfg))
+          .then(mctool.makeHfile(root, file.name, store.state.baseCfg))
           .then(a => file.name)
       } catch(e) {
         console.error(e);
@@ -67,6 +69,7 @@ module.exports = {
   uploadCopyFiles,
   uploadFiles,
   configFilesList,
+  configFilesListUpload,
   configFiles,
   getBoards,
   getThermistors,
