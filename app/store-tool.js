@@ -15,4 +15,4 @@ exports.read = () =>
   .then(data => JSON.parse(data))
 .then(a=>(console.log('read', a),a))
   .then(data => Object.assign(store, data))
-//  .catch(e => e)
+  .catch(e => e)
